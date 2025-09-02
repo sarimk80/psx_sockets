@@ -9,9 +9,11 @@ import SwiftUI
 
 @main
 struct psx_socketsApp: App {
+    
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView()
         }
     }
 }
