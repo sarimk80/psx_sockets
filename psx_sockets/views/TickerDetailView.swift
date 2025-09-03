@@ -12,7 +12,10 @@ struct TickerDetailView: View {
     var symbol:String
     @State private var psxViewModel = PsxViewModel(psxServiceManager: PsxServiceManager())
     
-    @State private var psxSocketManager = WebSocketManager()
+    //@State private var psxSocketManager = WebSocketManager()
+    
+    @Environment(WebSocketManager.self) private var psxSocketManager
+    
     var body: some View {
         ScrollView {
             VStack(alignment:.leading){
@@ -142,11 +145,8 @@ struct TickerDetailView: View {
         .navigationTitle(symbol)
         .task {
             await psxViewModel.getCompanyDetail(symbol: symbol)
-            psxSocketManager.getSymbolDetailRealTime(symbol: symbol)
+           await psxSocketManager.unSubscribeStream(symbol: symbol,market: "REG")
             psxSocketManager.KlineSteam(symbol: symbol)
-        }
-        .onDisappear {
-            psxSocketManager.unSubscribeStream(symbol: symbol)
         }
     }
 }
@@ -171,6 +171,8 @@ struct KlineChart: View {
     
     var psxSocketManager: WebSocketManager
     
+    @State private var scrollPosition: Double = 0.0
+    
     var body: some View {
         if let kline = psxSocketManager.klineModel{
             
@@ -178,20 +180,28 @@ struct KlineChart: View {
             Chart {
                 
                 ForEach(kline.klines){data in
-                    AreaMark(x: .value("Date", data.customDate), y: .value("Price", data.close))
-                        .foregroundStyle(.linearGradient(colors: [Color.pink.opacity(0.3),Color.pink.opacity(0.1)], startPoint: .top, endPoint: .bottom))
+                    AreaMark(x: .value("Date", data.adjustedDate), y: .value("Price", data.close))
+                        .foregroundStyle(.linearGradient(colors: [ Color.pink.opacity(0.3),Color.pink.opacity(0.1)], startPoint: .top, endPoint: .bottom))
                     
-                    LineMark(x: .value("Date", data.customDate), y: .value("Price", data.close))
+                    LineMark(x: .value("Date", data.adjustedDate), y: .value("Price", data.close))
                         .foregroundStyle(Color.white)
+                    
+//                    BarMark(x: .value("Date", data.customDate), y: .value("Volume", data.volume))
+//                        .foregroundStyle(Color.white)
                     
                 }
                 
             }
             .clipShape(Rectangle())
+            .chartYScale(domain: [kline.klines.map({$0.close}).min() ?? 0.0, kline.klines.map({$0.close}).max() ?? 0.0])
+//            .chartXScale(domain: [kline.klines.first!.customDate ... kline.klines.last!.customDate])
             .chartScrollableAxes(.horizontal)
-            //.chartXScale(domain: closeMin...closeMax)
-            //.chartYScale(domain: closeMin ... closeMax)
+            .chartScrollPosition(initialX: scrollPosition)
+            .chartXVisibleDomain(length: 60 * 60 * 24 * 7)
             .frame(height:350)
+            .onAppear {
+                self.scrollPosition = kline.klines.map({$0.close}).max() ?? 0.0
+            }
             
         }else{
             ProgressView()

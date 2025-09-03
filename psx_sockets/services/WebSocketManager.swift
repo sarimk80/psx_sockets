@@ -20,7 +20,11 @@ class WebSocketManager{
     var tickerUpdate:TickerUpdate?
     var klineModel:KlineModel?
     
-    private var subKey:String = ""
+    private var selectedSymbol:String = "KSE100"
+    
+    private var subKey:String?
+    
+    private var psxServiceManager:PsxServiceManager = PsxServiceManager()
     
     
     init() {
@@ -122,19 +126,34 @@ class WebSocketManager{
         }
     }
     
-    func unSubscribeStream(symbol:String){
+    func unSubscribeStream(symbol:String,market:String) async{
         do{
-            let unSubscribeModel = UnSubscriptionModel(type: "unsubscribe", subscriptionKey: subKey, requestId: UUID().uuidString)
             
-            let data = try JSONEncoder().encode(unSubscribeModel)
+            self.tickerUpdate = nil
             
-            guard let string = String(data: data, encoding: .utf8) else { return  }
+            let response =   try await psxServiceManager.getSymbolDetail(market: market, symbol: symbol)
             
-            webSocketTask?.send(.string(string)) { error in
-                print(error.debugDescription)
+            self.tickerUpdate = TickerUpdate(type: "tickUpdate", symbol: symbol, market: market, tick: Tick(m: market, st: response.data.st, s: symbol, t: response.data.timestamp, o: 0.0, h: response.data.high, l: response.data.low, c: response.data.price, v: response.data.volume, ldcp: 0.0, ch: response.data.change, pch: response.data.changePercent, bp: Double(response.data.bid), bv: response.data.bidVol, ap: Double(response.data.ask), av: response.data.askVol, val: response.data.value, tr: response.data.timestamp), timestamp: response.timestamp)
+            
+            
+            if let subKeyPresent = subKey{
+                let unSubscribeModel = UnSubscriptionModel(type: "unsubscribe", subscriptionKey: subKeyPresent, requestId: UUID().uuidString)
+                
+                let data = try JSONEncoder().encode(unSubscribeModel)
+                
+                guard let string = String(data: data, encoding: .utf8) else { return  }
+                
+                webSocketTask?.send(.string(string)) { error in
+                    print(error.debugDescription)
+                }
+                getSymbolDetailRealTime(symbol: symbol)
+
+                
+            }else{
+                getSymbolDetailRealTime(symbol: symbol)
             }
             
-            print("UnSubscribe")
+            
             
             
         }catch(let error){
@@ -145,7 +164,7 @@ class WebSocketManager{
     func KlineSteam(symbol:String){
         do{
             print("kline \(symbol)")
-            let kline = klineSubModel(type: "klines", symbol: symbol, timeframe: "1m", requestId: UUID().uuidString)
+            let kline = klineSubModel(type: "klines", symbol: symbol, timeframe: "1h", requestId: UUID().uuidString)
             let data = try JSONEncoder().encode(kline)
             
             guard let string = String(data: data, encoding: .utf8) else { return  }

@@ -10,10 +10,13 @@ import SwiftUI
 @main
 struct psx_socketsApp: App {
     
+    @State private var psxWebSocket = WebSocketManager()
+    
     
     var body: some Scene {
         WindowGroup {
             RootView()
+                .environment(psxWebSocket)
         }
     }
 }

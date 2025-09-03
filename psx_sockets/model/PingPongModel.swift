@@ -63,3 +63,14 @@ struct klineSubModel:Codable {
     let requestId:String//": "req-006"
 }
 
+struct UnSubscriptionResponseModel: Codable {
+    let type, requestID, status, subscriptionKey: String
+    let message: String
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case requestID = "requestId"
+        case status, subscriptionKey, message
+    }
+}
+

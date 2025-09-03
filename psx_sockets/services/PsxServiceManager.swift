@@ -131,4 +131,28 @@ class PsxServiceManager:PsxProtocol{
         return decodeResponse
     }
     
+    func getSymbolDetail(market:String,symbol:String)async throws -> SymbolDetail {
+        guard let url = URL(string: "https://psxterminal.com/api/ticks/\(market)/\(symbol)")
+        else {  throw URLError(.badURL) }
+              
+        let (data,response) = try await URLSession.shared.data(from: url)
+              
+              
+        guard let response = response as? HTTPURLResponse,
+                    
+                response.statusCode == 200
+                      
+                      
+        else { throw URLError(.badServerResponse) }
+              
+        if let string = String(data: data, encoding: .utf8) {
+                    print(string)
+                }
+              
+              
+        let decodeResponse = try JSONDecoder().decode(SymbolDetail.self, from: data)
+        
+        return decodeResponse
+    }
+    
 }

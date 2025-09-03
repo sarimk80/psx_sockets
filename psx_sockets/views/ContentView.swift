@@ -21,9 +21,10 @@ struct ContentView: View {
     
     @State private var psxViewModel:PsxViewModel = PsxViewModel(psxServiceManager: PsxServiceManager())
     
-    @State private var webSocketManager:WebSocketManager = WebSocketManager()
+    //@State private var webSocketManager:WebSocketManager = WebSocketManager()
     
     @Environment(AppNavigation.self) private var appNavigation
+    @Environment(WebSocketManager.self) private var webSocketManager
     
     
     var body: some View {
@@ -75,10 +76,7 @@ struct ContentView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task {
             await psxViewModel.getPsxMarketStats()
-            webSocketManager.getSymbolDetailRealTime(symbol: "KSE100")
-        }
-        .onDisappear {
-            webSocketManager.unSubscribeStream(symbol: "KSE100")
+            await webSocketManager.unSubscribeStream(symbol: "KSE100", market: "IDX")
         }
        
     }
