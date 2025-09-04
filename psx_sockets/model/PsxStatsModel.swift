@@ -27,3 +27,22 @@ struct Top:Codable{
     let volume: Int
     let value: Double
 }
+
+
+// MARK: - SectorModel
+struct SectorModel: Codable {
+    let success: Bool
+    let data: [String:SectorDataModel]
+    let timestamp: Int
+}
+
+// MARK: - Datum
+struct SectorDataModel: Codable,Identifiable {
+    let totalVolume: Int
+    let totalValue: Double
+    let totalTrades, gainers, losers: Int
+    let avgChange, avgChangePercent,unchanged: Double
+    let symbols: [String]
+    
+    var id:String {symbols.first ?? ""}
+}

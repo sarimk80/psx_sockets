@@ -29,11 +29,19 @@ enum PsxSearchSymbolEnum{
     case error(errorMessage:String)
 }
 
+enum PsxSectorEnum {
+    case initial
+    case loading
+    case loaded(data:SectorModel)
+    case error(errorMessage:String)
+}
+
 @Observable
 class PsxViewModel{
     var psxStats:PsxStatsEnum = PsxStatsEnum.initial
     var psxCompany:PsxCompanyDetailEnums = PsxCompanyDetailEnums.initial
     var psxSearch : PsxSearchSymbolEnum = PsxSearchSymbolEnum.initial
+    var psxSector : PsxSectorEnum = PsxSectorEnum.initial
     var symbolSearch:String = ""
     
     @ObservationIgnored
@@ -86,6 +94,18 @@ class PsxViewModel{
             
             self.psxSearch = PsxSearchSymbolEnum.loaded(data: searchSymbol)
  
+        }
+    }
+    
+    func getPsxSector() async{
+        self.psxSector = PsxSectorEnum.loading
+        
+        do{
+            let sectors = try await psxServiceManager.getPsxSector()
+            self.psxSector = PsxSectorEnum.loaded(data: sectors)
+        }
+        catch(let error){
+            self.psxSector = PsxSectorEnum.error(errorMessage: error.localizedDescription)
         }
     }
 }
