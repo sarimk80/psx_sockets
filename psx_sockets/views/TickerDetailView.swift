@@ -180,11 +180,13 @@ struct KlineChart: View {
             Chart {
                 
                 ForEach(kline.klines){data in
+                    LineMark(x: .value("Date", data.adjustedDate), y: .value("Price", data.close))
+                        .foregroundStyle(Color.pink)
+                    
                     AreaMark(x: .value("Date", data.adjustedDate), y: .value("Price", data.close))
                         .foregroundStyle(.linearGradient(colors: [ Color.pink.opacity(0.3),Color.pink.opacity(0.1)], startPoint: .top, endPoint: .bottom))
                     
-                    LineMark(x: .value("Date", data.adjustedDate), y: .value("Price", data.close))
-                        .foregroundStyle(Color.white)
+                    
                     
 //                    BarMark(x: .value("Date", data.customDate), y: .value("Volume", data.volume))
 //                        .foregroundStyle(Color.white)
