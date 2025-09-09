@@ -171,38 +171,35 @@ struct KlineChart: View {
     
     var psxSocketManager: WebSocketManager
     
-    @State private var scrollPosition: Double = 0.0
+    @State private var scrollPosition: Date = .now
     
     var body: some View {
+        
         if let kline = psxSocketManager.klineModel{
+            
             
             
             Chart {
                 
                 ForEach(kline.klines){data in
                     LineMark(x: .value("Date", data.adjustedDate), y: .value("Price", data.close))
-                        .foregroundStyle(Color.pink)
+                        .foregroundStyle(Color.green)
                     
                     AreaMark(x: .value("Date", data.adjustedDate), y: .value("Price", data.close))
-                        .foregroundStyle(.linearGradient(colors: [ Color.pink.opacity(0.3),Color.pink.opacity(0.1)], startPoint: .top, endPoint: .bottom))
+                        .foregroundStyle(.linearGradient(colors: [ Color.green.opacity(0.3),Color.green.opacity(0.1)], startPoint: .top, endPoint: .bottom))
                     
-                    
-                    
-//                    BarMark(x: .value("Date", data.customDate), y: .value("Volume", data.volume))
-//                        .foregroundStyle(Color.white)
                     
                 }
                 
             }
             .clipShape(Rectangle())
             .chartYScale(domain: [kline.klines.map({$0.close}).min() ?? 0.0, kline.klines.map({$0.close}).max() ?? 0.0])
-//            .chartXScale(domain: [kline.klines.first!.customDate ... kline.klines.last!.customDate])
             .chartScrollableAxes(.horizontal)
-            .chartScrollPosition(initialX: scrollPosition)
-            .chartXVisibleDomain(length: 60 * 60 * 24 * 7)
+            .chartScrollPosition(x: $scrollPosition)
+            .chartXVisibleDomain(length: 60 * 60 * 24 * 30)
             .frame(height:350)
             .onAppear {
-                self.scrollPosition = kline.klines.map({$0.close}).max() ?? 0.0
+                self.scrollPosition = kline.klines.map({ $0.adjustedDate }).last ?? .now
             }
             
         }else{

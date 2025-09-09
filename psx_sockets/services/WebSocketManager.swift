@@ -164,7 +164,7 @@ class WebSocketManager{
     func KlineSteam(symbol:String){
         do{
             print("kline \(symbol)")
-            let kline = klineSubModel(type: "klines", symbol: symbol, timeframe: "1h", requestId: UUID().uuidString)
+            let kline = klineSubModel(type: "klines", symbol: symbol, timeframe: "1d", requestId: UUID().uuidString)
             let data = try JSONEncoder().encode(kline)
             
             guard let string = String(data: data, encoding: .utf8) else { return  }
