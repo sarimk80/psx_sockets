@@ -11,7 +11,7 @@ struct RootView: View {
     @State private var appNavigation:AppNavigation = AppNavigation()
     var body: some View {
         TabView {
-            Tab("", systemImage: "house") {
+            Tab("Home", systemImage: "house") {
                 NavigationStack(path:$appNavigation.tickerNavigation) {
                     ContentView()
                         .environment(appNavigation)
@@ -25,7 +25,7 @@ struct RootView: View {
                 
             }
 
-            Tab("",systemImage: "chart.pie"){
+            Tab("Sectors",systemImage: "chart.pie"){
 
                 NavigationStack {
                     SectorView()
@@ -33,6 +33,13 @@ struct RootView: View {
                 
             }
             
+            Tab("Portfolio",systemImage: "scroll"){
+
+                NavigationStack {
+                    PortfolioView()
+                }
+                
+            }
             
             Tab("",systemImage: "magnifyingglass",role: .search){
                 

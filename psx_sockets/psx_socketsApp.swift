@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct psx_socketsApp: App {
@@ -17,6 +18,8 @@ struct psx_socketsApp: App {
         WindowGroup {
             RootView()
                 .environment(psxWebSocket)
+                
         }
+        .modelContainer(for: [PortfolioModel.self])
     }
 }

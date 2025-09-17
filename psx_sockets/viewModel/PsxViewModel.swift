@@ -25,6 +25,7 @@ enum PsxCompanyDetailEnums{
 enum PsxSearchSymbolEnum{
     case initial
     case loading
+    case allSymbolLoaded(allSymbol:[String])
     case loaded(data:[String])
     case error(errorMessage:String)
 }
@@ -44,7 +45,6 @@ class PsxViewModel{
     var psxSector : PsxSectorEnum = PsxSectorEnum.initial
     var symbolSearch:String = ""
     
-    @ObservationIgnored
     var listOfSymbols:[String] = []
     
     private let psxServiceManager:PsxServiceManager
@@ -79,6 +79,7 @@ class PsxViewModel{
     func getAllSymbols()async{
         do{
             let symbols =   try await psxServiceManager.getAllSymbols()
+            self.psxSearch = PsxSearchSymbolEnum.allSymbolLoaded(allSymbol: symbols.data)
             self.listOfSymbols = symbols.data
         }catch(let error){
             self.psxSearch = PsxSearchSymbolEnum.error(errorMessage: error.localizedDescription)
@@ -94,6 +95,8 @@ class PsxViewModel{
             
             self.psxSearch = PsxSearchSymbolEnum.loaded(data: searchSymbol)
  
+        }else{
+            self.psxSearch = PsxSearchSymbolEnum.loaded(data: self.listOfSymbols)
         }
     }
     

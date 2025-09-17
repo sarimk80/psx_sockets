@@ -30,6 +30,14 @@ struct SearchView: View {
                 }
             case .error(let errorMessage):
                 Text(errorMessage)
+            case .allSymbolLoaded(allSymbol: let allSymbol):
+                List(allSymbol,id: \.self){result in
+                    Text(result)
+                        .onTapGesture {
+                            appNavigation.tickerNavigation.append(TickerDetailRoute.tickerDetail(symbol: result))
+                        }
+                    
+                }
             }
         }
         .navigationTitle("Search")

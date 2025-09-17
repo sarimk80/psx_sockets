@@ -76,8 +76,10 @@ class WebSocketManager{
             case "tickUpdate":
                 let tick = try JSONDecoder().decode(TickerUpdate.self, from: data)
                 self.tickerUpdate = tick
+                
                 print(tick.symbol)
-                print(tick.tick.c)
+                print(tick.market)
+                print(tick.type)
             case "unsubscribeResponse":
                 print("UnSubscribe")
             case "subscribeResponse":
