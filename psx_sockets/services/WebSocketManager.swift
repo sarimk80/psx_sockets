@@ -11,6 +11,8 @@ import Combine
 @Observable
 class WebSocketManager{
     
+    private var swiftDataService:SwiftDataService = SwiftDataService()
+    
     private var webSocketTask: URLSessionWebSocketTask?
     
     private let urlSession = URLSession(configuration: .default)

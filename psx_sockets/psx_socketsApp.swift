@@ -12,6 +12,16 @@ import SwiftData
 struct psx_socketsApp: App {
     
     @State private var psxWebSocket = WebSocketManager()
+    let container: ModelContainer
+    
+    init() {
+        do{
+            let configuration = ModelConfiguration(isStoredInMemoryOnly: false)
+            container = try ModelContainer(for: PortfolioModel.self, configurations: configuration)
+        }catch(let error){
+            fatalError(error.localizedDescription)
+        }
+    }
     
     
     var body: some Scene {
@@ -20,6 +30,6 @@ struct psx_socketsApp: App {
                 .environment(psxWebSocket)
                 
         }
-        .modelContainer(for: [PortfolioModel.self])
+        .modelContainer(for: PortfolioModel.self)
     }
 }

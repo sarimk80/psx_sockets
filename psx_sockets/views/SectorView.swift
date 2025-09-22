@@ -45,6 +45,7 @@ struct SectorView: View {
             }
         }
         .navigationTitle("Sectors")
+        .navigationBarTitleDisplayMode(.inline)
         .task{
           await psxViewModel.getPsxSector()
         }

@@ -35,8 +35,15 @@ struct RootView: View {
             
             Tab("Portfolio",systemImage: "scroll"){
 
-                NavigationStack {
+                NavigationStack(path:$appNavigation.tickerNavigation) {
                     PortfolioView()
+                        .environment(appNavigation)
+                        .navigationDestination(for: TickerDetailRoute.self) { route in
+                            switch route{
+                            case .tickerDetail(let symbol):
+                                TickerDetailView(symbol: symbol)
+                            }
+                        }
                 }
                 
             }

@@ -37,17 +37,28 @@ enum PsxSectorEnum {
     case error(errorMessage:String)
 }
 
+enum PortfolioEnum{
+    case initial
+    case loading
+    case loaded(data:[PsxFundamentalsModel])
+    case error(errorMessage:String)
+}
+
 @Observable
 class PsxViewModel{
     var psxStats:PsxStatsEnum = PsxStatsEnum.initial
     var psxCompany:PsxCompanyDetailEnums = PsxCompanyDetailEnums.initial
     var psxSearch : PsxSearchSymbolEnum = PsxSearchSymbolEnum.initial
     var psxSector : PsxSectorEnum = PsxSectorEnum.initial
+    var portfolioData : PortfolioEnum = PortfolioEnum.initial
     var symbolSearch:String = ""
     
     var listOfSymbols:[String] = []
+    private var portfolioDataResult : [PsxFundamentalsModel] = []
     
     private let psxServiceManager:PsxServiceManager
+    
+    private let swiftDataService = SwiftDataService()
     
     init(psxServiceManager: PsxServiceManager) {
         self.psxServiceManager = psxServiceManager
@@ -109,6 +120,23 @@ class PsxViewModel{
         }
         catch(let error){
             self.psxSector = PsxSectorEnum.error(errorMessage: error.localizedDescription)
+        }
+    }
+    
+    func getPortfolioData() async{
+        do{
+            portfolioDataResult.removeAll()
+        self.portfolioData = PortfolioEnum.loading
+            let data = swiftDataService.getSavedTicker()
+            
+            for model in data {
+                let result = try await psxServiceManager.psxfundamentals(symbol: model.ticker)
+                portfolioDataResult.append(result)
+            }
+        self.portfolioData = PortfolioEnum.loaded(data: portfolioDataResult)
+            
+        }catch(let error){
+            self.portfolioData = PortfolioEnum.error(errorMessage: error.localizedDescription)
         }
     }
 }
