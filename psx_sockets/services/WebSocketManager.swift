@@ -26,6 +26,7 @@ class WebSocketManager{
     private var selectedSymbol:String = "KSE100"
     
     private var subKey:String?
+    private var subKeys:[String] = []
     
     private var psxServiceManager:PsxServiceManager = PsxServiceManager()
     
@@ -89,7 +90,10 @@ class WebSocketManager{
                 print("UnSubscribe")
             case "subscribeResponse":
                 let response = try JSONDecoder().decode(SubscribeResponseModel.self, from: data)
+                print(response)
                 self.subKey = response.subscriptionKey
+                self.subKeys.append(response.subscriptionKey)
+                print(subKeys)
             case "klines":
                 let response = try JSONDecoder().decode(KlineModel.self, from: data)
                 self.klineModel = response
@@ -193,16 +197,39 @@ class WebSocketManager{
        await getPortfolioRealTime(tickers: tickers,market: "REG")
     }
     
-    func getMarketUpdate(tickers:[String])async{
-        await getPortfolioRealTime(tickers: tickers,market: "IDX")
+    func getMarketUpdate(tickers:[String],market:String)async{
+        await getPortfolioRealTime(tickers: tickers,market: market)
     }
     
     func getPortfolioRealTime(tickers:[String],market:String) async {
         
+        self.portfolioUpdate.removeAll()
+        
         do{
+            
+            // make api call to get all the tickers detail
             for model in tickers {
                 let result = try await psxServiceManager.getSymbolDetail(market: market,symbol: model)
                 self.portfolioUpdate.append(TickerUpdate(type: "tickUpdate", symbol: result.data.symbol, market: result.data.market, tick: Tick(m: market, st: result.data.st, s: model, t: result.data.timestamp, o: 0.0, h: result.data.high, l: result.data.low, c: result.data.price, v: result.data.volume, ldcp: 0.0, ch: result.data.change, pch: result.data.changePercent, bp: Double(result.data.bid), bv: result.data.bidVol, ap: Double(result.data.ask), av: result.data.askVol, val: result.data.value, tr: result.data.timestamp), timestamp: result.timestamp))
+                
+            }
+            print("Subkeys")
+            print(subKeys.count)
+            // unsubscribe all the subscribe tickers
+            for key in subKeys {
+                let unSubscribeModel = UnSubscriptionModel(type: "unsubscribe", subscriptionKey: key, requestId: UUID().uuidString)
+                
+                let data = try JSONEncoder().encode(unSubscribeModel)
+                
+                guard let string = String(data: data, encoding: .utf8) else { return  }
+                
+                webSocketTask?.send(.string(string)) { error in
+                    print(error.debugDescription)
+                }
+            }
+            
+            // subscribe to all the new tickers
+            for model in tickers{
                 getSymbolDetailRealTime(symbol: model)
             }
         }catch(let error){

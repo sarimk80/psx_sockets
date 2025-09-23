@@ -74,7 +74,7 @@ struct ContentView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task {
             await psxViewModel.getPsxMarketStats()
-            await webSocketManager.getMarketUpdate(tickers: ["KSE100","ALLSHR","KMI30","PSXDIV20","KSE30","MII30"])
+            await webSocketManager.getMarketUpdate(tickers: ["KSE100","ALLSHR","KMI30","PSXDIV20","KSE30","MII30"],market: "IDX")
         }
         
     }
@@ -141,43 +141,15 @@ struct IndexView: View {
             ProgressView()
         }else{
             TabView{
-                
                 ForEach(psxWebSocket.portfolioUpdate,id:
                             \.symbol) { result in
-                    VStack(alignment:.leading){
-                        HStack{
-                            Text(result.symbol )
-                                .font(.headline)
-                            Text(result.tick.st)
-                                .font(.subheadline)
-                        }
-                        HStack{
-                            Text("Current Price: ")
-                                .font(.subheadline)
-                            Text(result.tick.c,format: .number.precision(.fractionLength(2)))
-                                .contentTransition(.numericText())
-                                .font(.headline)
-                            
-                            
-                        }
-                        Text("Change: \(result.tick.ch,specifier: "%.2f")")
-                            .font(.subheadline)
-                            .foregroundStyle(result.tick.ch > 0 ? .green : .red)
-                        
-                        Text("Open: \(result.tick.o ,format: .number.precision(.fractionLength(2)))")
-                            .font(.caption)
-                        Text("High: \(result.tick.h ,format: .number.precision(.fractionLength(2)))")
-                            .font(.caption)
-                        Text("Low: \(result.tick.l ,format: .number.precision(.fractionLength(2)))")
-                            .font(.caption)
-                        
-                    }
+                    TickerView(ticker: result)
                     .frame(maxWidth:.infinity,alignment:.leading)
                 }
             }
                             .tabViewStyle(.page)
                             .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
-                            .frame(height: 150)
+                            .frame(height: 200)
                             
             }
             
@@ -186,6 +158,62 @@ struct IndexView: View {
     
     
     
+struct TickerView: View {
+    var ticker: TickerUpdate?
+    var body: some View {
+        VStack(alignment:.leading){
+            HStack{
+                Text(ticker?.symbol ?? "" )
+                    .font(.headline)
+                Text(ticker?.tick.st ?? "")
+                    .font(.subheadline)
+            }
+            HStack{
+                Text("Current Price: ")
+                    .font(.subheadline)
+                Text(ticker?.tick.c ?? 0.0,format: .number.precision(.fractionLength(2)))
+                    .contentTransition(.numericText())
+                    .font(.headline)
+                
+                
+            }
+            Text("Change: \(ticker?.tick.ch ?? 0.0,specifier: "%.2f")")
+                .font(.subheadline)
+                .foregroundStyle(ticker?.tick.ch ?? 0.0 > 0 ? .green : .red)
+            HStack{
+                VStack(alignment:.leading){
+                    
+                    Text("Open: \(ticker?.tick.o ?? 0.0,format: .number.precision(.fractionLength(2)))")
+                        .font(.caption)
+                    Text("High: \(ticker?.tick.h ?? 0.0,format: .number.precision(.fractionLength(2)))")
+                        .font(.caption)
+                    Text("Low: \(ticker?.tick.l ?? 0.0,format: .number.precision(.fractionLength(2)))")
+                        .font(.caption)
+                }
+                Spacer()
+                if ticker?.market != "IDX" {
+                    
+                VStack(alignment:.trailing){
+                    Text("Bid: \(ticker?.tick.bp ?? 0.0,format: .number.precision(.fractionLength(2)))")
+                        .font(.caption)
+                    Text("Bid volume: \(ticker?.tick.bv ?? 0,format: .number.precision(.fractionLength(2)))")
+                        .font(.caption)
+                    Text("Ask: \(ticker?.tick.ap ?? 0.0,format: .number.precision(.fractionLength(2)))")
+                        .font(.caption)
+                    Text("Ask volume: \(ticker?.tick.av ?? 0,format: .number.precision(.fractionLength(2)))")
+                        .font(.caption)
+                }
+            }
+                
+                
+            }
+            
+            
+        }
+    }
+}
+
+
     
     #Preview {
         ContentView()

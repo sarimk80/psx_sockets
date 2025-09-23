@@ -13,7 +13,7 @@ struct PortfolioView: View {
     @State private var psxVM:PsxViewModel = PsxViewModel(psxServiceManager: PsxServiceManager())
     @State private var portfolioVM = PortfolioViewModel()
     @Environment(AppNavigation.self) private var appNavigation
-    @State private var socketManager:WebSocketManager = WebSocketManager()
+    @Environment(WebSocketManager.self) private var socketManager
     
     var body: some View {
         VStack{

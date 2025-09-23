@@ -19,8 +19,12 @@ struct TickerDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment:.leading){
-                IndexView(psxWebSocket: psxSocketManager)
-                    .padding(.horizontal,16)
+                if psxSocketManager.portfolioUpdate.isEmpty{
+                    ProgressView()
+                }else{
+                    TickerView(ticker: psxSocketManager.portfolioUpdate.first)
+                        .padding(.horizontal,16)
+                }
                 
                 KlineChart(psxSocketManager: psxSocketManager)
                     .padding(.horizontal,16)
@@ -145,7 +149,7 @@ struct TickerDetailView: View {
         .navigationTitle(symbol)
         .task {
             await psxViewModel.getCompanyDetail(symbol: symbol)
-           await psxSocketManager.unSubscribeStream(symbol: symbol,market: "REG")
+            await psxSocketManager.getMarketUpdate(tickers: [symbol],market: "REG")
             psxSocketManager.KlineSteam(symbol: symbol)
         }
     }
