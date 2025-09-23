@@ -9,8 +9,8 @@ import SwiftUI
 
 
 enum StockerEnums:String,Identifiable{
-   case Active
-   case Lossers
+    case Active
+    case Lossers
     
     var id:Self{self}
 }
@@ -20,8 +20,6 @@ struct ContentView: View {
     @State private var stockerEnums:StockerEnums = .Active
     
     @State private var psxViewModel:PsxViewModel = PsxViewModel(psxServiceManager: PsxServiceManager())
-    
-    //@State private var webSocketManager:WebSocketManager = WebSocketManager()
     
     @Environment(AppNavigation.self) private var appNavigation
     @Environment(WebSocketManager.self) private var webSocketManager
@@ -40,7 +38,7 @@ struct ContentView: View {
                 Picker("My Picker", selection: $stockerEnums) {
                     Text("Gainers").tag(StockerEnums.Active)
                     Text("Lossers").tag(StockerEnums.Lossers)
-                    }
+                }
                 .pickerStyle(.segmented)
                 
                 switch psxViewModel.psxStats {
@@ -69,16 +67,16 @@ struct ContentView: View {
                     Text(errorMessage)
                 }
             }
-                .padding()
-                
+            .padding()
+            
         }
         .navigationTitle("Home")
         .navigationBarTitleDisplayMode(.inline)
         .task {
             await psxViewModel.getPsxMarketStats()
-            await webSocketManager.unSubscribeStream(symbol: "KSE100", market: "IDX")
+            await webSocketManager.getMarketUpdate(tickers: ["KSE100","ALLSHR","KMI30","PSXDIV20","KSE30","MII30"])
         }
-       
+        
     }
 }
 
@@ -101,7 +99,7 @@ struct TileView: View {
                         .font(.subheadline)
                         .foregroundStyle(ticker.changePercent > 0 ? .green : .red)
                 }
-               
+                
             }
             
         }
@@ -139,45 +137,56 @@ struct IndexView: View {
     var psxWebSocket:WebSocketManager
     
     var body: some View {
-        VStack(alignment:.leading){
-            if let tickerUpdate = psxWebSocket.tickerUpdate{
-                VStack(alignment:.leading){
-                    HStack{
-                        Text(psxWebSocket.tickerUpdate?.symbol ?? "" )
-                            .font(.headline)
-                        Text(psxWebSocket.tickerUpdate?.tick.st ?? "")
+        if psxWebSocket.portfolioUpdate.isEmpty{
+            ProgressView()
+        }else{
+            TabView{
+                
+                ForEach(psxWebSocket.portfolioUpdate,id:
+                            \.symbol) { result in
+                    VStack(alignment:.leading){
+                        HStack{
+                            Text(result.symbol )
+                                .font(.headline)
+                            Text(result.tick.st)
+                                .font(.subheadline)
+                        }
+                        HStack{
+                            Text("Current Price: ")
+                                .font(.subheadline)
+                            Text(result.tick.c,format: .number.precision(.fractionLength(2)))
+                                .contentTransition(.numericText())
+                                .font(.headline)
+                            
+                            
+                        }
+                        Text("Change: \(result.tick.ch,specifier: "%.2f")")
                             .font(.subheadline)
-                    }
-                    HStack{
-                        Text("Current Price: \(psxWebSocket.tickerUpdate?.tick.c ?? 0.0,format: .number.precision(.fractionLength(2)))")
-                            .font(.subheadline)
+                            .foregroundStyle(result.tick.ch > 0 ? .green : .red)
+                        
+                        Text("Open: \(result.tick.o ,format: .number.precision(.fractionLength(2)))")
+                            .font(.caption)
+                        Text("High: \(result.tick.h ,format: .number.precision(.fractionLength(2)))")
+                            .font(.caption)
+                        Text("Low: \(result.tick.l ,format: .number.precision(.fractionLength(2)))")
+                            .font(.caption)
                         
                     }
-                    Text("Change: \(tickerUpdate.tick.ch,specifier: "%.2f")")
-                        .font(.subheadline)
-                        .foregroundStyle(tickerUpdate.tick.ch > 0 ? .green : .red)
-                    
-                    Text("Open: \(psxWebSocket.tickerUpdate?.tick.o ?? 0.0,format: .number.precision(.fractionLength(2)))")
-                        .font(.caption)
-                    Text("High: \(psxWebSocket.tickerUpdate?.tick.h ?? 0.0,format: .number.precision(.fractionLength(2)))")
-                        .font(.caption)
-                    Text("Low: \(psxWebSocket.tickerUpdate?.tick.l ?? 0.0,format: .number.precision(.fractionLength(2)))")
-                        .font(.caption)
-
-                    
-                   
-                    
+                    .frame(maxWidth:.infinity,alignment:.leading)
                 }
-            }else{
-                ProgressView()
             }
+                            .tabViewStyle(.page)
+                            .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
+                            .frame(height: 150)
+                            
+            }
+            
         }
     }
-}
-
-
-
-
-#Preview {
-    ContentView()
-}
+    
+    
+    
+    
+    #Preview {
+        ContentView()
+    }

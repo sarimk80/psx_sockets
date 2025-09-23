@@ -187,14 +187,23 @@ class WebSocketManager{
         }
     }
     
-    func getPortfolioRealTime() async {
-        
+    func getRealTimeTickersUpdate() async{
         let data = swiftDataService.getSavedTicker()
+        let tickers = data.map { $0.ticker }
+       await getPortfolioRealTime(tickers: tickers,market: "REG")
+    }
+    
+    func getMarketUpdate(tickers:[String])async{
+        await getPortfolioRealTime(tickers: tickers,market: "IDX")
+    }
+    
+    func getPortfolioRealTime(tickers:[String],market:String) async {
+        
         do{
-            for model in data {
-                let result = try await psxServiceManager.getSymbolDetail(market: "REG",symbol: model.ticker)
-                self.portfolioUpdate.append(TickerUpdate(type: "tickUpdate", symbol: result.data.symbol, market: result.data.market, tick: Tick(m: "REG", st: result.data.st, s: model.ticker, t: result.data.timestamp, o: 0.0, h: result.data.high, l: result.data.low, c: result.data.price, v: result.data.volume, ldcp: 0.0, ch: result.data.change, pch: result.data.changePercent, bp: Double(result.data.bid), bv: result.data.bidVol, ap: Double(result.data.ask), av: result.data.askVol, val: result.data.value, tr: result.data.timestamp), timestamp: result.timestamp))
-                getSymbolDetailRealTime(symbol: model.ticker)
+            for model in tickers {
+                let result = try await psxServiceManager.getSymbolDetail(market: market,symbol: model)
+                self.portfolioUpdate.append(TickerUpdate(type: "tickUpdate", symbol: result.data.symbol, market: result.data.market, tick: Tick(m: market, st: result.data.st, s: model, t: result.data.timestamp, o: 0.0, h: result.data.high, l: result.data.low, c: result.data.price, v: result.data.volume, ldcp: 0.0, ch: result.data.change, pch: result.data.changePercent, bp: Double(result.data.bid), bv: result.data.bidVol, ap: Double(result.data.ask), av: result.data.askVol, val: result.data.value, tr: result.data.timestamp), timestamp: result.timestamp))
+                getSymbolDetailRealTime(symbol: model)
             }
         }catch(let error){
             print(error.localizedDescription)

@@ -27,7 +27,8 @@ struct PortfolioView: View {
                        Spacer()
                        VStack{
                            Text(result.tick.c,format: .number.precision(.fractionLength(2)))
-                               .font(.subheadline)
+                               .font(.headline)
+                               .contentTransition(.numericText())
                            Text(result.tick.ch,format: .number.precision(.fractionLength(2)))
                                .font(.caption)
                                .foregroundStyle(result.tick.ch > 0 ? .green : .red)
@@ -42,56 +43,6 @@ struct PortfolioView: View {
            }
            
             
-//            if let portfolioUpdate = socketManager.portfolioUpdate{
-//                Text("")
-////                List(portfolioUpdate,id: \.portfolioUpdate.timestamp){result in
-////                                   HStack{
-////                                       Text(result.data.symbol)
-////                                           .font(.subheadline)
-////                                       Spacer()
-////                                       VStack{
-////                                           Text(result.data.price,format: .number.precision(.fractionLength(2)))
-////                                               .font(.subheadline)
-////                                           Text(result.data.changePercent,format: .number.precision(.fractionLength(2)))
-////                                               .font(.caption)
-////                                       }
-////                                   }
-////                                   .onTapGesture {
-////                                       appNavigation.tickerNavigation.append(TickerDetailRoute.tickerDetail(symbol: result.data.symbol))
-////                                   }
-//            }else{
-//                ProgressView()
-//            }
-//            switch psxVM.portfolioData{
-//            case .initial:
-//                ProgressView()
-//            case .loading:
-//                ProgressView()
-//            case .error(let errorMessage):
-//                Text(errorMessage)
-//            case .loaded(let data):
-//                List(data,id: \.data.timestamp){result in
-//                    HStack{
-//                        Text(result.data.symbol)
-//                            .font(.subheadline)
-//                        Spacer()
-//                        VStack{
-//                            Text(result.data.price,format: .number.precision(.fractionLength(2)))
-//                                .font(.subheadline)
-//                            Text(result.data.changePercent,format: .number.precision(.fractionLength(2)))
-//                                .font(.caption)
-//                        }
-//                    }
-//                    .onTapGesture {
-//                        appNavigation.tickerNavigation.append(TickerDetailRoute.tickerDetail(symbol: result.data.symbol))
-//                    }
-//                    
-//                }
-//                
-//                
-//            }
-                
-            
         }
         .navigationTitle("Portfolio")
         .navigationBarTitleDisplayMode(.inline)
@@ -104,12 +55,12 @@ struct PortfolioView: View {
             }
         }
         .sheet(isPresented: $showSymbolsheet) {
-            SheetView(psxViewModel: $psxVM,protfolioViewModel: portfolioVM,psxVM: psxVM)
+            SheetView(psxViewModel: $psxVM,protfolioViewModel: portfolioVM,psxVM: psxVM,socketManager: socketManager)
                 .presentationDetents([.large])
         }
         .task {
             await psxVM.getAllSymbols()
-            await socketManager.getPortfolioRealTime()
+            await socketManager.getRealTimeTickersUpdate()
         }
         
     }
@@ -120,6 +71,7 @@ struct SheetView: View {
    @Binding var psxViewModel:PsxViewModel
     var protfolioViewModel:PortfolioViewModel
     var psxVM: PsxViewModel
+    var socketManager:WebSocketManager
     
     
     var body: some View {
@@ -131,9 +83,9 @@ struct SheetView: View {
                 case .loading:
                     ProgressView()
                 case .allSymbolLoaded(let allSymbol):
-                    TickerListView(tickers: allSymbol,protfolioViewModel: protfolioViewModel,psxVM: psxVM)
+                    TickerListView(tickers: allSymbol,protfolioViewModel: protfolioViewModel,psxVM: psxVM,socketManager: socketManager)
                 case .loaded(let data):
-                    TickerListView(tickers: data,protfolioViewModel: protfolioViewModel,psxVM: psxVM)
+                    TickerListView(tickers: data,protfolioViewModel: protfolioViewModel,psxVM: psxVM,socketManager: socketManager)
                 case .error(let errorMessage):
                     Text(errorMessage)
                 }
@@ -156,6 +108,7 @@ struct TickerListView: View {
     var tickers:[String]
     var protfolioViewModel:PortfolioViewModel
     var psxVM:PsxViewModel
+    var socketManager:WebSocketManager
     
     
     var body: some View {
@@ -172,6 +125,7 @@ struct TickerListView: View {
                 Task{
                     try await Task.sleep(for: .seconds(3))
                     await psxVM.getPortfolioData()
+                    await socketManager.getRealTimeTickersUpdate()
                 }
                 
             }
