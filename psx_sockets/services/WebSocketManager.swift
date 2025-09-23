@@ -21,6 +21,7 @@ class WebSocketManager{
     
     var tickerUpdate:TickerUpdate?
     var klineModel:KlineModel?
+    var portfolioUpdate:[TickerUpdate] = []
     
     private var selectedSymbol:String = "KSE100"
     
@@ -78,10 +79,12 @@ class WebSocketManager{
             case "tickUpdate":
                 let tick = try JSONDecoder().decode(TickerUpdate.self, from: data)
                 self.tickerUpdate = tick
+                updateListRealTime()
                 
                 print(tick.symbol)
                 print(tick.market)
                 print(tick.type)
+                print(tick.tick.c)
             case "unsubscribeResponse":
                 print("UnSubscribe")
             case "subscribeResponse":
@@ -182,6 +185,62 @@ class WebSocketManager{
         }catch(let error){
             print(error.localizedDescription)
         }
+    }
+    
+    func getPortfolioRealTime() async {
+        
+        let data = swiftDataService.getSavedTicker()
+        do{
+            for model in data {
+                let result = try await psxServiceManager.getSymbolDetail(market: "REG",symbol: model.ticker)
+                self.portfolioUpdate.append(TickerUpdate(type: "tickUpdate", symbol: result.data.symbol, market: result.data.market, tick: Tick(m: "REG", st: result.data.st, s: model.ticker, t: result.data.timestamp, o: 0.0, h: result.data.high, l: result.data.low, c: result.data.price, v: result.data.volume, ldcp: 0.0, ch: result.data.change, pch: result.data.changePercent, bp: Double(result.data.bid), bv: result.data.bidVol, ap: Double(result.data.ask), av: result.data.askVol, val: result.data.value, tr: result.data.timestamp), timestamp: result.timestamp))
+                getSymbolDetailRealTime(symbol: model.ticker)
+            }
+        }catch(let error){
+            print(error.localizedDescription)
+        }
+        
+    }
+    
+    func updateListRealTime(){
+        
+        if let tick = self.tickerUpdate ,
+            let index = portfolioUpdate.firstIndex(where: {$0.symbol == tick.symbol}){
+            
+            var updateTick = self.portfolioUpdate[index]
+            var tickUpdate = self.portfolioUpdate[index].tick
+            
+            tickUpdate.ap = tick.tick.ap
+            tickUpdate.av = tick.tick.av
+            tickUpdate.bp = tick.tick.bp
+            tickUpdate.bv = tick.tick.bv
+            tickUpdate.c = tick.tick.c
+            tickUpdate.ch = tick.tick.ch
+            tickUpdate.h = tick.tick.h
+            tickUpdate.l = tick.tick.l
+            tickUpdate.ldcp = tick.tick.ldcp
+            tickUpdate.m = tick.tick.m
+            tickUpdate.o = tick.tick.o
+            tickUpdate.pch = tick.tick.pch
+            tickUpdate.s = tick.tick.s
+            tickUpdate.st = tick.tick.st
+            tickUpdate.t = tick.tick.t
+            tickUpdate.tr = tick.tick.tr
+            tickUpdate.v = tick.tick.v
+            tickUpdate.val = tick.tick.val
+            
+            updateTick.market = tick.market
+            updateTick.timestamp = tick.timestamp
+            updateTick.tick = tickUpdate
+            
+            
+                
+            self.portfolioUpdate[index] = updateTick
+            
+            }
+            
+            
+        
     }
     
 }

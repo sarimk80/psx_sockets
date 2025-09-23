@@ -13,37 +13,83 @@ struct PortfolioView: View {
     @State private var psxVM:PsxViewModel = PsxViewModel(psxServiceManager: PsxServiceManager())
     @State private var portfolioVM = PortfolioViewModel()
     @Environment(AppNavigation.self) private var appNavigation
+    @State private var socketManager:WebSocketManager = WebSocketManager()
     
     var body: some View {
         VStack{
-            switch psxVM.portfolioData{
-            case .initial:
+           if socketManager.portfolioUpdate.isEmpty {
                 ProgressView()
-            case .loading:
-                ProgressView()
-            case .error(let errorMessage):
-                Text(errorMessage)
-            case .loaded(let data):
-                List(data,id: \.data.timestamp){result in
-                    HStack{
-                        Text(result.data.symbol)
-                            .font(.subheadline)
-                        Spacer()
-                        VStack{
-                            Text(result.data.price,format: .number.precision(.fractionLength(2)))
-                                .font(.subheadline)
-                            Text(result.data.changePercent,format: .number.precision(.fractionLength(2)))
-                                .font(.caption)
-                        }
-                    }
-                    .onTapGesture {
-                        appNavigation.tickerNavigation.append(TickerDetailRoute.tickerDetail(symbol: result.data.symbol))
-                    }
-                    
-                }
-                
-                
-            }
+           }else{
+               List(socketManager.portfolioUpdate,id: \.symbol){result in
+                   HStack{
+                       Text(result.symbol)
+                           .font(.subheadline)
+                       Spacer()
+                       VStack{
+                           Text(result.tick.c,format: .number.precision(.fractionLength(2)))
+                               .font(.subheadline)
+                           Text(result.tick.ch,format: .number.precision(.fractionLength(2)))
+                               .font(.caption)
+                               .foregroundStyle(result.tick.ch > 0 ? .green : .red)
+                       }
+                   }
+                   .onTapGesture {
+                       appNavigation.tickerNavigation.append(TickerDetailRoute.tickerDetail(symbol: result.symbol))
+                   }
+                   
+                   
+               }
+           }
+           
+            
+//            if let portfolioUpdate = socketManager.portfolioUpdate{
+//                Text("")
+////                List(portfolioUpdate,id: \.portfolioUpdate.timestamp){result in
+////                                   HStack{
+////                                       Text(result.data.symbol)
+////                                           .font(.subheadline)
+////                                       Spacer()
+////                                       VStack{
+////                                           Text(result.data.price,format: .number.precision(.fractionLength(2)))
+////                                               .font(.subheadline)
+////                                           Text(result.data.changePercent,format: .number.precision(.fractionLength(2)))
+////                                               .font(.caption)
+////                                       }
+////                                   }
+////                                   .onTapGesture {
+////                                       appNavigation.tickerNavigation.append(TickerDetailRoute.tickerDetail(symbol: result.data.symbol))
+////                                   }
+//            }else{
+//                ProgressView()
+//            }
+//            switch psxVM.portfolioData{
+//            case .initial:
+//                ProgressView()
+//            case .loading:
+//                ProgressView()
+//            case .error(let errorMessage):
+//                Text(errorMessage)
+//            case .loaded(let data):
+//                List(data,id: \.data.timestamp){result in
+//                    HStack{
+//                        Text(result.data.symbol)
+//                            .font(.subheadline)
+//                        Spacer()
+//                        VStack{
+//                            Text(result.data.price,format: .number.precision(.fractionLength(2)))
+//                                .font(.subheadline)
+//                            Text(result.data.changePercent,format: .number.precision(.fractionLength(2)))
+//                                .font(.caption)
+//                        }
+//                    }
+//                    .onTapGesture {
+//                        appNavigation.tickerNavigation.append(TickerDetailRoute.tickerDetail(symbol: result.data.symbol))
+//                    }
+//                    
+//                }
+//                
+//                
+//            }
                 
             
         }
@@ -63,7 +109,7 @@ struct PortfolioView: View {
         }
         .task {
             await psxVM.getAllSymbols()
-            await psxVM.getPortfolioData()
+            await socketManager.getPortfolioRealTime()
         }
         
     }
