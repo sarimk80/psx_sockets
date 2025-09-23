@@ -17,7 +17,7 @@ Built on top of [psx-terminal](https://github.com/mumtazkahn/psx-terminal) for A
 ## 📱 Screenshots  
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/fd215893-b6d7-4796-ae79-498d675cf1a7" width="250" />
+  <img src="https://github.com/user-attachments/assets/1a98668c-be66-44dd-bb27-474c59fc39d2" width="250" />
   <img src="https://github.com/user-attachments/assets/14a62dea-51d7-4a69-9444-0cccc1e6abf8" width="250" />
   <img src="https://github.com/user-attachments/assets/4d39f7b9-f55d-4dd1-a85e-a675284ec59a" width="250" />
 </p>
@@ -29,10 +29,12 @@ Built on top of [psx-terminal](https://github.com/mumtazkahn/psx-terminal) for A
 </p>
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/b4420971-e7b9-4623-939a-e948e3336ad8" width="250" />
+  <img src="https://github.com/user-attachments/assets/5375b716-b26f-4aaf-b3dd-87f0732e3a34" width="250" />
+  
+  <img src="https://github.com/user-attachments/assets/1c21d743-af49-4c89-a98b-b0df15174f2b" width="250" />
 </p>
 
----
+
 
 ## 🚀 Getting Started  
 
