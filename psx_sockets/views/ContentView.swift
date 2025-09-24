@@ -24,12 +24,26 @@ struct ContentView: View {
     @Environment(AppNavigation.self) private var appNavigation
     @Environment(WebSocketManager.self) private var webSocketManager
     
+    @State private var selectedTab:Int = 0
+    
     
     var body: some View {
         
         List {
             VStack(spacing: 16) {
-                IndexView(psxWebSocket: webSocketManager)
+                IndexView(psxWebSocket: webSocketManager,selectedTab: $selectedTab)
+                
+                HStack{
+                    ForEach(0..<6,id: \.self) { index in
+                        HStack{
+                            Circle()
+                                .fill(index == selectedTab ? Color("AccentColor"):Color.gray.opacity(0.3))
+                                .frame(width: 10,height: 10)
+                        }
+                        
+                    }
+                }
+                
                 
                 Picker("My Picker", selection: $stockerEnums) {
                     Text("Gainers").tag(StockerEnums.Active)
@@ -136,20 +150,22 @@ struct StatsView: View {
 struct IndexView: View {
     
     var psxWebSocket:WebSocketManager
+    @Binding var selectedTab:Int
     
     var body: some View {
         if psxWebSocket.portfolioUpdate.isEmpty{
             ProgressView()
         }else{
-            TabView{
-                ForEach(psxWebSocket.portfolioUpdate,id:
-                            \.symbol) { result in
+            TabView(selection:$selectedTab){
+                ForEach(psxWebSocket.portfolioUpdate.enumerated(),id:
+                            \.element) { index,result in
                     TickerView(ticker: result)
                         .frame(maxWidth:.infinity,alignment:.leading)
+                        .tag(index)
                 }
             }
             .tabViewStyle(.page)
-            .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
+            .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .never))
             .frame(height: 160)
             
         }

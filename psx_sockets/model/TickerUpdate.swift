@@ -8,7 +8,7 @@
 import Foundation
 
 
-struct TickerUpdate :Codable{
+struct TickerUpdate :Codable,Hashable{
     
     let  type:String//": "tickUpdate",
     let  symbol:String//": "AIRLINK",
@@ -16,9 +16,11 @@ struct TickerUpdate :Codable{
     var tick:Tick//": ,
     var timestamp:Int//": 1750762129000
     
+    var id:String {symbol}
+    
 }
 
-struct Tick :Codable{
+struct Tick :Codable,Hashable{
     
     var m, st, s: String
     var t: Int
