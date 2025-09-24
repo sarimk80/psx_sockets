@@ -13,6 +13,10 @@ Built on top of [psx-terminal](https://github.com/mumtazkahn/psx-terminal) for A
 - **Portfolio Tracking** – Manage and monitor your personal holdings.  
 
 ---
+## Video
+
+https://github.com/user-attachments/assets/2cfc1f6c-a0c9-497d-90be-c70e9b3eebae
+
 
 ## 📱 Screenshots  
 
@@ -33,6 +37,9 @@ Built on top of [psx-terminal](https://github.com/mumtazkahn/psx-terminal) for A
   
   <img src="https://github.com/user-attachments/assets/1c21d743-af49-4c89-a98b-b0df15174f2b" width="250" />
 </p>
+
+
+
 
 
 
