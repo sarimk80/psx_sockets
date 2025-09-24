@@ -26,20 +26,17 @@ struct ContentView: View {
     
     
     var body: some View {
-        Group {
-            ScrollView {
-                HStack(){
-                    IndexView(psxWebSocket: webSocketManager)
-                    Spacer()
-                    
-                }
-                .padding(.bottom)
+        
+        List {
+            VStack(spacing: 16) {
+                IndexView(psxWebSocket: webSocketManager)
                 
                 Picker("My Picker", selection: $stockerEnums) {
                     Text("Gainers").tag(StockerEnums.Active)
                     Text("Lossers").tag(StockerEnums.Lossers)
                 }
                 .pickerStyle(.segmented)
+                
                 
                 switch psxViewModel.psxStats {
                 case .initial:
@@ -66,18 +63,22 @@ struct ContentView: View {
                 case .error(let errorMessage):
                     Text(errorMessage)
                 }
-            }
-            .padding()
+            
+        
             
         }
+        .listRowSeparator(.hidden)
+        
+    }
+        .listStyle(.plain)
         .navigationTitle("Home")
-        .navigationBarTitleDisplayMode(.inline)
         .task {
             await psxViewModel.getPsxMarketStats()
             await webSocketManager.getMarketUpdate(tickers: ["KSE100","ALLSHR","KMI30","PSXDIV20","KSE30","MII30"],market: "IDX")
         }
-        
-    }
+    
+    
+}
 }
 
 struct TileView: View {
@@ -144,25 +145,25 @@ struct IndexView: View {
                 ForEach(psxWebSocket.portfolioUpdate,id:
                             \.symbol) { result in
                     TickerView(ticker: result)
-                    .frame(maxWidth:.infinity,alignment:.leading)
+                        .frame(maxWidth:.infinity,alignment:.leading)
                 }
             }
-                            .tabViewStyle(.page)
-                            .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
-                            .frame(height: 200)
-                            
-            }
+            .tabViewStyle(.page)
+            .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
+            .frame(height: 160)
             
         }
+        
     }
-    
-    
-    
+}
+
+
+
 struct TickerView: View {
     var ticker: TickerUpdate?
     var body: some View {
         VStack(alignment:.leading){
-            HStack{
+            HStack(alignment:.top){
                 Text(ticker?.symbol ?? "" )
                     .font(.headline)
                 Text(ticker?.tick.st ?? "")
@@ -193,17 +194,17 @@ struct TickerView: View {
                 Spacer()
                 if ticker?.market != "IDX" {
                     
-                VStack(alignment:.trailing){
-                    Text("Bid: \(ticker?.tick.bp ?? 0.0,format: .number.precision(.fractionLength(2)))")
-                        .font(.caption)
-                    Text("Bid volume: \(ticker?.tick.bv ?? 0,format: .number.precision(.fractionLength(2)))")
-                        .font(.caption)
-                    Text("Ask: \(ticker?.tick.ap ?? 0.0,format: .number.precision(.fractionLength(2)))")
-                        .font(.caption)
-                    Text("Ask volume: \(ticker?.tick.av ?? 0,format: .number.precision(.fractionLength(2)))")
-                        .font(.caption)
+                    VStack(alignment:.trailing){
+                        Text("Bid: \(ticker?.tick.bp ?? 0.0,format: .number.precision(.fractionLength(2)))")
+                            .font(.caption)
+                        Text("Bid volume: \(ticker?.tick.bv ?? 0,format: .number.precision(.fractionLength(2)))")
+                            .font(.caption)
+                        Text("Ask: \(ticker?.tick.ap ?? 0.0,format: .number.precision(.fractionLength(2)))")
+                            .font(.caption)
+                        Text("Ask volume: \(ticker?.tick.av ?? 0,format: .number.precision(.fractionLength(2)))")
+                            .font(.caption)
+                    }
                 }
-            }
                 
                 
             }
@@ -214,7 +215,7 @@ struct TickerView: View {
 }
 
 
-    
-    #Preview {
-        ContentView()
-    }
+
+#Preview {
+    ContentView()
+}

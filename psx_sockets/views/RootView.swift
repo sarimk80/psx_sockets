@@ -21,6 +21,7 @@ struct RootView: View {
                                 TickerDetailView(symbol: symbol)
                             }
                         }
+
                 }
                 
             }

@@ -45,7 +45,6 @@ struct PortfolioView: View {
             
         }
         .navigationTitle("Portfolio")
-        .navigationBarTitleDisplayMode(.inline)
 
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
