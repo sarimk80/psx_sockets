@@ -48,6 +48,6 @@ https://github.com/user-attachments/assets/2cfc1f6c-a0c9-497d-90be-c70e9b3eebae
 Clone the repository and open it in Xcode:  
 
 ```bash
-git clone https://github.com/yourusername/psx-ios-app.git
+git clone https://github.com/sarimk80/psx_sockets.git
 cd psx-ios-app
 open PSX.xcodeproj
