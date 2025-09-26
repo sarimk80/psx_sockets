@@ -17,9 +17,6 @@ struct PortfolioView: View {
     
     var body: some View {
         VStack{
-           if socketManager.portfolioUpdate.isEmpty {
-                ProgressView()
-           }else{
                List(socketManager.portfolioUpdate,id: \.symbol){result in
                    HStack{
                        Text(result.symbol)
@@ -40,7 +37,6 @@ struct PortfolioView: View {
                    
                    
                }
-           }
            
             
         }

@@ -41,13 +41,13 @@ struct TickerDetailView: View {
                             .padding(.vertical,8)
                             .padding(.horizontal,16)
                         Text(company.data.businessDescription)
-                            .padding(.all,8)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color.white)
-                                    .shadow(color: .black.opacity(0.26), radius: 6)
-                            )
-                            .padding(.horizontal,16)
+                            .padding(.all,16)
+//                            .background(
+//                                RoundedRectangle(cornerRadius: 12)
+//                                    .fill(Color.white)
+//                                    .shadow(color: .black.opacity(0.26), radius: 6)
+//                            )
+//                            .padding(.horizontal,16)
                             .frame(width: UIScreen.main.bounds.width)
                             
                         
@@ -69,11 +69,7 @@ struct TickerDetailView: View {
                             CompanyFundamentals(title: "Volume Average yearly:", subTitle: fundamental.data.volume30Avg.description)
                         }
                         
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.white)
-                                .shadow(color: .black.opacity(0.26), radius: 6)
-                        )
+                        
                         .padding(.horizontal,16)
                         .frame(width: UIScreen.main.bounds.width)
                         
@@ -88,10 +84,10 @@ struct TickerDetailView: View {
                             ForEach(company.data.keyPeople,id: \.position){div in
                                     HStack{
                                         Text(div.position)
-                                            .font(.headline)
+                                            .font(.subheadline)
                                         Spacer()
                                         Text(div.name)
-                                            .font(.subheadline)
+                                            .font(.headline)
                                     }
                                     .padding([.horizontal,.vertical],8)
                                 
@@ -99,11 +95,7 @@ struct TickerDetailView: View {
                             }
                         }
                         
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.white)
-                                .shadow(color: .black.opacity(0.26), radius: 6)
-                        )
+                        
                         .padding(.horizontal,16)
                         .frame(width: UIScreen.main.bounds.width)
                             
@@ -130,11 +122,7 @@ struct TickerDetailView: View {
                             }
                         }
                         
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.white)
-                                .shadow(color: .black.opacity(0.26), radius: 6)
-                        )
+                        
                         .padding(.horizontal,16)
                         .frame(width: UIScreen.main.bounds.width)
                         
@@ -163,9 +151,10 @@ struct CompanyFundamentals: View {
     var body: some View {
         HStack {
             Text(title)
-                .bold()
+                .font(.subheadline)
             Spacer()
             Text(subTitle)
+                .font(.headline)
         }
         .padding()
     }
