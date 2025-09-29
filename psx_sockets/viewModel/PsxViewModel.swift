@@ -44,6 +44,13 @@ enum PortfolioEnum{
     case error(errorMessage:String)
 }
 
+enum KlineEnums{
+    case initial
+    case loading
+    case loaded(data:KLineRequestModel)
+    case error(errorMessage:String)
+}
+
 @Observable
 class PsxViewModel{
     var psxStats:PsxStatsEnum = PsxStatsEnum.initial
@@ -51,6 +58,8 @@ class PsxViewModel{
     var psxSearch : PsxSearchSymbolEnum = PsxSearchSymbolEnum.initial
     var psxSector : PsxSectorEnum = PsxSectorEnum.initial
     var portfolioData : PortfolioEnum = PortfolioEnum.initial
+    var kLineEnum : KlineEnums = KlineEnums.initial
+    
     var symbolSearch:String = ""
     
     var listOfSymbols:[String] = []
@@ -137,6 +146,17 @@ class PsxViewModel{
             
         }catch(let error){
             self.portfolioData = PortfolioEnum.error(errorMessage: error.localizedDescription)
+        }
+    }
+    
+    func getKlineSymbol(symbol:String,timeFrame:String)async{
+        self.kLineEnum = KlineEnums.loading
+        do{
+          let result =  try await psxServiceManager.psxKline(symbol: symbol, timeFrame: timeFrame)
+            self.kLineEnum = KlineEnums.loaded(data: result)
+        }catch(let error){
+            self.kLineEnum = KlineEnums.error(errorMessage: error.localizedDescription)
+            print(error.localizedDescription)
         }
     }
 }

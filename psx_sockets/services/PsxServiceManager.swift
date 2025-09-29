@@ -9,6 +9,30 @@ import Foundation
 
 
 class PsxServiceManager:PsxProtocol{
+    func psxKline(symbol: String,timeFrame:String) async throws -> KLineRequestModel {
+        guard let url = URL(string: "https://psxterminal.com/api/klines/\(symbol)/\(timeFrame)")
+        else {  throw URLError(.badURL) }
+              
+        let (data,response) = try await URLSession.shared.data(from: url)
+              
+              
+        guard let response = response as? HTTPURLResponse,
+                    
+                response.statusCode == 200
+                      
+                      
+        else { throw URLError(.badServerResponse) }
+              
+        if let string = String(data: data, encoding: .utf8) {
+                    print(string)
+                }
+              
+              
+        let decodeResponse = try JSONDecoder().decode(KLineRequestModel.self, from: data)
+              
+        return decodeResponse
+    }
+    
     func psxStats(type: String) async throws -> PsxStatsModel {
         guard let url = URL(string: "https://psxterminal.com/api/stats/\(type)")
         else {  throw URLError(.badURL) }

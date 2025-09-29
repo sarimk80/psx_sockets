@@ -15,4 +15,6 @@ protocol PsxProtocol{
     func psxfundamentals (symbol:String) async throws -> PsxFundamentalsModel
     
     func psxDividend(symbol:String) async throws -> PsxDividendModel
+    
+    func psxKline(symbol:String,timeFrame:String) async throws -> KLineRequestModel
 }
