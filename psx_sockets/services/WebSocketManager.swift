@@ -205,6 +205,7 @@ class WebSocketManager{
         
         self.portfolioUpdate.removeAll()
         
+        
         do{
             
             // make api call to get all the tickers detail
@@ -227,11 +228,13 @@ class WebSocketManager{
                     print(error.debugDescription)
                 }
             }
+            self.subKeys.removeAll()
             
             // subscribe to all the new tickers
             for model in tickers{
                 getSymbolDetailRealTime(symbol: model)
             }
+            
         }catch(let error){
             print(error.localizedDescription)
         }
