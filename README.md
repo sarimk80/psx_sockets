@@ -24,13 +24,13 @@ Built on top of [psx-terminal](https://github.com/mumtazkahn/psx-terminal) for A
 ## 📱 Screenshots
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/1a98668c-be66-44dd-bb27-474c59fc39d2" width="250" />
-  <img src="https://github.com/user-attachments/assets/14a62dea-51d7-4a69-9444-0cccc1e6abf8" width="250" />
-  <img src="https://github.com/user-attachments/assets/4d39f7b9-f55d-4dd1-a85e-a675284ec59a" width="250" />
+  <img src="https://github.com/user-attachments/assets/5349b82e-9dd4-48cd-9f2d-b680eebfafc9" width="250" />
+  <img src="https://github.com/user-attachments/assets/c98924a4-dac7-4f36-86fc-4ea751067a02" width="250" />
+  <img src="https://github.com/user-attachments/assets/0c39c061-e12c-467a-903c-fba5c059e011" width="250" />
 </p>
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/cf056102-378c-41e5-8f68-c3150218ac13" width="250" />
-  <img src="https://github.com/user-attachments/assets/11cb5230-8e0f-4851-a8d1-0f6ac84318ec" width="250" />
+  <img src="https://github.com/user-attachments/assets/bb02f4c1-e330-47bd-9e13-052c8da4553e" width="250" />
+  <img src="https://github.com/user-attachments/assets/656a4e44-7ee2-4287-bf9a-e695d9737c95" width="250" />
   <img src="https://github.com/user-attachments/assets/16802857-521c-4620-b315-c1dd65b65da1" width="250" />
 </p>
 <p align="center">
@@ -38,7 +38,7 @@ Built on top of [psx-terminal](https://github.com/mumtazkahn/psx-terminal) for A
   <img src="https://github.com/user-attachments/assets/1c21d743-af49-4c89-a98b-b0df15174f2b" width="250" />
 </p>
 
----
+
 
 ## 🚀 Getting Started
 
