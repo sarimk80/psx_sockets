@@ -9,75 +9,244 @@ import SwiftUI
 
 struct SectorView: View {
     
-    @State private var psxViewModel:PsxViewModel = PsxViewModel(psxServiceManager: PsxServiceManager())
+    @State private var psxViewModel: PsxViewModel = PsxViewModel(psxServiceManager: PsxServiceManager())
     
     var body: some View {
-        List{
+        List {
             switch psxViewModel.psxSector {
             case .initial:
-                ProgressView()
+                ProgressView("Loading sectors...")
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .listRowSeparator(.hidden)
+                
             case .loading:
-                ProgressView()
+                ProgressView("Loading sectors...")
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .listRowSeparator(.hidden)
+                
             case .loaded(let response):
-                    
-                
-                    ForEach(Array(response.data.keys),id:\.self) { key in
-                        
-                            VStack(alignment:.leading){
-                                Text("\(key):")
-                                    .font(.headline)
-                                SectorTileView(title: "Total volume", subtitle: Double(response.data[key]?.totalVolume ?? 0))
-                                SectorTileView(title: "Total value", subtitle: Double(response.data[key]?.totalValue ?? 0))
-                                SectorTileView(title: "Winners", subtitle: Double(response.data[key]?.gainers ?? 0))
-                                SectorTileView(title: "Losers", subtitle: Double(response.data[key]?.losers ?? 0))
-                                SectorTileView(title: "Change%", subtitle: Double(response.data[key]?.avgChangePercent ?? 0))
-                                
-                                
-                            }
-                            .listSectionSeparator(.hidden)
-                            
-                        
+                if response.data.isEmpty {
+                    emptyStateView
+                } else {
+                    ForEach(Array(response.data.keys.sorted()), id: \.self) { key in
+                        SectorCardView(
+                            sectorName: key,
+                            data: response.data[key]!
+                        )
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                        .listRowBackground(Color.clear)
                     }
-                
-                    
-                   
-                    
+                }
                 
             case .error(let errorMessage):
-                Text(errorMessage)
+                errorStateView(message: errorMessage)
+                    .listRowSeparator(.hidden)
             }
-            
         }
         .listStyle(.plain)
-        .navigationTitle("Sectors")
-        .task{
-          await psxViewModel.getPsxSector()
+        .navigationTitle("Market Sectors")
+        .navigationBarTitleDisplayMode(.large)
+        .background(Color(.systemGroupedBackground))
+        .task {
+            await psxViewModel.getPsxSector()
+        }
+        .refreshable {
+            await psxViewModel.getPsxSector()
         }
     }
     
+    private var emptyStateView: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "chart.pie.fill")
+                .font(.system(size: 60))
+                .foregroundColor(.secondary)
+                .padding()
+            
+            Text("No Sector Data")
+                .font(.title2)
+                .fontWeight(.semibold)
+                .foregroundColor(.primary)
+            
+            Text("Sector information is currently unavailable")
+                .font(.body)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity, minHeight: 300)
+        .listRowSeparator(.hidden)
+    }
     
-    
-    
-    
+    private func errorStateView(message: String) -> some View {
+        VStack(spacing: 20) {
+            Image(systemName: "exclamationmark.triangle")
+                .font(.system(size: 60))
+                .foregroundColor(.orange)
+                .padding()
+            
+            Text("Unable to Load")
+                .font(.title2)
+                .fontWeight(.semibold)
+                .foregroundColor(.primary)
+            
+            Text(message)
+                .font(.body)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+        }
+        .frame(maxWidth: .infinity, minHeight: 300)
+    }
 }
 
-struct SectorTileView: View {
-    var title:String
-    var subtitle:Double
+struct SectorCardView: View {
+    let sectorName: String
+    let data: SectorDataModel
+    
     var body: some View {
-        HStack{
-            Text("\(title): ")
-                .font(.subheadline)
-            Text(subtitle,format: .number.precision(.fractionLength(4)))
-                .font(.headline)
+        VStack(alignment: .leading, spacing: 16) {
+            // Header
+            HStack {
+                Text(sectorName)
+                    .font(.title3)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
+                
+                Spacer()
+                
+                // Change indicator
+                HStack(spacing: 6) {
+                    Image(systemName: data.avgChangePercent >= 0 ? "arrow.up.right" : "arrow.down.right")
+                        .font(.caption2)
+                        .foregroundColor(data.avgChangePercent >= 0 ? .green : .red)
+                    
+                    Text(data.avgChangePercent, format: .percent.precision(.fractionLength(2)))
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(data.avgChangePercent >= 0 ? .green : .red)
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(
+                    Capsule()
+                        .fill((data.avgChangePercent >= 0 ? Color.green : Color.red).opacity(0.1))
+                )
+            }
+            
+            // Metrics Grid
+            LazyVGrid(columns: [
+                GridItem(.flexible()),
+                GridItem(.flexible())
+            ], spacing: 12) {
+                SectorMetricView(
+                    title: "Total Volume",
+                    value: Double(data.totalVolume),
+                    valueColor: .blue,
+                    icon: "chart.bar.fill"
+                )
+                
+                SectorMetricView(
+                    title: "Total Value",
+                    value: data.totalValue,
+                    valueColor: .purple,
+                    icon: "dollarsign.circle.fill"
+                )
+                
+                SectorMetricView(
+                    title: "Winners",
+                    value: Double(data.gainers),
+                    valueColor: .green,
+                    icon: "arrow.up.right.circle.fill"
+                )
+                
+                SectorMetricView(
+                    title: "Losers",
+                    value: Double(data.losers),
+                    valueColor: .red,
+                    icon: "arrow.down.right.circle.fill"
+                )
+            }
         }
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.systemBackground))
+                .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 2)
+        )
     }
 }
 
-
-
-
+struct SectorMetricView: View {
+    let title: String
+    let value: Double
+    let valueColor: Color
+    let icon: String
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.caption)
+                    .foregroundColor(valueColor)
+                
+                Text(title)
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            
+            Text(formatValue(value, for: title))
+                .font(.system(.body, design: .monospaced))
+                .fontWeight(.semibold)
+                .foregroundColor(.primary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(valueColor.opacity(0.05))
+        )
+    }
+    
+    private func formatValue(_ value: Double, for title: String) -> String {
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .decimal
+        numberFormatter.maximumFractionDigits = 2
+        numberFormatter.minimumFractionDigits = 0
+        
+        switch title {
+        case "Total Volume", "Total Value":
+            // Format large numbers with abbreviations
+            if value >= 1_000_000_000 {
+                return String(format: "%.2fB", value / 1_000_000_000)
+            } else if value >= 1_000_000 {
+                return String(format: "%.2fM", value / 1_000_000)
+            } else if value >= 1_000 {
+                return String(format: "%.2fK", value / 1_000)
+            } else {
+                return numberFormatter.string(from: NSNumber(value: value)) ?? "\(value)"
+            }
+            
+        case "Winners", "Losers":
+            // Integer formatting for counts
+            return "\(Int(value))"
+            
+        case "Change%":
+            // Percentage formatting
+            return "\(value >= 0 ? "+" : "")\(String(format: "%.2f", value))%"
+            
+        default:
+            return numberFormatter.string(from: NSNumber(value: value)) ?? "\(value)"
+        }
+    }
+}
 
 #Preview {
-    SectorView()
+    NavigationView {
+        SectorView()
+    }
 }

@@ -231,9 +231,9 @@ class WebSocketManager{
             self.subKeys.removeAll()
             
             // subscribe to all the new tickers
-            for model in tickers{
-                getSymbolDetailRealTime(symbol: model)
-            }
+            //for model in tickers{
+            getSymbolDetailRealTime(symbol: tickers.first ?? "KSE100")
+            //}
             
         }catch(let error){
             print(error.localizedDescription)

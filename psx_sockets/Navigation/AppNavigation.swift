@@ -11,6 +11,7 @@ import Combine
 
 enum TickerDetailRoute:Hashable {
     case tickerDetail(symbol:String)
+    case corporationDetail(sectionName:CorporationEnum  ,data:[DividendModel])
 }
 
 @Observable

@@ -9,6 +9,31 @@ import Foundation
 
 
 class PsxServiceManager:PsxProtocol{
+    func getDividend() async throws -> [DividendModel] {
+        guard let url = URL(string: "https://sarim-pix.hf.space/dividend_history")
+        else {  throw URLError(.badURL) }
+              
+        let (data,response) = try await URLSession.shared.data(from: url)
+              
+              
+        guard let response = response as? HTTPURLResponse,
+                    
+                response.statusCode == 200
+                      
+                      
+        else { throw URLError(.badServerResponse) }
+              
+        if let string = String(data: data, encoding: .utf8) {
+                    print(string)
+                }
+              
+              
+        let decodeResponse = try JSONDecoder().decode([DividendModel].self, from: data)
+        print(decodeResponse)
+              
+        return decodeResponse
+    }
+    
     func psxKline(symbol: String,timeFrame:String) async throws -> KLineRequestModel {
         guard let url = URL(string: "https://psxterminal.com/api/klines/\(symbol)/\(timeFrame)")
         else {  throw URLError(.badURL) }

@@ -7,16 +7,11 @@
 
 import SwiftUI
 
-enum StockerEnums: String, Identifiable {
-    case Active
-    case Lossers
-    
-    var id: Self { self }
-}
+
 
 struct ContentView: View {
     
-    @State private var stockerEnums: StockerEnums = .Active
+    
     @State private var psxViewModel: PsxViewModel = PsxViewModel(psxServiceManager: PsxServiceManager())
     @Environment(AppNavigation.self) private var appNavigation
     @Environment(WebSocketManager.self) private var webSocketManager
@@ -39,16 +34,13 @@ struct ContentView: View {
                 }
                 .padding(.vertical, 8)
                 
-                // Segmented Control
-                Picker("Market Performance", selection: $stockerEnums) {
-                    Text("Gainers").tag(StockerEnums.Active)
-                    Text("Losers").tag(StockerEnums.Lossers)
-                }
-                .pickerStyle(.segmented)
-                .padding(.vertical, 4)
                 
-                // Stocks List
-                stocksListView
+                // Corporate Actions Detail Views
+                CorporateActionsSection(psxViewModel: psxViewModel,appNavigation: appNavigation)
+                
+                
+                
+                
             }
             .listRowSeparator(.hidden)
             .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
@@ -59,91 +51,28 @@ struct ContentView: View {
         .navigationBarTitleDisplayMode(.large)
         .background(Color(.systemGroupedBackground))
         .task {
-            await psxViewModel.getPsxMarketStats()
-            await webSocketManager.getMarketUpdate(tickers: ["KSE100","ALLSHR","KMI30","PSXDIV20","KSE30","MII30"], market: "IDX")
-        }
-    }
-    
-    @ViewBuilder
-    private var stocksListView: some View {
-        switch psxViewModel.psxStats {
-        case .initial:
-            ProgressView("Loading market data...")
-                .frame(maxWidth: .infinity, minHeight: 200)
-                .foregroundColor(.secondary)
-                
-        case .loading:
-            ProgressView("Loading market data...")
-                .frame(maxWidth: .infinity, minHeight: 200)
-                .foregroundColor(.secondary)
-                
-        case .loaded(let data):
-            let stocks = stockerEnums == .Active ? data.data.topGainers : data.data.topLosers
-            
-            if stocks.isEmpty {
-                emptyStateView
-            } else {
-                ForEach(stocks, id: \.symbol) { ticker in
-                    TileView(ticker: ticker)
-                        .padding(.vertical, 8)
-                        .padding(.horizontal, 16)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color(.systemBackground))
-                                .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
-                        )
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 4)
-                        .onTapGesture {
-                            appNavigation.tickerNavigation.append(TickerDetailRoute.tickerDetail(symbol: ticker.symbol))
-                        }
-                }
+            if webSocketManager.portfolioUpdate.isEmpty{
+                await webSocketManager.getMarketUpdate(tickers: ["KSE100","ALLSHR","KMI30","PSXDIV20","KSE30","MII30"], market: "IDX")
             }
             
-        case .error(let errorMessage):
-            errorStateView(message: errorMessage)
+            if case DividendEnums.initial = psxViewModel.dividendEnums{
+                await psxViewModel.getDividendData()
+
+            }
         }
     }
     
-    private var emptyStateView: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "chart.line.downtrend.xyaxis")
-                .font(.system(size: 48))
-                .foregroundColor(.secondary)
-            Text("No stocks found")
-                .font(.headline)
-                .foregroundColor(.primary)
-            Text("There are currently no \(stockerEnums == .Active ? "gainers" : "losers") in the market")
-                .font(.body)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity, minHeight: 200)
-        .padding()
-    }
-    
-    private func errorStateView(message: String) -> some View {
-        VStack(spacing: 16) {
-            Image(systemName: "exclamationmark.triangle")
-                .font(.system(size: 48))
-                .foregroundColor(.orange)
-            Text("Unable to load data")
-                .font(.headline)
-                .foregroundColor(.primary)
-            Text(message)
-                .font(.body)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity, minHeight: 200)
-        .padding()
+    // Helper function to count actions
+    private func getActionCount(data: [DividendModel], filter: (DividendModel) -> Bool) -> Int {
+        guard case .loaded(let loadedData) = psxViewModel.dividendEnums else { return 0 }
+        return loadedData.filter(filter).count
     }
 }
 
 struct TileView: View {
     var ticker: Top
     var body: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: 12) {
             // Symbol with background
             ZStack {
                 Circle()
@@ -173,7 +102,7 @@ struct TileView: View {
                     .fontWeight(.semibold)
                     .foregroundColor(.primary)
                 
-                HStack(spacing: 12) {
+                HStack(spacing: 8) {
                     HStack(spacing: 4) {
                         Image(systemName: ticker.change > 0 ? "arrow.up.right" : "arrow.down.right")
                             .font(.caption2)
@@ -383,6 +312,436 @@ struct TickerView: View {
         }
     }
 }
+
+
+// Corporate Action Card Component
+struct CorporateActionCard: View {
+    let title: String
+    let count: Int
+    let icon: String
+    let color: Color
+    
+    var body: some View {
+        VStack(spacing: 12) {
+            HStack {
+                Image(systemName: icon)
+                    .font(.title3)
+                    .foregroundColor(color)
+                
+                Spacer()
+                
+                Text("\(count)")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundColor(color)
+            }
+            
+            Text(title)
+                .font(.caption)
+                .fontWeight(.medium)
+                .foregroundColor(.primary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.systemBackground))
+                .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+        )
+    }
+}
+
+// Main Corporate Actions Section
+struct CorporateActionsSection: View {
+    var psxViewModel: PsxViewModel
+    var appNavigation: AppNavigation
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            switch psxViewModel.dividendEnums {
+            case .initial:
+                ProgressView("Loading corporate actions...")
+                    .frame(maxWidth: .infinity, minHeight: 100)
+                    .foregroundColor(.secondary)
+                
+            case .loading:
+                ProgressView("Loading corporate actions...")
+                    .frame(maxWidth: .infinity, minHeight: 100)
+                    .foregroundColor(.secondary)
+                
+            case .loaded(let data):
+                LazyVStack(spacing: 16) {
+                    // Only show sections that have data
+                    if data.contains(where: { $0.dividend != "-" }) {
+                        let dividendData = data.filter { $0.dividend != "-" }
+                        DividendSection(data: Array(dividendData.prefix(3))) {
+                            appNavigation.tickerNavigation.append(TickerDetailRoute.corporationDetail(sectionName: .Dividend, data: data))
+                        }
+                    }
+                    
+                    if data.contains(where: { $0.eps != "-" }) {
+                        let epsData = data.filter { $0.eps != "-" }
+                        EpsSection(data: Array(epsData.prefix(3))) {
+                            appNavigation.tickerNavigation.append(TickerDetailRoute.corporationDetail(sectionName: .Eps, data: data))
+                        }
+                    }
+                    
+                    if data.contains(where: { $0.profitLossAfterTax != "-" || $0.profitLossBeforeTax != "-" }) {
+                        let profitLossData = data.filter { $0.profitLossAfterTax != "-" || $0.profitLossBeforeTax != "-" }
+                        ProfitLossSection(data: Array(profitLossData.prefix(3))) {
+                            appNavigation.tickerNavigation.append(TickerDetailRoute.corporationDetail(sectionName: .ProfitLoss, data: data))
+                        }
+                    }
+                    
+                    if data.contains(where: { $0.boardMeeting != "-" }) {
+                        let meetingData = data.filter { $0.boardMeeting != "-" }
+                        MeetingSection(data: Array(meetingData.prefix(3))) {
+                            appNavigation.tickerNavigation.append(TickerDetailRoute.corporationDetail(sectionName: .Meeting, data: data))
+                        }
+                    }
+                }
+                
+            case .error(let errorMessage):
+                ErrorView(message: errorMessage)
+            }
+        }
+        .padding(.horizontal, 16)
+    }
+}
+
+// Improved Dividend View
+struct DividendSection: View {
+    let data: [DividendModel]
+    let onTap: () -> Void
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Dividend Announcements", icon: "gift", color: .green,corporationEnum: .Dividend,onTap: {
+                
+            })
+                .onTapGesture(perform: onTap)
+            
+            ForEach(data.filter { $0.dividend != "-" }, id: \.id) { result in
+                DividendCard(result: result)
+            }
+        }
+    }
+}
+
+struct DividendCard: View {
+    let result: DividendModel
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            // Company Icon
+            ZStack {
+                Circle()
+                    .fill(Color.green.opacity(0.1))
+                    .frame(width: 44, height: 44)
+                
+                Image(systemName: "gift")
+                    .font(.system(size: 18))
+                    .foregroundColor(.green)
+            }
+            
+            VStack(alignment: .leading, spacing: 6) {
+                Text(result.company)
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                    .lineLimit(1)
+                
+                HStack {
+                    Text("Dividend:")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    
+                    Text(result.dividend)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.green)
+                }
+                
+                if result.date != "-" {
+                    HStack {
+                        Text("Payment:")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        Text(result.date)
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .foregroundColor(.primary)
+                    }
+                }
+            }
+            
+            Spacer()
+        }
+        
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.systemBackground))
+                .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+        )
+    }
+}
+
+// Improved EPS View
+struct EpsSection: View {
+    let data: [DividendModel]
+    let onTap: () -> Void
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "EPS Announcements", icon: "chart.line.uptrend.xyaxis", color: .orange,corporationEnum: .Eps,onTap: {})
+                .onTapGesture(perform: onTap)
+            
+            ForEach(data.filter { $0.eps != "-" }, id: \.id) { result in
+                EpsCard(result: result)
+            }
+        }
+    }
+}
+
+struct EpsCard: View {
+    let result: DividendModel
+    
+    private var isPositive: Bool {
+        !result.eps.contains("(") && result.eps != "-"
+    }
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            ZStack {
+                Circle()
+                    .fill(isPositive ? Color.green.opacity(0.1) : Color.red.opacity(0.1))
+                    .frame(width: 44, height: 44)
+                
+                Image(systemName: isPositive ? "arrow.up.right" : "arrow.down.right")
+                    .font(.system(size: 18))
+                    .foregroundColor(isPositive ? .green : .red)
+            }
+            
+            VStack(alignment: .leading, spacing: 6) {
+                Text(result.company)
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                    .lineLimit(1)
+                
+                HStack {
+                    Text("EPS:")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    
+                    Text(result.eps)
+                        .font(.system(.subheadline, design: .monospaced))
+                        .fontWeight(.semibold)
+                        .foregroundColor(isPositive ? .green : .red)
+                }
+                
+                if result.yearEnded != "-" {
+                    HStack {
+                        Text("Period:")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        Text(result.yearEnded)
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .foregroundColor(.primary)
+                    }
+                }
+            }
+            
+            Spacer()
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.systemBackground))
+                .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+        )
+    }
+}
+
+// Improved Profit/Loss View
+struct ProfitLossSection: View {
+    let data: [DividendModel]
+    let onTap: () -> Void
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Profit & Loss", icon: "dollarsign.circle", color: .purple,corporationEnum: .ProfitLoss,onTap: {})
+                .onTapGesture(perform: onTap)
+            
+            ForEach(data.filter { $0.profitLossAfterTax != "-" || $0.profitLossBeforeTax != "-" }, id: \.id) { result in
+                ProfitLossCard(result: result)
+            }
+        }
+    }
+}
+
+struct ProfitLossCard: View {
+    let result: DividendModel
+    
+    private var isProfit: Bool {
+        !result.profitLossAfterTax.contains("(") && result.profitLossAfterTax != "-"
+    }
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            ZStack {
+                Circle()
+                    .fill(isProfit ? Color.green.opacity(0.1) : Color.red.opacity(0.1))
+                    .frame(width: 44, height: 44)
+                
+                Image(systemName: isProfit ? "plus.circle" : "minus.circle")
+                    .font(.system(size: 18))
+                    .foregroundColor(isProfit ? .green : .red)
+            }
+            
+            VStack(alignment: .leading, spacing: 6) {
+                Text(result.company)
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                    .lineLimit(1)
+                
+                if result.profitLossAfterTax != "-" {
+                    HStack {
+                        Text("After Tax:")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        Text(result.profitLossAfterTax)
+                            .font(.system(.caption, design: .monospaced))
+                            .fontWeight(.medium)
+                            .foregroundColor(isProfit ? .green : .red)
+                    }
+                }
+                
+                if result.profitLossBeforeTax != "-" {
+                    HStack {
+                        Text("Before Tax:")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        Text(result.profitLossBeforeTax)
+                            .font(.system(.caption, design: .monospaced))
+                            .fontWeight(.medium)
+                            .foregroundColor(isProfit ? .green : .red)
+                    }
+                }
+            }
+            
+            Spacer()
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.systemBackground))
+                .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+        )
+    }
+}
+
+// Improved Meeting View
+struct MeetingSection: View {
+    let data: [DividendModel]
+    let onTap: () -> Void
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Board Meetings", icon: "person.2", color: .blue,corporationEnum: .Meeting,onTap: {})
+                .onTapGesture(perform: onTap)
+            
+            ForEach(data.filter { $0.boardMeeting != "-" }, id: \.id) { result in
+                MeetingCard(result: result)
+            }
+        }
+    }
+}
+
+struct MeetingCard: View {
+    let result: DividendModel
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            ZStack {
+                Circle()
+                    .fill(Color.blue.opacity(0.1))
+                    .frame(width: 44, height: 44)
+                
+                Image(systemName: "person.2")
+                    .font(.system(size: 18))
+                    .foregroundColor(.blue)
+            }
+            
+            VStack(alignment: .leading, spacing: 6) {
+                Text(result.company)
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                    .lineLimit(1)
+                
+                HStack {
+                    Text("Meeting:")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    
+                    Text(result.boardMeeting)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.blue)
+                }
+            }
+            
+            Spacer()
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.systemBackground))
+                .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+        )
+    }
+}
+
+// Reusable Section Header
+struct SectionHeader: View {
+    let title: String
+    let icon: String
+    let color: Color
+    let corporationEnum:CorporationEnum
+    let onTap: () -> Void
+    let isFromDetail:Bool = false
+    
+    
+    var body: some View {
+        HStack {
+            Image(systemName: icon)
+                .font(.headline)
+                .foregroundColor(color)
+            
+            Text(title)
+                .font(.headline)
+                .fontWeight(.semibold)
+                .foregroundColor(.primary)
+            
+            Spacer()
+            
+
+            Button(action: onTap) {
+                Text("View all")
+                    .font(.caption)
+                    .foregroundColor(color)
+            }
+            .opacity(isFromDetail ? 0 : 1)
+            .disabled(isFromDetail)
+
+        }
+    }
+}
+
 
 #Preview {
     ContentView()

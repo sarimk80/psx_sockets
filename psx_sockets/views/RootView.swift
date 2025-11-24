@@ -19,9 +19,28 @@ struct RootView: View {
                             switch route{
                             case .tickerDetail(let symbol):
                                 TickerDetailView(symbol: symbol)
+                            case .corporationDetail(let symbol,let data):
+                                CorporationDetailView(corporation: symbol, data: data)
                             }
                         }
 
+                }
+                
+            }
+            
+            Tab("Stocks",systemImage: "flame"){
+
+                NavigationStack(path: $appNavigation.tickerNavigation) {
+                    HotStocks()
+                        .environment(appNavigation)
+                        .navigationDestination(for: TickerDetailRoute.self) { route in
+                            switch route{
+                            case .tickerDetail(let symbol):
+                                TickerDetailView(symbol: symbol)
+                            case .corporationDetail(let corporation,let data):
+                                CorporationDetailView(corporation: corporation, data: data)
+                            }
+                        }
                 }
                 
             }
@@ -43,6 +62,9 @@ struct RootView: View {
                             switch route{
                             case .tickerDetail(let symbol):
                                 TickerDetailView(symbol: symbol)
+                            case .corporationDetail(sectionName: let sectionName, data: let data):
+                                CorporationDetailView(corporation: sectionName, data: data)
+
                             }
                         }
                 }
@@ -58,6 +80,9 @@ struct RootView: View {
                             switch route{
                             case .tickerDetail(let symbol):
                                 TickerDetailView(symbol: symbol)
+                            case .corporationDetail(sectionName: let sectionName, data: let data):
+                                CorporationDetailView(corporation: sectionName, data: data)
+
                             }
                         }
                 }

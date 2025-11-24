@@ -51,6 +51,13 @@ enum KlineEnums{
     case error(errorMessage:String)
 }
 
+enum DividendEnums{
+    case initial
+    case loading
+    case loaded(data:[DividendModel])
+    case error(errorMessage:String)
+}
+
 @Observable
 class PsxViewModel{
     var psxStats:PsxStatsEnum = PsxStatsEnum.initial
@@ -59,6 +66,7 @@ class PsxViewModel{
     var psxSector : PsxSectorEnum = PsxSectorEnum.initial
     var portfolioData : PortfolioEnum = PortfolioEnum.initial
     var kLineEnum : KlineEnums = KlineEnums.initial
+    var dividendEnums : DividendEnums = DividendEnums.initial
     
     var symbolSearch:String = ""
     
@@ -156,6 +164,17 @@ class PsxViewModel{
             self.kLineEnum = KlineEnums.loaded(data: result)
         }catch(let error){
             self.kLineEnum = KlineEnums.error(errorMessage: error.localizedDescription)
+            print(error.localizedDescription)
+        }
+    }
+    
+    func getDividendData()async{
+        self.dividendEnums = DividendEnums.loading
+        do{
+            let data = try await psxServiceManager.getDividend()
+            self.dividendEnums = DividendEnums.loaded(data: data)
+        }catch(let error){
+            self.dividendEnums = DividendEnums.error(errorMessage: error.localizedDescription)
             print(error.localizedDescription)
         }
     }

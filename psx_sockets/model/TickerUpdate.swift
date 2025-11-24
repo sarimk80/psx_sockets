@@ -34,3 +34,6 @@ struct Tick :Codable,Hashable{
     var tr: Int
     
 }
+
+
+
