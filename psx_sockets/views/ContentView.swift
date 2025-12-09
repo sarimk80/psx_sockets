@@ -51,9 +51,8 @@ struct ContentView: View {
         .navigationBarTitleDisplayMode(.large)
         .background(Color(.systemGroupedBackground))
         .task {
-            if webSocketManager.portfolioUpdate.isEmpty{
                 await webSocketManager.getMarketUpdate(tickers: ["KSE100","ALLSHR","KMI30","PSXDIV20","KSE30","MII30"], market: "IDX")
-            }
+            
             
             if case DividendEnums.initial = psxViewModel.dividendEnums{
                 await psxViewModel.getDividendData()

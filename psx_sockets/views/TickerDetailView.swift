@@ -256,10 +256,10 @@ struct KlineChart: View {
             switch psxViewModel.kLineEnum {
             case .initial:
                 ProgressView()
-                    .frame(height: 200)
+                    .frame(width: 200,height: 200)
             case .loading:
                 ProgressView()
-                    .frame(height: 200)
+                    .frame(width:200,height: 200)
             case .loaded(let kline):
                 KlineChartView(kline: kline, scrollPosition: $scrollPosition)
             case .error(let errorMessage):
@@ -290,6 +290,11 @@ struct KlineChartView: View {
                         )
                     )
                     .lineStyle(StrokeStyle(lineWidth: 2))
+                    .interpolationMethod(.cardinal)
+                    .annotation(position:.top) {
+                        Text("\(data.close)")
+                            .foregroundStyle(.secondary)
+                    }
                 
                 AreaMark(x: .value("Date", data.adjustedDate), y: .value("Price", data.close))
                     .foregroundStyle(

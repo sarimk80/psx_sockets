@@ -148,9 +148,6 @@ struct PortfolioStockRow: View {
                     .font(.headline)
                     .foregroundColor(.primary)
                 
-                Text("Live Price")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
             }
             
             Spacer()
@@ -172,7 +169,7 @@ struct PortfolioStockRow: View {
                         .fontWeight(.medium)
                         .foregroundColor(result.tick.ch > 0 ? .green : .red)
                     
-                    Text("\(result.tick.ch > 0 ? "+" : "")\(String(format: "%.2f", result.tick.ch))")
+                    Text("\(result.tick.pch > 0 ? "+" : "")\(String(format: "%.2f", result.tick.pch))%")
                         .font(.system(.caption, design: .monospaced))
                         .fontWeight(.medium)
                         .foregroundColor(result.tick.ch > 0 ? .green : .red)
