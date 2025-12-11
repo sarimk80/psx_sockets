@@ -192,19 +192,18 @@ class WebSocketManager{
     }
     
     func getRealTimeTickersUpdate() async{
+        self.portfolioUpdate.removeAll()
         let data = swiftDataService.getSavedTicker()
         let tickers = data.map { $0.ticker }
        await getPortfolioRealTime(tickers: tickers,market: "REG")
     }
     
     func getMarketUpdate(tickers:[String],market:String)async{
+        self.portfolioUpdate.removeAll()
         await getPortfolioRealTime(tickers: tickers,market: market)
     }
     
     func getPortfolioRealTime(tickers:[String],market:String) async {
-        
-        self.portfolioUpdate.removeAll()
-        
         
         do{
             
