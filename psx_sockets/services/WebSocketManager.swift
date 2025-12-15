@@ -22,6 +22,7 @@ class WebSocketManager{
     var tickerUpdate:TickerUpdate?
     var klineModel:KlineModel?
     var portfolioUpdate:[TickerUpdate] = []
+    var isLoading:Bool = true
     
     private var selectedSymbol:String = "KSE100"
     
@@ -29,6 +30,7 @@ class WebSocketManager{
     private var subKeys:[String] = []
     
     private var psxServiceManager:PsxServiceManager = PsxServiceManager()
+    
     
     
     init() {
@@ -193,13 +195,13 @@ class WebSocketManager{
     
     func getRealTimeTickersUpdate() async{
         self.portfolioUpdate.removeAll()
+        self.isLoading = true
         let data = swiftDataService.getSavedTicker()
         let tickers = data.map { $0.ticker }
        await getPortfolioRealTime(tickers: tickers,market: "REG")
     }
     
     func getMarketUpdate(tickers:[String],market:String)async{
-        self.portfolioUpdate.removeAll()
         await getPortfolioRealTime(tickers: tickers,market: market)
     }
     
@@ -213,6 +215,7 @@ class WebSocketManager{
                 self.portfolioUpdate.append(TickerUpdate(type: "tickUpdate", symbol: result.data.symbol, market: result.data.market, tick: Tick(m: market, st: result.data.st, s: model, t: result.data.timestamp, o: 0.0, h: result.data.high, l: result.data.low, c: result.data.price, v: result.data.volume, ldcp: 0.0, ch: result.data.change, pch: result.data.changePercent, bp: Double(result.data.bid), bv: result.data.bidVol, ap: Double(result.data.ask), av: result.data.askVol, val: result.data.value, tr: result.data.timestamp), timestamp: result.timestamp))
                 
             }
+            self.isLoading = false
             print("Subkeys")
             print(subKeys.count)
             // unsubscribe all the subscribe tickers

@@ -17,24 +17,15 @@ struct PortfolioView: View {
     
     var body: some View {
         VStack {
-            if socketManager.portfolioUpdate.isEmpty {
-                emptyPortfolioView
+            if socketManager.isLoading {
+                ProgressView()
             } else {
                 portfolioListView
             }
         }
-        .navigationTitle("Portfolio")
-        .navigationBarTitleDisplayMode(.large)
+        
         .background(Color(.systemGroupedBackground))
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button("Add Symbol", systemImage: "plus.circle.fill") {
-                    self.showSymbolsheet.toggle()
-                }
-                .fontWeight(.semibold)
-                .foregroundColor(.blue)
-            }
-        }
+        
         .sheet(isPresented: $showSymbolsheet) {
             SymbolSearchSheetView(
                 psxViewModel: $psxVM,
@@ -120,6 +111,17 @@ struct PortfolioView: View {
                         .foregroundColor(.secondary)
                 }
                 .padding(.bottom, 8)
+            }
+        }
+        .navigationTitle("Portfolio")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button("Add Symbol", systemImage: "plus.circle.fill") {
+                    self.showSymbolsheet.toggle()
+                }
+                .fontWeight(.semibold)
+                .foregroundColor(.blue)
             }
         }
         .listStyle(.plain)
