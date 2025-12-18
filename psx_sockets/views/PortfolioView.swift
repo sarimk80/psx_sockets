@@ -266,7 +266,7 @@ struct SymbolSearchSheetView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button(role:.cancel) {
                         dismiss()
                     }
                     .fontWeight(.semibold)
