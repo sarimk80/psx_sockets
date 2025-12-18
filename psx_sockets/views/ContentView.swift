@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-
-
 struct ContentView: View {
     
     
@@ -51,7 +49,7 @@ struct ContentView: View {
         .navigationBarTitleDisplayMode(.large)
         .background(Color(.systemGroupedBackground))
         .task {
-                await webSocketManager.getMarketUpdate(tickers: ["KSE100","ALLSHR","KMI30","PSXDIV20","KSE30","MII30"], market: "IDX")
+                await webSocketManager.getMarketUpdate(tickers: ["KSE100","ALLSHR","KMI30","PSXDIV20","KSE30","MII30"], market: "IDX",inIndex: true)
             
             
             if case DividendEnums.initial = psxViewModel.dividendEnums{
@@ -202,7 +200,7 @@ struct IndexView: View {
                         .padding(.horizontal, 20)
                         .padding(.vertical, 16)
                         .background(
-                            RoundedRectangle(cornerRadius: 16)
+                            RoundedRectangle(cornerRadius: 20)
                                 .fill(
                                     LinearGradient(
                                         colors: [Color(.systemBackground), Color(.systemGray6)],

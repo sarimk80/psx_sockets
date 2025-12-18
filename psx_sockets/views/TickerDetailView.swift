@@ -155,7 +155,7 @@ struct TickerDetailView: View {
         .navigationBarTitleDisplayMode(.large)
         .task {
             await psxViewModel.getCompanyDetail(symbol: symbol)
-            await psxSocketManager.getMarketUpdate(tickers: [symbol], market: "REG")
+            await psxSocketManager.getMarketUpdate(tickers: [symbol], market: "REG",inIndex: true)
             await psxViewModel.getKlineSymbol(symbol: symbol, timeFrame: "1d")
         }
     }

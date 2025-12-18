@@ -28,6 +28,24 @@ struct RootView: View {
                 
             }
             
+            Tab("Portfolio",systemImage: "scroll"){
+
+                NavigationStack(path:$appNavigation.tickerNavigation) {
+                    PortfolioView()
+                        .environment(appNavigation)
+                        .navigationDestination(for: TickerDetailRoute.self) { route in
+                            switch route{
+                            case .tickerDetail(let symbol):
+                                TickerDetailView(symbol: symbol)
+                            case .corporationDetail(sectionName: let sectionName, data: let data):
+                                CorporationDetailView(corporation: sectionName, data: data)
+
+                            }
+                        }
+                }
+                
+            }
+            
             Tab("Stocks",systemImage: "flame"){
 
                 NavigationStack(path: $appNavigation.tickerNavigation) {
@@ -53,23 +71,7 @@ struct RootView: View {
                 
             }
             
-            Tab("Portfolio",systemImage: "scroll"){
-
-                NavigationStack(path:$appNavigation.tickerNavigation) {
-                    PortfolioView()
-                        .environment(appNavigation)
-                        .navigationDestination(for: TickerDetailRoute.self) { route in
-                            switch route{
-                            case .tickerDetail(let symbol):
-                                TickerDetailView(symbol: symbol)
-                            case .corporationDetail(sectionName: let sectionName, data: let data):
-                                CorporationDetailView(corporation: sectionName, data: data)
-
-                            }
-                        }
-                }
-                
-            }
+            
             
             Tab("",systemImage: "magnifyingglass",role: .search){
                 

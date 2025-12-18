@@ -14,6 +14,7 @@ struct PortfolioView: View {
     @State private var portfolioVM = PortfolioViewModel()
     @Environment(AppNavigation.self) private var appNavigation
     @Environment(WebSocketManager.self) private var socketManager
+    @State private var timer:Timer?
     
     var body: some View {
         VStack {
@@ -38,6 +39,24 @@ struct PortfolioView: View {
         .task {
             await psxVM.getAllSymbols()
             await socketManager.getRealTimeTickersUpdate()
+            stopTimer()
+            startTimer()
+        }
+        .onDisappear {
+            stopTimer()
+        }
+    }
+    
+    func stopTimer()  {
+        timer?.invalidate()
+        timer = nil
+    }
+    
+    func startTimer() {
+        timer = Timer.scheduledTimer(withTimeInterval: 40, repeats: true) { _ in
+            Task {
+                await socketManager.getRealTimeTickersUpdate()
+            }
         }
     }
     
@@ -300,7 +319,6 @@ struct SymbolListView: View {
                             portfolioViewModel.addTicker(ticker: symbol)
                             Task {
                                 try await Task.sleep(for: .seconds(2))
-                                await psxViewModel.getPortfolioData()
                                 await socketManager.getRealTimeTickersUpdate()
                                 onDismiss()
                             }

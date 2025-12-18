@@ -117,7 +117,7 @@ class PsxViewModel{
     func getFilteredSymbols()async{
         self.psxSearch = PsxSearchSymbolEnum.loading
         
-        if(!symbolSearch.isEmpty && symbolSearch.count > 2){
+        if(!symbolSearch.isEmpty && symbolSearch.count > 1){
 
             let searchSymbol = self.listOfSymbols.filter({$0.localizedCaseInsensitiveContains(symbolSearch)})
             

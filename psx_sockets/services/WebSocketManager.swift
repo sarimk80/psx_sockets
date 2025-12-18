@@ -193,19 +193,20 @@ class WebSocketManager{
         }
     }
     
-    func getRealTimeTickersUpdate() async{
+    func getRealTimeTickersUpdate(isIndex:Bool = false) async{
         self.portfolioUpdate.removeAll()
         self.isLoading = true
         let data = swiftDataService.getSavedTicker()
         let tickers = data.map { $0.ticker }
-       await getPortfolioRealTime(tickers: tickers,market: "REG")
+       await getPortfolioRealTime(tickers: tickers,market: "REG",isIndex: isIndex)
     }
     
-    func getMarketUpdate(tickers:[String],market:String)async{
-        await getPortfolioRealTime(tickers: tickers,market: market)
+    func getMarketUpdate(tickers:[String],market:String,inIndex:Bool)async{
+        self.portfolioUpdate.removeAll()
+        await getPortfolioRealTime(tickers: tickers,market: market,isIndex: inIndex)
     }
     
-    func getPortfolioRealTime(tickers:[String],market:String) async {
+    func getPortfolioRealTime(tickers:[String],market:String,isIndex:Bool) async {
         
         do{
             
@@ -234,7 +235,9 @@ class WebSocketManager{
             
             // subscribe to all the new tickers
             //for model in tickers{
-            getSymbolDetailRealTime(symbol: tickers.first ?? "KSE100")
+            if(isIndex){
+                getSymbolDetailRealTime(symbol: tickers.first ?? "KSE100")
+            }
             //}
             
         }catch(let error){
