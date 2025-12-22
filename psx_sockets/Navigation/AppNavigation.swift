@@ -14,7 +14,32 @@ enum TickerDetailRoute:Hashable {
     case corporationDetail(sectionName:CorporationEnum  ,data:[DividendModel])
 }
 
+enum PortfolioNavigationEnums:Hashable{
+    case tickerDetail(symbol:String)
+    case addTickerVolume(symbol:String)
+}
+
+@MainActor
 @Observable
 class AppNavigation{
     var tickerNavigation = NavigationPath()
+}
+
+
+@MainActor
+@Observable
+class PortfolioNavigation{
+  var portfolioNav = NavigationPath()
+    
+    func push(route:PortfolioNavigationEnums) {
+        portfolioNav.append(route)
+    }
+    
+    func pop()  {
+        portfolioNav.removeLast()
+    }
+    
+    func root(){
+        portfolioNav = NavigationPath()
+    }
 }

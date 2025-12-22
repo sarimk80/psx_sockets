@@ -222,7 +222,7 @@ struct ErrorView: View {
     var body: some View {
         VStack(spacing: 12) {
             Image(systemName: "exclamationmark.triangle")
-                .font(.system(size: 40))
+                .font(.system(size: 60))
                 .foregroundColor(.orange)
             
             Text("Error Loading Data")
@@ -275,16 +275,21 @@ struct KlineChartView: View {
     
     var body: some View {
         let closes = kline.data.map { $0.close }
+        let open = kline.data.map{ $0.datumOpen}
         let minClose = closes.min() ?? 0.0
         let maxClose = closes.max() ?? 0.0
         let lastDate = kline.data.last?.adjustedDate ?? .now
         
+        let isPositive = closes.last ?? 0.0 >= open.last ?? 0.0
+        let lineColor:Color = isPositive ? .green : .red
+        
         Chart {
             ForEach(kline.data) { data in
+                
                 LineMark(x: .value("Date", data.adjustedDate), y: .value("Price", data.close))
                     .foregroundStyle(
                         LinearGradient(
-                            colors: [.blue, .green],
+                            colors: [.blue, lineColor],
                             startPoint: .leading,
                             endPoint: .trailing
                         )
@@ -299,7 +304,7 @@ struct KlineChartView: View {
                 AreaMark(x: .value("Date", data.adjustedDate), y: .value("Price", data.close))
                     .foregroundStyle(
                         .linearGradient(
-                            colors: [.green.opacity(0.3), .green.opacity(0.05)],
+                            colors: [lineColor.opacity(0.3), lineColor.opacity(0.05)],
                             startPoint: .top,
                             endPoint: .bottom
                         )

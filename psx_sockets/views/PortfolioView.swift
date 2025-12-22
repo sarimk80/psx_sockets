@@ -12,7 +12,7 @@ struct PortfolioView: View {
     @State private var showSymbolsheet = false
     @State private var psxVM: PsxViewModel = PsxViewModel(psxServiceManager: PsxServiceManager())
     @State private var portfolioVM = PortfolioViewModel()
-    @Environment(AppNavigation.self) private var appNavigation
+    @Environment(PortfolioNavigation.self) private var appNavigation
     @Environment(WebSocketManager.self) private var socketManager
     @State private var timer:Timer?
     
@@ -108,7 +108,7 @@ struct PortfolioView: View {
                     PortfolioStockRow(result: result)
                         .contentShape(Rectangle())
                         .onTapGesture {
-                            appNavigation.tickerNavigation.append(TickerDetailRoute.tickerDetail(symbol: result.symbol))
+                            appNavigation.push(route: PortfolioNavigationEnums.tickerDetail(symbol: result.symbol))
                         }
                         .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
                         .listRowSeparator(.hidden)
@@ -214,7 +214,7 @@ struct SymbolSearchSheetView: View {
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 switch psxViewModel.psxSearch {
                 case .initial:
@@ -292,6 +292,8 @@ struct SymbolListView: View {
     let socketManager: WebSocketManager
     let onDismiss: () -> Void
     
+    @Environment(PortfolioNavigation.self) private var appNavigation
+    
     var body: some View {
         List {
             if symbols.isEmpty {
@@ -316,12 +318,14 @@ struct SymbolListView: View {
                         symbol: symbol,
                         isInPortfolio: portfolioViewModel.savedTicker.contains { $0.ticker == symbol },
                         onAdd: {
-                            portfolioViewModel.addTicker(ticker: symbol)
-                            Task {
-                                try await Task.sleep(for: .seconds(2))
-                                await socketManager.getRealTimeTickersUpdate()
-                                onDismiss()
-                            }
+                            appNavigation.push(route: PortfolioNavigationEnums.addTickerVolume(symbol: symbol))
+                            
+//                            portfolioViewModel.addTicker(ticker: symbol)
+//                            Task {
+//                                try await Task.sleep(for: .seconds(2))
+//                                await socketManager.getRealTimeTickersUpdate()
+//                                onDismiss()
+//                            }
                         }
                     )
                     .listRowSeparator(.hidden)

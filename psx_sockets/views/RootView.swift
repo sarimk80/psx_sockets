@@ -9,6 +9,8 @@ import SwiftUI
 
 struct RootView: View {
     @State private var appNavigation:AppNavigation = AppNavigation()
+    @State private var portfolioNavigation:PortfolioNavigation = PortfolioNavigation()
+    
     var body: some View {
         TabView {
             Tab("Home", systemImage: "house") {
@@ -30,16 +32,17 @@ struct RootView: View {
             
             Tab("Portfolio",systemImage: "scroll"){
 
-                NavigationStack(path:$appNavigation.tickerNavigation) {
+                NavigationStack(path:$portfolioNavigation.portfolioNav) {
                     PortfolioView()
-                        .environment(appNavigation)
-                        .navigationDestination(for: TickerDetailRoute.self) { route in
+                        .environment(portfolioNavigation)
+                        .navigationDestination(for: PortfolioNavigationEnums.self) { route in
                             switch route{
                             case .tickerDetail(let symbol):
                                 TickerDetailView(symbol: symbol)
-                            case .corporationDetail(sectionName: let sectionName, data: let data):
-                                CorporationDetailView(corporation: sectionName, data: data)
+                            
 
+                            case .addTickerVolume(let symbol):
+                                Text("Hello world")
                             }
                         }
                 }
