@@ -19,6 +19,11 @@ enum PortfolioNavigationEnums:Hashable{
     case addTickerVolume(symbol:String)
 }
 
+enum SectorNavigationEnums:Hashable{
+    case sectorDetail(sector:SectorDataModel,sectorName:String)
+    case tickerDetail(symbol:String)
+}
+
 @MainActor
 @Observable
 class AppNavigation{
@@ -41,5 +46,23 @@ class PortfolioNavigation{
     
     func root(){
         portfolioNav = NavigationPath()
+    }
+}
+
+@MainActor
+@Observable
+class SectorNavigation{
+    var sectorNav = NavigationPath()
+    
+    func push(route:SectorNavigationEnums){
+        sectorNav.append(route)
+    }
+    
+    func pop(){
+        sectorNav.removeLast()
+    }
+    
+    func root(){
+        sectorNav = NavigationPath()
     }
 }

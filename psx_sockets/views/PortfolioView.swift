@@ -318,14 +318,14 @@ struct SymbolListView: View {
                         symbol: symbol,
                         isInPortfolio: portfolioViewModel.savedTicker.contains { $0.ticker == symbol },
                         onAdd: {
-                            appNavigation.push(route: PortfolioNavigationEnums.addTickerVolume(symbol: symbol))
+//                            appNavigation.push(route: PortfolioNavigationEnums.addTickerVolume(symbol: symbol))
                             
-//                            portfolioViewModel.addTicker(ticker: symbol)
-//                            Task {
-//                                try await Task.sleep(for: .seconds(2))
-//                                await socketManager.getRealTimeTickersUpdate()
-//                                onDismiss()
-//                            }
+                            portfolioViewModel.addTicker(ticker: symbol)
+                            Task {
+                                try await Task.sleep(for: .seconds(2))
+                                await socketManager.getRealTimeTickersUpdate()
+                                onDismiss()
+                            }
                         }
                     )
                     .listRowSeparator(.hidden)

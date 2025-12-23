@@ -37,7 +37,7 @@ struct SectorModel: Codable {
 }
 
 // MARK: - Datum
-struct SectorDataModel: Codable,Identifiable {
+struct SectorDataModel: Codable,Hashable,Identifiable {
     let totalVolume: Int
     let totalValue: Double
     let totalTrades, gainers, losers: Int
