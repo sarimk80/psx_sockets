@@ -24,6 +24,10 @@ enum SectorNavigationEnums:Hashable{
     case tickerDetail(symbol:String)
 }
 
+enum SheetNavigationEnums:Hashable{
+    case openVolumeSheet(symbol:String,volume:Int)
+}
+
 @MainActor
 @Observable
 class AppNavigation{
@@ -64,5 +68,23 @@ class SectorNavigation{
     
     func root(){
         sectorNav = NavigationPath()
+    }
+}
+
+@MainActor
+@Observable
+class SheetNavigation{
+    var sheetNav = NavigationPath()
+    
+    func push(route:SheetNavigationEnums){
+        sheetNav.append(route)
+    }
+    
+    func pop(){
+        sheetNav.removeLast()
+    }
+    
+    func root(){
+        sheetNav = NavigationPath()
     }
 }

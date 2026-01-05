@@ -13,9 +13,11 @@ class PortfolioModel{
     @Attribute(.unique) var id: UUID = UUID()
     var ticker:String
     var isSelected:Bool
+    var volume:Int?
     
-    init( ticker: String, isSelected: Bool) {
+    init( ticker: String, isSelected: Bool,volume:Int) {
         self.ticker = ticker
         self.isSelected = isSelected
+        self.volume = volume
     }
 }

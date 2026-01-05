@@ -12,7 +12,6 @@ struct SectorDetailView: View {
     let data: SectorDataModel
     
     @Environment(WebSocketManager.self) private var socketManager
-    //@Environment(SectorNavigation.self) private var appNavigation
     @Bindable var appNavigation:SectorNavigation
     
     

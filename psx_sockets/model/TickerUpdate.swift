@@ -32,6 +32,7 @@ struct Tick :Codable,Hashable{
     var av: Int
     var val: Double
     var tr: Int
+    var volume:Int?
     
 }
 

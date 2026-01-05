@@ -49,14 +49,14 @@ class SwiftDataService{
          
     }
     
-    func addTicker(ticker:String)  {
+    func addTicker(ticker:String,volume:Int)  {
         guard let modelContext = modelContext else {
                 return
             }
        if let filterTicker = getSavedTicker().first(where: {$0.ticker == ticker}){
            modelContext.delete(filterTicker)
         }else{
-            let portfolioModel = PortfolioModel(ticker: ticker, isSelected: true)
+            let portfolioModel = PortfolioModel(ticker: ticker, isSelected: true,volume: volume)
             modelContext.insert(portfolioModel)
 
         }

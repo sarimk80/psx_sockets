@@ -198,22 +198,25 @@ class WebSocketManager{
         self.isLoading = true
         let data = swiftDataService.getSavedTicker()
         let tickers = data.map { $0.ticker }
-       await getPortfolioRealTime(tickers: tickers,market: "REG",isIndex: isIndex)
+        let volume = data.map{ $0.volume ?? 1 }
+        await getPortfolioRealTime(tickers: tickers,market: "REG",isIndex: isIndex,volume: volume)
     }
     
     func getMarketUpdate(tickers:[String],market:String,inIndex:Bool)async{
         self.portfolioUpdate.removeAll()
-        await getPortfolioRealTime(tickers: tickers,market: market,isIndex: inIndex)
+        let volume = [Int](repeating: 1, count: tickers.count)
+        await getPortfolioRealTime(tickers: tickers,market: market,isIndex: inIndex,volume: volume)
     }
     
-    func getPortfolioRealTime(tickers:[String],market:String,isIndex:Bool) async {
+    func getPortfolioRealTime(tickers:[String],market:String,isIndex:Bool,volume:[Int]) async {
         
         do{
-            
+            //model
             // make api call to get all the tickers detail
-            for model in tickers {
+            
+            for (index,model) in tickers.enumerated() {
                 let result = try await psxServiceManager.getSymbolDetail(market: market,symbol: model)
-                self.portfolioUpdate.append(TickerUpdate(type: "tickUpdate", symbol: result.data.symbol, market: result.data.market, tick: Tick(m: market, st: result.data.st, s: model, t: result.data.timestamp, o: 0.0, h: result.data.high, l: result.data.low, c: result.data.price, v: result.data.volume, ldcp: 0.0, ch: result.data.change, pch: result.data.changePercent, bp: Double(result.data.bid), bv: result.data.bidVol, ap: Double(result.data.ask), av: result.data.askVol, val: result.data.value, tr: result.data.timestamp), timestamp: result.timestamp))
+                self.portfolioUpdate.append(TickerUpdate(type: "tickUpdate", symbol: result.data.symbol, market: result.data.market, tick: Tick(m: market, st: result.data.st, s: model, t: result.data.timestamp, o: 0.0, h: result.data.high, l: result.data.low, c: result.data.price, v: result.data.volume, ldcp: 0.0, ch: result.data.change, pch: result.data.changePercent, bp: Double(result.data.bid), bv: result.data.bidVol, ap: Double(result.data.ask), av: result.data.askVol, val: result.data.value, tr: result.data.timestamp,volume: volume[index]), timestamp: result.timestamp))
                 
             }
             self.isLoading = false
