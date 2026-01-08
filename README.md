@@ -49,6 +49,20 @@ Built on top of [psx-terminal](https://github.com/mumtazkahn/psx-terminal) for A
   <img src="https://github.com/user-attachments/assets/1c21d743-af49-4c89-a98b-b0df15174f2b" width="250" />
 </p>
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/46441e79-aa7a-4777-a064-09c8dc8d6287" width="250" />
+  <img src="https://github.com/user-attachments/assets/2281c622-48a6-4b50-b367-1be47eefd458" width="250" />
+
+  <img src="https://github.com/user-attachments/assets/db6b98eb-f1aa-42aa-9f21-ddbbbbabf033" width="250" />
+</p>
+
+<p align="center">
+    <img src="https://github.com/user-attachments/assets/84b20e59-7e8a-40e9-8701-a44c34d2e5cb" width="250" />
+
+  <img src="https://github.com/user-attachments/assets/688f24d5-025a-4b90-9364-b0ec01edd841" width="250" />
+
+  <img src="https://github.com/user-attachments/assets/0a4eaaef-7a69-493f-9a1f-b8585c9f4399" width="250" />
+</p>
 
 
 
