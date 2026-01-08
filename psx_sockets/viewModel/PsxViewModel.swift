@@ -58,6 +58,13 @@ enum DividendEnums{
     case error(errorMessage:String)
 }
 
+enum IndexDetailEnums{
+    case initial
+    case loading
+    case loaded(data:[IndexDetailModel],groupData:[SortedData])
+    case error(errorMessage:String)
+}
+
 @Observable
 class PsxViewModel{
     var psxStats:PsxStatsEnum = PsxStatsEnum.initial
@@ -67,6 +74,7 @@ class PsxViewModel{
     var portfolioData : PortfolioEnum = PortfolioEnum.initial
     var kLineEnum : KlineEnums = KlineEnums.initial
     var dividendEnums : DividendEnums = DividendEnums.initial
+    var indexDetailEnum: IndexDetailEnums = IndexDetailEnums.initial
     
     var symbolSearch:String = ""
     
@@ -178,4 +186,28 @@ class PsxViewModel{
             print(error.localizedDescription)
         }
     }
+    //IndexDetailEnums
+    
+    func getIndexData(indexEnum:IndexEnums)async{
+        self.indexDetailEnum = IndexDetailEnums.loading
+        var sortedData:[SortedData] = []
+        do{
+            let data = try await psxServiceManager.getIndexDetail(index: indexEnum)
+            let groupData = Dictionary(grouping:data,by: {$0.sector})
+            let sortedSector = groupData.sorted(by: {$0.key < $1.key})
+            
+           
+            sortedSector.forEach { sectorName, item in
+                sortedData.append(SortedData(sectorName: sectorName, sectorStockCount: item.count))
+            }
+            
+            
+            self.indexDetailEnum = IndexDetailEnums.loaded(data: data,groupData: sortedData)
+        }catch(let error){
+            self.indexDetailEnum = IndexDetailEnums.error(errorMessage: error.localizedDescription)
+            print(error.localizedDescription)
+        }
+    }
+    
+    
 }

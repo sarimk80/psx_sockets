@@ -7,6 +7,14 @@
 
 import Foundation
 
+enum IndexEnums:String {
+    case kse_100
+    case kse_30
+    case psx_div_20
+    case mii_30
+    case kmi_30
+}
+
 protocol PsxProtocol{
     func psxStats (type:String) async throws -> PsxStatsModel
     
@@ -19,4 +27,6 @@ protocol PsxProtocol{
     func psxKline(symbol:String,timeFrame:String) async throws -> KLineRequestModel
     
     func getDividend() async throws -> [DividendModel]
+    
+    func getIndexDetail(index:IndexEnums)async throws -> [IndexDetailModel]
 }

@@ -26,6 +26,8 @@ struct RootView: View {
                                 TickerDetailView(symbol: symbol)
                             case .corporationDetail(let symbol,let data):
                                 CorporationDetailView(corporation: symbol, data: data)
+                            case .indexDetail( let indexName):
+                                IndexDetailView(indexName: indexName,appNavigation: $appNavigation)
                             }
                         }
 
@@ -63,6 +65,8 @@ struct RootView: View {
                                 TickerDetailView(symbol: symbol)
                             case .corporationDetail(let corporation,let data):
                                 CorporationDetailView(corporation: corporation, data: data)
+                            case .indexDetail(indexName: let indexName):
+                                Text("")
                             }
                         }
                 }
@@ -100,6 +104,8 @@ struct RootView: View {
                             case .corporationDetail(sectionName: let sectionName, data: let data):
                                 CorporationDetailView(corporation: sectionName, data: data)
 
+                            case .indexDetail(indexName: let indexName):
+                                Text("")
                             }
                         }
                 }

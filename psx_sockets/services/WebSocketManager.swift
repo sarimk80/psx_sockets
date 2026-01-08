@@ -194,29 +194,49 @@ class WebSocketManager{
     }
     
     func getRealTimeTickersUpdate(isIndex:Bool = false) async{
-        self.portfolioUpdate.removeAll()
         self.isLoading = true
+        self.portfolioUpdate.removeAll()
         let data = swiftDataService.getSavedTicker()
         let tickers = data.map { $0.ticker }
         let volume = data.map{ $0.volume ?? 1 }
-        await getPortfolioRealTime(tickers: tickers,market: "REG",isIndex: isIndex,volume: volume)
+        let sectorName = [String](repeating: "", count: volume.count)
+        await getPortfolioRealTime(tickers: tickers,market: "REG",isIndex: isIndex,volume: volume,sectorName: sectorName)
     }
     
     func getMarketUpdate(tickers:[String],market:String,inIndex:Bool)async{
+        self.isLoading = true
         self.portfolioUpdate.removeAll()
         let volume = [Int](repeating: 1, count: tickers.count)
-        await getPortfolioRealTime(tickers: tickers,market: market,isIndex: inIndex,volume: volume)
+        let sectorName = [String](repeating: "", count: tickers.count)
+        await getPortfolioRealTime(tickers: tickers,market: market,isIndex: inIndex,volume: volume,sectorName: sectorName)
     }
     
-    func getPortfolioRealTime(tickers:[String],market:String,isIndex:Bool,volume:[Int]) async {
+    func getIndexDetail(index:IndexEnums)async{
+        self.isLoading = true
+        self.portfolioUpdate.removeAll()
+        do{
+        let response = try await psxServiceManager.getIndexDetail(index: index)
+        let volume = [Int](repeating: 1, count: response.count)
+        
+            await getPortfolioRealTime(tickers: response.map{$0.symbol}, market: "REG", isIndex: false, volume: volume,isFromIndex: true,sectorName: response.map{$0.sector})
+
+        }catch(let e){
+            print("Error\(e.localizedDescription)")
+        }
+    }
+    
+    func getPortfolioRealTime(tickers:[String],market:String,isIndex:Bool,volume:[Int],isFromIndex:Bool = false,sectorName:[String]) async {
         
         do{
             //model
             // make api call to get all the tickers detail
             
             for (index,model) in tickers.enumerated() {
+                if(isFromIndex){
+                    try await Task.sleep(nanoseconds: 1_000_000_000)
+                }
                 let result = try await psxServiceManager.getSymbolDetail(market: market,symbol: model)
-                self.portfolioUpdate.append(TickerUpdate(type: "tickUpdate", symbol: result.data.symbol, market: result.data.market, tick: Tick(m: market, st: result.data.st, s: model, t: result.data.timestamp, o: 0.0, h: result.data.high, l: result.data.low, c: result.data.price, v: result.data.volume, ldcp: 0.0, ch: result.data.change, pch: result.data.changePercent, bp: Double(result.data.bid), bv: result.data.bidVol, ap: Double(result.data.ask), av: result.data.askVol, val: result.data.value, tr: result.data.timestamp,volume: volume[index]), timestamp: result.timestamp))
+                self.portfolioUpdate.append(TickerUpdate(type: "tickUpdate", symbol: result.data.symbol, market: result.data.market, tick: Tick(m: market, st: result.data.st, s: model, t: result.data.timestamp, o: 0.0, h: result.data.high, l: result.data.low, c: result.data.price, v: result.data.volume, ldcp: 0.0, ch: result.data.change, pch: result.data.changePercent, bp: Double(result.data.bid), bv: result.data.bidVol, ap: Double(result.data.ask), av: result.data.askVol, val: result.data.value, tr: result.data.timestamp,volume: volume[index],sectorName: sectorName[index]), timestamp: result.timestamp))
                 
             }
             self.isLoading = false

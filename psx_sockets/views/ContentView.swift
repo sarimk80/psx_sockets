@@ -19,11 +19,11 @@ struct ContentView: View {
         List {
             VStack(spacing: 20) {
                 // Index Carousel Section
-                IndexView(psxWebSocket: webSocketManager, selectedTab: $selectedTab)
+                IndexView(psxWebSocket: webSocketManager, selectedTab: $selectedTab,appNavigation: appNavigation)
                 
                 // Custom Page Indicators
                 HStack(spacing: 8) {
-                    ForEach(0..<6, id: \.self) { index in
+                    ForEach(0..<5, id: \.self) { index in
                         Capsule()
                             .fill(index == selectedTab ? Color("AccentColor") : Color.gray.opacity(0.3))
                             .frame(width: index == selectedTab ? 24 : 8, height: 8)
@@ -49,7 +49,7 @@ struct ContentView: View {
         .navigationBarTitleDisplayMode(.large)
         .background(Color(.systemGroupedBackground))
         .task {
-                await webSocketManager.getMarketUpdate(tickers: ["KSE100","ALLSHR","KMI30","PSXDIV20","KSE30","MII30"], market: "IDX",inIndex: true)
+                await webSocketManager.getMarketUpdate(tickers: ["KSE100","KMI30","PSXDIV20","KSE30","MII30"], market: "IDX",inIndex: true)
             
             
             if case DividendEnums.initial = psxViewModel.dividendEnums{
@@ -186,9 +186,10 @@ struct StatCard: View {
 struct IndexView: View {
     var psxWebSocket: WebSocketManager
     @Binding var selectedTab: Int
+    var appNavigation: AppNavigation
     
     var body: some View {
-        if psxWebSocket.portfolioUpdate.isEmpty {
+        if psxWebSocket.isLoading {
             ProgressView("Loading indices...")
                 .frame(height: 160)
                 .frame(maxWidth: .infinity)
@@ -197,6 +198,7 @@ struct IndexView: View {
             TabView(selection: $selectedTab) {
                 ForEach(psxWebSocket.portfolioUpdate.enumerated(), id: \.element) { index, result in
                     TickerView(ticker: result)
+                        
                         .padding(.horizontal, 20)
                         .padding(.vertical, 16)
                         .background(
@@ -211,6 +213,9 @@ struct IndexView: View {
                                 .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
                         )
                         .padding(.horizontal, 16)
+                        .onTapGesture {
+                            appNavigation.tickerNavigation.append(TickerDetailRoute.indexDetail(indexName: StringToIndexEnum(indexName: result.symbol)))
+                        }
                         .tag(index)
                 }
             }

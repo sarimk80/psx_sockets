@@ -186,7 +186,7 @@ struct PortfolioView: View {
             // portfolio list
             Section {
                 ForEach(socketManager.portfolioUpdate, id: \.symbol) { result in
-                    PortfolioStockRow(result: result)
+                    PortfolioStockRow(result: result,isShowHolding: true)
                     
                         .contentShape(Rectangle())
                         .onTapGesture {
@@ -241,6 +241,7 @@ struct PortfolioView: View {
 
 struct PortfolioStockRow: View {
     let result: TickerUpdate
+    var isShowHolding:Bool = false
     
     private var totalStock: Double {
         result.tick.c * Double(result.tick.volume ?? 0)
@@ -285,7 +286,7 @@ struct PortfolioStockRow: View {
                     .lineLimit(1)
                 
                 // Stock holdings info
-                HStack(spacing: 4) {
+                if (isShowHolding) {    HStack(spacing: 4) {
                     Text("\(result.tick.volume ?? 0)")
                         .font(.system(.caption, design: .monospaced))
                         .fontWeight(.medium)
@@ -296,6 +297,12 @@ struct PortfolioStockRow: View {
                         .foregroundColor(.secondary.opacity(0.7))
                     
                     Text(result.tick.c, format: .number.precision(.fractionLength(2)))
+                        .font(.system(.caption, design: .monospaced))
+                        .fontWeight(.medium)
+                        .foregroundColor(.secondary)
+                }
+                }else{
+                    Text(result.tick.sectorName ?? "")
                         .font(.system(.caption, design: .monospaced))
                         .fontWeight(.medium)
                         .foregroundColor(.secondary)
