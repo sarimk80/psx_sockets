@@ -29,4 +29,6 @@ protocol PsxProtocol{
     func getDividend() async throws -> [DividendModel]
     
     func getIndexDetail(index:IndexEnums)async throws -> [IndexDetailModel]
+    
+    func getAllStocksDetail() async throws -> SectorPsxResponse
 }

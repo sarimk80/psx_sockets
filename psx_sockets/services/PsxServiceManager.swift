@@ -10,6 +10,32 @@ import Foundation
 
 class PsxServiceManager:PsxProtocol{
     
+    func getAllStocksDetail() async throws -> SectorPsxResponse {
+        guard let url = URL(string: "https://sarim-pix.hf.space/gainer_loosers")
+        else {  throw URLError(.badURL) }
+              
+        let (data,response) = try await URLSession.shared.data(from: url)
+              
+              
+        guard let response = response as? HTTPURLResponse,
+                    
+                response.statusCode == 200
+                      
+                      
+        else { throw URLError(.badServerResponse) }
+              
+        if let string = String(data: data, encoding: .utf8) {
+                    print(string)
+                }
+              
+              
+        let decodeResponse = try JSONDecoder().decode(SectorPsxResponse.self, from: data)
+        //print(decodeResponse)
+              
+        return decodeResponse
+    }
+    
+    
     func getIndexDetail(index: IndexEnums) async throws -> [IndexDetailModel] {
         
         guard let url = URL(string: "https://sarim-pix.hf.space/index/\(index.rawValue)")
@@ -56,7 +82,7 @@ class PsxServiceManager:PsxProtocol{
               
               
         let decodeResponse = try JSONDecoder().decode([DividendModel].self, from: data)
-        print(decodeResponse)
+       // print(decodeResponse)
               
         return decodeResponse
     }

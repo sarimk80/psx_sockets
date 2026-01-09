@@ -65,6 +65,13 @@ enum IndexDetailEnums{
     case error(errorMessage:String)
 }
 
+enum HotStocksEnums {
+    case initial
+    case loading
+    case loaded(gainers:[SectorStocks],losers:[SectorStocks],mostActive:[SectorStocks])
+    case error(errorMessage:String)
+}
+
 @Observable
 class PsxViewModel{
     var psxStats:PsxStatsEnum = PsxStatsEnum.initial
@@ -75,6 +82,7 @@ class PsxViewModel{
     var kLineEnum : KlineEnums = KlineEnums.initial
     var dividendEnums : DividendEnums = DividendEnums.initial
     var indexDetailEnum: IndexDetailEnums = IndexDetailEnums.initial
+    var hotStockEnum: HotStocksEnums = HotStocksEnums.initial
     
     var symbolSearch:String = ""
     
@@ -91,13 +99,34 @@ class PsxViewModel{
     
     func getPsxMarketStats() async{
         do{
-            self.psxStats = PsxStatsEnum.loading
-            let stats =  try await psxServiceManager.psxStats(type: "REG")
-            self.psxStats = PsxStatsEnum.loaded(data: stats)
+            self.hotStockEnum = HotStocksEnums.loading
+            let stocks = try await psxServiceManager.getAllStocksDetail()
+           
+            let allStocks = stocks.sectors.values.flatMap{$0}
+            
+            
+            let gainers = allStocks.filter{$0.trend == "increase"}
+                .sorted{Double($0.change) ?? 0.0 > Double($1.change) ?? 0.0}
+                .prefix(10)
+                .map{$0}
+            
+            let losers = allStocks.filter{$0.trend == "decrease"}
+                .sorted{Double($0.change) ?? 0.0 < Double($1.change) ?? 0.0}
+                .prefix(10)
+                .map{$0}
+            
+            let mostActive = allStocks
+                .sorted{Double($0.volume) ?? 0.0 > Double($1.volume) ?? 0.0 }
+                .prefix(10)
+                .map{$0}
+            
+
+            self.hotStockEnum = HotStocksEnums.loaded(gainers: gainers, losers: losers, mostActive: mostActive)
         }catch(let error){
-            self.psxStats = PsxStatsEnum.error(errorMessage: error.localizedDescription)
+            self.hotStockEnum = HotStocksEnums.error(errorMessage: error.localizedDescription)
         }
     }
+    //debugDescription    String    "No value associated with key CodingKeys(stringValue: \"sectors\", //intValue: nil) (\"sectors\")."
     
     func getCompanyDetail(symbol:String)async{
         do{
