@@ -319,7 +319,7 @@ struct StocksListView: View {
                     .foregroundColor(.primary)
                     .lineLimit(1)
                 
-                Text("LTP: \(sectorStock.current)")
+                Text("LTP: \(Double(sectorStock.current) ?? 0.0,format: .number.precision(.fractionLength(2)))")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -329,15 +329,15 @@ struct StocksListView: View {
             VStack(alignment: .trailing, spacing: 2) {
                 HStack(spacing: 8) {
                     VStack(alignment: .trailing, spacing: 2) {
-                        Text("H: \(sectorStock.high)")
+                        Text("H: \(Double(sectorStock.high) ?? 0.0,format: .number.precision(.fractionLength(2)))")
                             .font(.caption2)
                             .foregroundColor(.green)
                         
-                        Text("L: \(sectorStock.low)")
+                        Text("L: \(Double(sectorStock.low) ?? 0.0 ,format: .number.precision(.fractionLength(2)))")
                             .font(.caption2)
                             .foregroundColor(.red)
                         
-                        Text("O: \(sectorStock.open)")
+                        Text("O: \(Double(sectorStock.open) ?? 0.0 ,format: .number.precision(.fractionLength(2)))")
                             .font(.caption2)
                             .foregroundColor(.blue)
                     }
@@ -353,7 +353,7 @@ struct StocksListView: View {
                             .background(changeColor.opacity(0.1))
                             .clipShape(RoundedRectangle(cornerRadius: 6))
                         
-                        Text("Vol: \(sectorStock.volume)")
+                        Text("Vol: \(Double(sectorStock.volume) ?? 0.0 ,format: .number.precision(.fractionLength(2)))")
                             .font(.caption2)
                             .foregroundColor(.secondary)
                     }
