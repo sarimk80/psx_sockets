@@ -41,3 +41,19 @@ func IndexEnumToString(indexEnum:IndexEnums) -> String {
         "KMI30"
     }
 }
+
+
+func calculateYScaleDomain(for items: [Annual]) -> ClosedRange<Double> {
+    guard !items.isEmpty else { return 0...1 }
+    
+    // Extract all sales and profit values
+    let allSales = items.compactMap { $0.sales }
+    let allProfits = items.compactMap { $0.profitAfterTax }
+    let allValues = allSales + allProfits
+    
+    guard let maxValue = allValues.max() else { return 0...1 }
+    
+    // Add 15% padding to the top, start at 0 for bar charts
+    let padding = (Double(maxValue) * 0.15)
+    return 0...(Double(maxValue) + padding)
+}

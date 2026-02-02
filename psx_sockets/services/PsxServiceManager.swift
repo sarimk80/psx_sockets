@@ -9,6 +9,31 @@ import Foundation
 
 
 class PsxServiceManager:PsxProtocol{
+    func getSymbolOverview(symbol: String) async throws -> SymbolOverview {
+        guard let url = URL(string: "https://sarim-pix.hf.space/get_symbol_detail\(symbol)")
+        else {  throw URLError(.badURL) }
+              
+        let (data,response) = try await URLSession.shared.data(from: url)
+              
+              
+        guard let response = response as? HTTPURLResponse,
+                    
+                response.statusCode == 200
+                      
+                      
+        else { throw URLError(.badServerResponse) }
+              
+        if let string = String(data: data, encoding: .utf8) {
+                    print(string)
+                }
+              
+              
+        let decodeResponse = try JSONDecoder().decode(SymbolOverview.self, from: data)
+        //print(decodeResponse)
+              
+        return decodeResponse
+    }
+    
     
     func getAllStocksDetail() async throws -> SectorPsxResponse {
         guard let url = URL(string: "https://sarim-pix.hf.space/gainer_loosers")
@@ -30,7 +55,6 @@ class PsxServiceManager:PsxProtocol{
               
               
         let decodeResponse = try JSONDecoder().decode(SectorPsxResponse.self, from: data)
-        //print(decodeResponse)
               
         return decodeResponse
     }
@@ -57,7 +81,6 @@ class PsxServiceManager:PsxProtocol{
               
               
         let decodeResponse = try JSONDecoder().decode([IndexDetailModel].self, from: data)
-        print(decodeResponse)
               
         return decodeResponse
     }
@@ -82,7 +105,6 @@ class PsxServiceManager:PsxProtocol{
               
               
         let decodeResponse = try JSONDecoder().decode([DividendModel].self, from: data)
-       // print(decodeResponse)
               
         return decodeResponse
     }

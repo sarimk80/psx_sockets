@@ -72,6 +72,13 @@ enum HotStocksEnums {
     case error(errorMessage:String)
 }
 
+enum SymbolOverviewEnums {
+    case initial
+    case loading
+    case loaded(overview : SymbolOverview)
+    case error(errorMessage:String)
+}
+
 @Observable
 class PsxViewModel{
     var psxStats:PsxStatsEnum = PsxStatsEnum.initial
@@ -83,6 +90,7 @@ class PsxViewModel{
     var dividendEnums : DividendEnums = DividendEnums.initial
     var indexDetailEnum: IndexDetailEnums = IndexDetailEnums.initial
     var hotStockEnum: HotStocksEnums = HotStocksEnums.initial
+    var symbolOverviewEnums: SymbolOverviewEnums = .initial
     
     var symbolSearch:String = ""
     
@@ -234,6 +242,18 @@ class PsxViewModel{
             self.indexDetailEnum = IndexDetailEnums.loaded(data: data,groupData: sortedData)
         }catch(let error){
             self.indexDetailEnum = IndexDetailEnums.error(errorMessage: error.localizedDescription)
+            print(error.localizedDescription)
+        }
+    }
+    
+    func getSymbolOverview(symbol:String) async{
+        self.symbolOverviewEnums = .loading
+        do{
+            let data = try await psxServiceManager.getSymbolOverview(symbol: symbol)
+            
+            self.symbolOverviewEnums = .loaded(overview: data)
+        }catch(let error){
+            self.symbolOverviewEnums = .error(errorMessage: error.localizedDescription)
             print(error.localizedDescription)
         }
     }

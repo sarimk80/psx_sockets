@@ -31,4 +31,6 @@ protocol PsxProtocol{
     func getIndexDetail(index:IndexEnums)async throws -> [IndexDetailModel]
     
     func getAllStocksDetail() async throws -> SectorPsxResponse
+    
+    func getSymbolOverview(symbol:String) async throws -> SymbolOverview
 }
