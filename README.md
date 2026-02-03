@@ -17,7 +17,12 @@ Built on top of [psx-terminal](https://github.com/mumtazkahn/psx-terminal) for A
 
 ## 📽️ Demo Video
 
-[Watch demo](https://github.com/user-attachments/assets/2cfc1f6c-a0c9-497d-90be-c70e9b3eebae)
+[Watch demo](https://github.com/user-attachments/assets/da413b88-7475-418e-af6f-81838ba375a3)
+
+
+
+
+
 
 ---
 
