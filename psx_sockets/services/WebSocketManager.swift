@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 
+@MainActor
 @Observable
 class WebSocketManager{
     
@@ -39,7 +40,7 @@ class WebSocketManager{
             print("Already connected")
             return
         }
-        connectWebSockets()
+        //connectWebSockets()
     }
     
     func connectWebSockets(){
@@ -308,6 +309,11 @@ class WebSocketManager{
             
             
         
+    }
+    
+    func clearData(){
+        self.portfolioUpdate.removeAll()
+        self.isLoading = false
     }
     
 }

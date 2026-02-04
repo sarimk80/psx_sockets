@@ -22,28 +22,12 @@ struct SymbolDataClass: Codable {
     let value, high, low, bid, ask: Double
     let  bidVol, askVol: Int
     let timestamp: Int
+    let sectorName:String?
+    let portfolioVolume:Int?
 }
 
 
-//{
-//    "success": true,
-//    "data": {
-//        "market": "REG",
-//        "st": "PCL",
-//        "symbol": "DCR",
-//        "price": 32.28,
-//        "change": -0.17,
-//        "changePercent": -0.00524,
-//        "volume": 854510,
-//        "trades": 1853,
-//        "value": 27590476.87,
-//        "high": 32.5,
-//        "low": 32.2,
-//        "bid": 32.28,
-//        "ask": 32.28,
-//        "bidVol": 348,
-//        "askVol": 0,
-//        "timestamp": 1756895871
-//    },
-//    "timestamp": 1756895956774
-//}
+extension SymbolDataClass {
+    static let mock = SymbolDataClass(market: "", st: "", symbol: "", price: 0.0, change: 0.8, changePercent: 0.0, volume: 0, trades: 0, value: 0.0, high: 0.0, low: 0.0, bid: 0.0, ask: 0.0, bidVol: 0, askVol: 0, timestamp: 0, sectorName: "", portfolioVolume: 0)
+}
+

@@ -57,3 +57,92 @@ func calculateYScaleDomain(for items: [Annual]) -> ClosedRange<Double> {
     let padding = (Double(maxValue) * 0.15)
     return 0...(Double(maxValue) + padding)
 }
+
+func iconForSector(_ sector: String) -> String {
+    switch sector {
+
+    // MARK: - Finance
+    case "BANKS",
+         "INV BANKS",
+         "INSURANCE",
+         "LEASING",
+         "MUTUAL FUND",
+         "ETFS",
+         "MODARABAS":
+        return "building.columns.fill"
+
+    // MARK: - Energy / Oil / Power
+    case "POWER",
+         "O&G EXPL",
+         "O&G MKT",
+         "REFINERY":
+        return "bolt.fill"
+
+    // MARK: - Technology
+    case "TECH & COMM":
+        return "cpu.fill"
+
+    // MARK: - Automotive / Transport
+    case "AUTO PARTS",
+         "AUTO ASSEMBLER",
+         "TRANSPORT":
+        return "car.fill"
+
+    // MARK: - Pharma / Medical
+    case "PHARMA":
+        return "pills.fill"
+
+    // MARK: - Chemicals / Industrial
+    case
+        "CABLE & ELEC",
+         "ENGINEERING",
+         "SYNTHETIC":
+        return "gearshape.fill"
+        
+    case "CHEMICAL":
+        return "testtube.2"
+
+    // MARK: - Construction / Materials
+    case "CEMENT",
+         "GLASS & CERAM":
+        return "hammer.fill"
+
+    // MARK: - Real Estate
+    case "PROPERTY",
+         "REAL ESTATE":
+        return "house.fill"
+
+    // MARK: - Consumer / Food
+    case "FOOD & CARE",
+         "VANASPATI",
+         "SUGAR",
+         "TOBACCO":
+        return "cart.fill"
+
+    // MARK: - Textile / Leather
+    case "TEXTILE SPIN",
+         "TEXTILE WEAV",
+         "TEXTILE COMP",
+         "WOOLLEN",
+         "LEATHER":
+        return "tshirt.fill"
+
+    // MARK: - Packaging / Paper
+    case "PAPER & PACK":
+        return "shippingbox.fill"
+
+    // MARK: - Agriculture / Fertilizer
+    case "FERTILIZER":
+        return "leaf.fill"
+
+    // MARK: - Misc / Manufacturing
+    case "MISC",
+         "JUTE":
+        return "cube.box.fill"
+
+    default:
+        // ⭐ VERY IMPORTANT fallback
+        return "circle"
+    }
+}
+

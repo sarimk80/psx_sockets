@@ -16,15 +16,14 @@ struct SectorView: View {
     var body: some View {
         List {
             switch psxViewModel.psxSector {
-            case .initial:
-                ProgressView("Loading sectors...")
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .listRowSeparator(.hidden)
+            case .initial, .loading:
+                ForEach(0..<5) { _ in
+                    SectorListView(sectorName: "", data: SectorDataModel.mock)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                        .listRowBackground(Color.clear)
+                }
                 
-            case .loading:
-                ProgressView("Loading sectors...")
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .listRowSeparator(.hidden)
                 
             case .loaded(let response):
                 if response.data.isEmpty {
@@ -54,7 +53,10 @@ struct SectorView: View {
         .navigationBarTitleDisplayMode(.large)
         .background(Color(.systemGroupedBackground))
         .task {
-            await psxViewModel.getPsxSector()
+            if case PsxSectorEnum.initial = psxViewModel.psxSector {
+                await psxViewModel.getPsxSector()
+            }
+            
         }
         .refreshable {
             await psxViewModel.getPsxSector()
@@ -112,9 +114,8 @@ struct SectorListView: View {
         HStack(spacing: 8) {
             // Sector name with icon
             HStack(spacing: 6) {
-                Circle()
-                    .fill(sectorColor)
-                    .frame(width: 8, height: 8)
+                Image(systemName: iconForSector(sectorName))
+                    .foregroundStyle(sectorColor)
                 
                 Text(sectorName)
                     .font(.subheadline)

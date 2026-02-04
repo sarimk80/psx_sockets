@@ -46,3 +46,7 @@ struct SectorDataModel: Codable,Hashable,Identifiable {
     
     var id:String {symbols.first ?? ""}
 }
+
+extension SectorDataModel{
+    static let mock = SectorDataModel(totalVolume: 0, totalValue: 0.0, totalTrades: 0, gainers: 0, losers: 0, avgChange: 0.0, avgChangePercent: 0.0, unchanged: 0.0, symbols: [])
+}

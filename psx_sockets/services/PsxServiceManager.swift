@@ -275,6 +275,7 @@ class PsxServiceManager:PsxProtocol{
               
               
         let decodeResponse = try JSONDecoder().decode(SymbolDetail.self, from: data)
+        print(decodeResponse)
         
         return decodeResponse
     }

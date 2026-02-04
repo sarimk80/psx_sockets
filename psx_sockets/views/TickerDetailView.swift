@@ -21,14 +21,19 @@ struct TickerDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment:.leading, spacing: 20){
-                // Ticker Header
-                if psxSocketManager.portfolioUpdate.isEmpty {
-                    ProgressView()
-                        .frame(height: 80)
-                } else {
-                    TickerView(ticker: psxSocketManager.portfolioUpdate.first)
+                
+                switch psxViewModel.symbolDetailEnum {
+                case .initial, .loading:
+                    TickerView(tickerDetail: SymbolDataClass.mock)
+                        .redacted(reason: .placeholder)
+                
+                case .loaded(let portfolioTickers):
+                    TickerView(tickerDetail: portfolioTickers.data)
                         .padding(.horizontal, 16)
+                case .error(let errorMessage):
+                    ErrorView(message: errorMessage)
                 }
+                
                 
                 // Chart Section
                 KlineChart(psxSocketManager: psxSocketManager, psxViewModel: psxViewModel)
@@ -67,9 +72,10 @@ struct TickerDetailView: View {
         .navigationBarTitleDisplayMode(.large)
         .task {
             await psxViewModel.getCompanyDetail(symbol: symbol)
-            await psxSocketManager.getMarketUpdate(tickers: [symbol], market: "REG",inIndex: true)
+            //await psxSocketManager.getMarketUpdate(tickers: [symbol], market: "REG",inIndex: true)
             await psxViewModel.getKlineSymbol(symbol: symbol, timeFrame: "1d")
             await psxViewModel.getSymbolOverview(symbol: symbol)
+            await psxViewModel.getSymbolDetail(ticker: symbol)
         }
     }
 }
@@ -132,7 +138,7 @@ struct CompanyDetailView: View {
                         CompanyFundamentals(title: "Market Cap:", subTitle: company.data.financialStats.marketCap.raw)
                         CompanyFundamentals(title: "Total shares:", subTitle: company.data.financialStats.shares.raw)
                         CompanyFundamentals(title: "Change %:", subTitle: fundamental.data.changePercent.formatted(.number.precision(.fractionLength(2))))
-                        CompanyFundamentals(title: "Dividend Yield:", subTitle: fundamental.data.dividendYield.description)
+                        CompanyFundamentals(title: "Dividend Yield:", subTitle: fundamental.data.dividendYield.formatted(.number.precision(.fractionLength(2))))
                         CompanyFundamentals(title: "Sharia Compliant:", subTitle: fundamental.data.isNonCompliant.description)
                         CompanyFundamentals(title: "P/E ratio:", subTitle: fundamental.data.peRatio.formatted(.number.precision(.fractionLength(2))))
                         CompanyFundamentals(title: "Yearly Change:", subTitle: fundamental.data.yearChange.formatted(.number.precision(.fractionLength(2))))
@@ -312,12 +318,8 @@ struct KlineChart: View {
     var body: some View {
         ZStack {
             switch psxViewModel.kLineEnum {
-            case .initial:
-                ProgressView()
-                    .frame(width: 350,height: 400)
-            case .loading:
-                ProgressView()
-                    .frame(width:350,height: 400)
+            case .initial, .loading:
+                LineChartLoading()
             case .loaded(let kline):
                 KlineChartView(kline: kline, scrollPosition: $scrollPosition)
             case .error(let errorMessage):
@@ -487,7 +489,7 @@ struct BarChart: View {
             ForEach(item,id: \.period) { value in
                 BarMark(x: .value("Year", value.period ?? "2026"), y: .value("Amount", value.sales ?? 0)
                 )
-                .foregroundStyle(.blue)
+                .foregroundStyle(by: .value("Type", "Sales"))
                 .clipShape(RoundedRectangle(cornerRadius: 16))
                 .position(by: .value("Type", "Sales"))
                 .annotation {
@@ -505,7 +507,7 @@ struct BarChart: View {
                 
                 BarMark(x: .value("Year", value.period ?? "2026"), y: .value("Amount", value.profitAfterTax ?? 0)
                 )
-                .foregroundStyle(.green)
+                .foregroundStyle(by: .value("Type", "Profit"))
                 .clipShape(RoundedRectangle(cornerRadius: 16))
                 .position(by: .value("Type", "Profit"))
                 .annotation {
@@ -538,13 +540,11 @@ struct BarChart: View {
                 
             }
         }
-        .chartLegend(position: .bottom , alignment:.leading ,content: {
-            HStack(spacing:16){
-                LegendItem(color: .blue, label: "Sales")
-                LegendItem(color: .green, label: "Profit")
-            }
-        })
-        .chartLegend(.visible)
+        .chartForegroundStyleScale([
+            "Sales": .blue,
+            "Profit": .green
+        ])
+        .chartLegend(position: .bottom, alignment: .leading)
         .padding(.horizontal, 16)
         .padding(.vertical,4)
     }
@@ -628,9 +628,9 @@ struct RatioChart: View {
             ForEach(data, id: \.period) { d in
                 BarMark(
                     x: .value("Year", d.period ?? ""),
-                    y: .value("Margin", d.grossProfitMargin ?? 0.0)
+                    y: .value("GrossProfit", d.grossProfitMargin ?? 0.0)
                 )
-                .foregroundStyle(.indigo)
+                .foregroundStyle(by: .value("Type", "GrossProfit"))
                 .clipShape(RoundedRectangle(cornerRadius: 16))
                 .position(by: .value("Type", "GrossProfit"))
                 .annotation {
@@ -648,9 +648,9 @@ struct RatioChart: View {
                 
                 BarMark(
                     x: .value("Year", d.period ?? ""),
-                    y: .value("Margin", d.netProfitMargin ?? 0.0)
+                    y: .value("NetProfit", d.netProfitMargin ?? 0.0)
                 )
-                .foregroundStyle(.orange)
+                .foregroundStyle(by: .value("Type", "NetProfit"))
                 .clipShape(RoundedRectangle(cornerRadius: 16))
                 .position(by: .value("Type", "NetProfit"))
                 .annotation {
@@ -667,7 +667,11 @@ struct RatioChart: View {
                 }
             }
         }
-        .chartLegend(position: .bottom)
+        .chartForegroundStyleScale([
+            "GrossProfit": .indigo,
+            "NetProfit": .orange
+        ])
+        .chartLegend(position: .bottom, alignment: .leading)
         .frame(height: 300)
         .padding()
     }

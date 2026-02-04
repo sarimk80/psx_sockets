@@ -38,3 +38,7 @@ struct SectorStocks:Codable,Hashable,Identifiable {
             case trend
         }
 }
+
+extension SectorStocks{
+    static let mock = SectorStocks(scriptCode: "", scriptName: "", ldcp: "", open: "", high: "", low: "", current: "", change: "", volume: "", trend: "")
+}

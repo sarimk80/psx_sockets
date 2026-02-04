@@ -18,8 +18,9 @@ struct ContentView: View {
     var body: some View {
         List {
             VStack(spacing: 20) {
+                
                 // Index Carousel Section
-                IndexView(psxWebSocket: webSocketManager, selectedTab: $selectedTab,appNavigation: appNavigation)
+                IndexView(psxWebSocket: webSocketManager, selectedTab: $selectedTab,appNavigation: appNavigation,psxViewModel: psxViewModel)
                 
                 // Custom Page Indicators
                 HStack(spacing: 8) {
@@ -49,13 +50,27 @@ struct ContentView: View {
         .navigationBarTitleDisplayMode(.large)
         .background(Color(.systemGroupedBackground))
         .task {
-                await webSocketManager.getMarketUpdate(tickers: ["KSE100","KMI30","PSXDIV20","KSE30","MII30"], market: "IDX",inIndex: true)
-            
-            
-            if case DividendEnums.initial = psxViewModel.dividendEnums{
-                await psxViewModel.getDividendData()
+          await startAutoRefresh()
+        }
+       
+    }
+    
+    private func startAutoRefresh() async {
+        
+        if case DividendEnums.initial = psxViewModel.dividendEnums{
+            await psxViewModel.getDividendData()
 
-            }
+        }
+        if case IndicesEnums.initial = psxViewModel.indicesEnums{
+            await psxViewModel.getIndexSymbolDetail(indices: ["KSE100","KMI30","PSXDIV20","KSE30","MII30"])
+        }
+        
+        
+        while !Task.isCancelled {
+            await psxViewModel.getIndexSymbolDetail(indices: ["KSE100","KMI30","PSXDIV20","KSE30","MII30"])
+            
+            try? await Task.sleep(for: .seconds(60))
+            
         }
     }
     
@@ -187,17 +202,24 @@ struct IndexView: View {
     var psxWebSocket: WebSocketManager
     @Binding var selectedTab: Int
     var appNavigation: AppNavigation
+    var psxViewModel: PsxViewModel
     
     var body: some View {
-        if psxWebSocket.isLoading {
-            ProgressView("Loading indices...")
-                .frame(height: 160)
-                .frame(maxWidth: .infinity)
-                .foregroundColor(.secondary)
-        } else {
+        
+        switch psxViewModel.indicesEnums {
+        case .initial, .loading:
+            TickerView(tickerDetail: SymbolDataClass.mock)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
+                .redacted(reason: .placeholder)
+        
+        case .loaded(let data):
             TabView(selection: $selectedTab) {
-                ForEach(psxWebSocket.portfolioUpdate.enumerated(), id: \.element) { index, result in
-                    TickerView(ticker: result)
+                ForEach(data.indices, id: \.self) { index in
+                    
+                    let result = data[index]
+                    
+                    TickerView(tickerDetail: result.data)
                         
                         .padding(.horizontal, 20)
                         .padding(.vertical, 16)
@@ -214,7 +236,7 @@ struct IndexView: View {
                         )
                         .padding(.horizontal, 16)
                         .onTapGesture {
-                            appNavigation.tickerNavigation.append(TickerDetailRoute.indexDetail(indexName: StringToIndexEnum(indexName: result.symbol)))
+                            appNavigation.tickerNavigation.append(TickerDetailRoute.indexDetail(indexName: StringToIndexEnum(indexName: result.data.symbol)))
                         }
                         .tag(index)
                 }
@@ -222,23 +244,26 @@ struct IndexView: View {
             .tabViewStyle(.page)
             .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .never))
             .frame(height: 180)
+        case .error(let errorMessage):
+            ErrorView(message: errorMessage)
         }
+        
     }
 }
 
 struct TickerView: View {
-    var ticker: TickerUpdate?
+    var tickerDetail: SymbolDataClass?
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             // Header
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(ticker?.symbol ?? "")
+                    Text(tickerDetail?.symbol ?? "")
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(.primary)
                     
-                    Text(ticker?.tick.st ?? "")
+                    Text(tickerDetail?.st ?? "")
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .padding(.horizontal, 8)
@@ -250,13 +275,13 @@ struct TickerView: View {
                 
                 // Current Price with change indicator
                 VStack(alignment: .trailing, spacing: 4) {
-                    Text(ticker?.tick.c ?? 0.0, format: .number.precision(.fractionLength(2)))
+                    Text(tickerDetail?.price ?? 0.0, format: .number.precision(.fractionLength(2)))
                         .font(.title3)
                         .fontWeight(.semibold)
                         .foregroundColor(.primary)
                         .contentTransition(.numericText())
                     
-                    if let change = ticker?.tick.ch {
+                    if let change = tickerDetail?.change {
                         HStack(spacing: 4) {
                             Image(systemName: change > 0 ? "arrow.up.right" : "arrow.down.right")
                                 .font(.caption2)
@@ -273,19 +298,19 @@ struct TickerView: View {
             // Price metrics
             HStack(spacing: 20) {
                 VStack(alignment: .leading, spacing: 6) {
-                    priceMetric(title: "Open", value: ticker?.tick.o ?? 0.0)
-                    priceMetric(title: "High", value: ticker?.tick.h ?? 0.0)
-                    priceMetric(title: "Low", value: ticker?.tick.l ?? 0.0)
+                    priceMetric(title: "High", value: tickerDetail?.high ?? 0.0)
+                    priceMetric(title: "Low", value: tickerDetail?.low ?? 0.0)
+                    priceMetric(title: "Volume", value: Double(tickerDetail?.volume ?? 0))
                 }
                 
                 Spacer()
                 
-                if ticker?.market != "IDX" {
+                if tickerDetail?.market != "IDX" {
                     VStack(alignment: .trailing, spacing: 6) {
-                        priceMetric(title: "Bid", value: ticker?.tick.bp ?? 0.0)
-                        priceMetric(title: "Bid Vol", value: Double(ticker?.tick.bv ?? 0))
-                        priceMetric(title: "Ask", value: ticker?.tick.ap ?? 0.0)
-                        priceMetric(title: "Ask Vol", value: Double(ticker?.tick.av ?? 0))
+                        priceMetric(title: "Bid", value: Double(tickerDetail?.bid ?? 0))
+                        priceMetric(title: "Bid Vol", value: Double(tickerDetail?.bidVol ?? 0))
+                        priceMetric(title: "Ask", value: Double(tickerDetail?.ask ?? 0))
+                        priceMetric(title: "Ask Vol", value: Double(tickerDetail?.askVol ?? 0))
                     }
                 }
             }
@@ -361,15 +386,9 @@ struct CorporateActionsSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             switch psxViewModel.dividendEnums {
-            case .initial:
-                ProgressView("Loading corporate actions...")
-                    .frame(maxWidth: .infinity, minHeight: 100)
-                    .foregroundColor(.secondary)
-                
-            case .loading:
-                ProgressView("Loading corporate actions...")
-                    .frame(maxWidth: .infinity, minHeight: 100)
-                    .foregroundColor(.secondary)
+            case .initial, .loading:
+                DividendSection(data: DividendModel.mockDividendModel) {}
+                .redacted(reason: .placeholder)
                 
             case .loaded(let data):
                 LazyVStack(spacing: 16) {

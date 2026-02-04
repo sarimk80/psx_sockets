@@ -15,45 +15,71 @@ struct IndexDetailView: View {
     @Binding var appNavigation: AppNavigation
     @State private var psxViewModel: PsxViewModel = PsxViewModel(psxServiceManager: PsxServiceManager())
     
+   
+    
     var body: some View {
         ZStack {
-            if webSocketManager.portfolioUpdate.isEmpty {
-                VStack(spacing: 16) {
-                    ProgressView()
-                        .scaleEffect(1.2)
-                    Text("Loading portfolio data...")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-            } else {
-                List {
-                    // Chart Section
+            List {
+
+                if psxViewModel.indexSymbols.isEmpty {
+
+                    // MARK: - Chart Skeleton
+                    Section {
+                        ChartLoading()
+                            .frame(maxWidth: .infinity)
+                            .listRowInsets(EdgeInsets(top: 16, leading: 16, bottom: 16, trailing: 16))
+                            .listRowSeparator(.hidden)
+                    }
+
+                    // MARK: - Rows Skeleton
+                    Section {
+                        ForEach(0..<5, id: \.self) { _ in
+                            PortfolioStockRow(result: SymbolDataClass.mock)
+                                .redacted(reason: .placeholder)
+                                .listRowInsets(EdgeInsets(top: 8, leading: 6, bottom: 8, trailing: 6))
+                                .listRowSeparator(.hidden)
+                                .listRowBackground(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color(.systemBackground))
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                )
+                        }
+                    } header: {
+                        Text("Stocks")
+                            .redacted(reason: .placeholder)
+                            .font(.headline)
+                            .textCase(nil)
+                    }
+
+                } else {
+
+                    // MARK: - Real Chart
                     Section {
                         chartView
                     }
                     .listRowInsets(EdgeInsets(top: 16, leading: 16, bottom: 16, trailing: 16))
-                    
-                    
-                    // Stocks Section
+
+                    // MARK: - Real Rows
                     Section {
-                        ForEach(webSocketManager.portfolioUpdate, id: \.symbol) { result in
-                            PortfolioStockRow(result: result)
+                        ForEach(psxViewModel.indexSymbols, id: \.data.symbol) { result in
+                            PortfolioStockRow(result: result.data)
                                 .contentShape(Rectangle())
                                 .onTapGesture {
                                     appNavigation.tickerNavigation.append(
-                                        TickerDetailRoute.tickerDetail(symbol: result.symbol)
+                                        TickerDetailRoute.tickerDetail(symbol: result.data.symbol)
                                     )
                                 }
                         }
-                    } header:{
+                    } header: {
                         HStack {
                             Text("Stocks")
                                 .font(.headline)
-                                .foregroundStyle(.primary)
                                 .textCase(nil)
+
                             Spacer()
-                            Text("\(webSocketManager.portfolioUpdate.count)")
-                                .font(.subheadline)
+
+                            Text("\(psxViewModel.indexSymbols.count)")
                                 .foregroundStyle(.secondary)
                         }
                     }
@@ -63,21 +89,22 @@ struct IndexDetailView: View {
                         RoundedRectangle(cornerRadius: 12)
                             .fill(Color(.systemBackground))
                             .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
-                            .padding(.horizontal, 6)
+                            .padding(.horizontal, 8)
                             .padding(.vertical, 4)
                     )
                 }
-                .listStyle(.grouped)
-                .scrollContentBackground(.hidden)
-                .background(Color(.systemGroupedBackground))
-                .navigationTitle(IndexEnumToString(indexEnum: indexName))
-                .navigationBarTitleDisplayMode(.large)
             }
+            .listStyle(.grouped)
+            .scrollContentBackground(.hidden)
+            .background(Color(.systemGroupedBackground))
         }
-        
+        .navigationTitle(IndexEnumToString(indexEnum: indexName))
+        .navigationBarTitleDisplayMode(.large)
         .task {
-            await psxViewModel.getIndexData(indexEnum: indexName)
-            await webSocketManager.getIndexDetail(index: indexName)
+            if case IndexDetailEnums.initial  = psxViewModel.indexDetailEnum{
+                await psxViewModel.getIndexData(indexEnum: indexName)
+            }
+            await psxViewModel.getIndexSymbolAllDetail(indexEnum: indexName)
         }
     }
     
@@ -85,14 +112,7 @@ struct IndexDetailView: View {
     private var chartView: some View {
         switch psxViewModel.indexDetailEnum {
         case .initial, .loading:
-            VStack(spacing: 12) {
-                ProgressView()
-                Text("Loading chart...")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            .frame(height: 320)
-            .frame(maxWidth: .infinity)
+            ChartLoading()
             
         case .loaded(_, let groupData):
             VStack(alignment: .leading, spacing: 16) {
@@ -105,8 +125,9 @@ struct IndexDetailView: View {
                     .foregroundStyle(by: .value("Sector", result.sectorName))
                     .cornerRadius(4)
                 }
-                .frame(height: 350)
+                .frame(height:indexName == .kse_100 ? 700 : 350)
                 .chartLegend(position: .bottom, alignment: .leading, spacing: 12)
+                //.chartLegend(indexName == .kse_100 ? .hidden : .visible)
                 
             }
             .padding(.vertical, 8)

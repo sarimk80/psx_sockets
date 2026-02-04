@@ -79,6 +79,36 @@ enum SymbolOverviewEnums {
     case error(errorMessage:String)
 }
 
+enum IndicesEnums{
+    case initial
+    case loading
+    case loaded(indicesData : [SymbolDetail])
+    case error(errorMessage:String)
+}
+
+enum PortfolioTickerEnum{
+    case initial
+    case loading
+    case loaded(portfolioTickers : [SymbolDetail])
+    case error(errorMessage:String)
+}
+
+enum SymbolDetailEnums {
+    case initial
+    case loading
+    case loaded(portfolioTickers : SymbolDetail)
+    case error(errorMessage:String)
+}
+
+enum SectorSymbolEnum{
+    case initial
+    case loading
+    case loaded(portfolioTickers : [SymbolDetail])
+    case error(errorMessage:String)
+}
+
+
+@MainActor
 @Observable
 class PsxViewModel{
     var psxStats:PsxStatsEnum = PsxStatsEnum.initial
@@ -91,6 +121,18 @@ class PsxViewModel{
     var indexDetailEnum: IndexDetailEnums = IndexDetailEnums.initial
     var hotStockEnum: HotStocksEnums = HotStocksEnums.initial
     var symbolOverviewEnums: SymbolOverviewEnums = .initial
+    var indicesEnums: IndicesEnums = .initial
+    var portfolioEnums: PortfolioTickerEnum = .initial
+    var symbolDetailEnum : SymbolDetailEnums = .initial
+    var sectorSymbolEnum : SectorSymbolEnum = .initial
+    
+    // for Index Detail symbols
+    
+    var indexSymbols: [SymbolDetail] = []
+    var isLoading = false
+    var errorMessage: String?
+    
+    //
     
     var symbolSearch:String = ""
     
@@ -258,5 +300,213 @@ class PsxViewModel{
         }
     }
     
+    func getIndexSymbolDetail(indices:[String]) async{
+        self.indicesEnums = .loading
+        var response:[SymbolDetail] =  []
+        response.reserveCapacity(indices.count)
+        
+        do{
+            for index in indices {
+                let data = try await psxServiceManager.getSymbolDetail(market: "IDX", symbol: index)
+                
+                response.append(data)
+                
+                try await Task.sleep(for: .milliseconds(250))
+            }
+            self.indicesEnums = .loaded(indicesData: response)
+                        
+        }catch{
+            self.indicesEnums = .error(errorMessage: error.localizedDescription)
+        }
+    }
     
+    func getIndexSymbolAllDetail(indexEnum: IndexEnums) async {
+        
+        print("🟡 Starting getIndexSymbolAllDetail")
+        isLoading = true
+        errorMessage = nil
+        indexSymbols.removeAll()
+        
+        do {
+            print("🔵 Fetching index data...")
+            let indexData = try await psxServiceManager.getIndexDetail(index: indexEnum)
+            print("✅ Got index data: \(indexData.count) symbols")
+            
+            let firstBatch = Array(indexData.prefix(10))
+            let remaining = Array(indexData.dropFirst(10))
+            
+            // 🚀 BURST LOAD (parallel)
+            print("🚀 Starting parallel load of first 10...")
+            try await withThrowingTaskGroup(of: SymbolDetail.self) { group in
+                
+                for item in firstBatch {
+                    group.addTask {
+                        print("   📡 Fetching \(item.symbol)...")
+                        let result = try await self.psxServiceManager
+                            .getSymbolDetail(market: "REG", symbol: item.symbol)
+                        print("   ✅ Got \(item.symbol)")
+                        
+                        let dataWithSector = SymbolDataClass(market: result.data.market, st: result.data.st, symbol: result.data.symbol, price: result.data.price, change: result.data.change, changePercent: result.data.changePercent, volume: result.data.volume, trades: result.data.trades, value: result.data.value, high: result.data.high, low: result.data.low, bid: result.data.bid, ask: result.data.ask, bidVol: result.data.bidVol, askVol: result.data.askVol, timestamp: result.timestamp,sectorName: item.sector,portfolioVolume: 1)
+                        
+                        return SymbolDetail(
+                            success: result.success,
+                            data: dataWithSector,
+                            timestamp: result.timestamp
+                        )
+                    }
+                }
+                
+                for try await result in group {
+                   
+                    self.indexSymbols.append(result)
+                    
+                }
+            }
+            
+            print("🔥 Setting isLoading to false")
+            await MainActor.run {
+                self.isLoading = false
+            }
+            
+            // 🌊 STREAM the rest (sequential)
+            print("🌊 Starting sequential load of remaining \(remaining.count)...")
+            for (index, item) in remaining.enumerated() {
+                
+                try Task.checkCancellation()
+                
+                print("   📡 Fetching \(index + 1)/\(remaining.count): \(item.symbol)...")
+                let result = try await psxServiceManager
+                    .getSymbolDetail(market: "REG", symbol: item.symbol)
+                print("   ✅ Got \(item.symbol)")
+                
+                let dataWithSector = SymbolDataClass(market: result.data.market, st: result.data.st, symbol: result.data.symbol, price: result.data.price, change: result.data.change, changePercent: result.data.changePercent, volume: result.data.volume, trades: result.data.trades, value: result.data.value, high: result.data.high, low: result.data.low, bid: result.data.bid, ask: result.data.ask, bidVol: result.data.bidVol, askVol: result.data.askVol, timestamp: result.timestamp,sectorName: item.sector,portfolioVolume: 1)
+                
+                let symbolDetail = SymbolDetail(
+                    success: result.success,
+                    data: dataWithSector,
+                    timestamp: result.timestamp
+                )
+                
+                    self.indexSymbols.append(symbolDetail)
+                
+                
+                // small delay prevents API throttling
+                try await Task.sleep(for: .milliseconds(700))
+            }
+            
+            print("🎉 All data loaded! Total: \(indexSymbols.count) items")
+            
+        } catch {
+            print(error.localizedDescription)
+            self.errorMessage = error.localizedDescription
+            self.isLoading = false
+            
+        }
+    }
+    
+    
+    func getPortfolioSymbolDetail() async{
+        
+        portfolioEnums = .loading
+        
+        
+        let data = swiftDataService.getSavedTicker()
+        
+        var symbolResponse:[SymbolDetail] =  []
+        symbolResponse.reserveCapacity(data.count)
+        
+        do{
+            for result in data{
+             let response = try await psxServiceManager.getSymbolDetail(market: "REG", symbol: result.ticker)
+                
+                let dataWithSector = SymbolDataClass(market: response.data.market, st: response.data.st, symbol: response.data.symbol, price: response.data.price, change: response.data.change, changePercent: response.data.changePercent, volume: response.data.volume, trades: response.data.trades, value: response.data.value, high: response.data.high, low: response.data.low, bid: response.data.bid, ask: response.data.ask, bidVol: response.data.bidVol, askVol: response.data.askVol, timestamp: response.timestamp,sectorName: nil,portfolioVolume: result.volume ?? 1)
+                
+                symbolResponse.append(  SymbolDetail(
+                        success: response.success,
+                        data: dataWithSector,
+                        timestamp: response.timestamp
+                        )
+                  )
+                
+                try await Task.sleep(for: .milliseconds(600))
+               
+            }
+            
+            portfolioEnums = .loaded(portfolioTickers: symbolResponse)
+            
+        }catch{
+            print(error.localizedDescription)
+            portfolioEnums = .error(errorMessage: error.localizedDescription)
+        }
+        
+    }
+    
+    func getSymbolDetail(ticker:String) async {
+        symbolDetailEnum = .loading
+        do{
+          let response = try await psxServiceManager.getSymbolDetail(market: "REG", symbol: ticker)
+            
+            symbolDetailEnum = .loaded(portfolioTickers: response)
+        }catch{
+            symbolDetailEnum = .error(errorMessage: error.localizedDescription)
+        }
+    }
+    
+    
+    func getSectorSymbolDetail(tickers:[String]) async{
+        sectorSymbolEnum = .loading
+        var sectorSymbol: [SymbolDetail] = []
+        sectorSymbol.reserveCapacity(tickers.count)
+        do{
+            
+            let firstBatch = Array(tickers.prefix(10))
+            let remaining = Array(tickers.dropFirst(10))
+            
+            try await withThrowingTaskGroup(of: SymbolDetail.self) { group in
+               
+                for ticker in firstBatch{
+                    group.addTask{
+                     let result =  try await self.psxServiceManager.getSymbolDetail(market: "REG", symbol: ticker)
+                        
+                        let dataWithSector = SymbolDataClass(market: result.data.market, st: result.data.st, symbol: result.data.symbol, price: result.data.price, change: result.data.change, changePercent: result.data.changePercent, volume: result.data.volume, trades: result.data.trades, value: result.data.value, high: result.data.high, low: result.data.low, bid: result.data.bid, ask: result.data.ask, bidVol: result.data.bidVol, askVol: result.data.askVol, timestamp: result.timestamp,sectorName: "",portfolioVolume: 1)
+                        
+                        return SymbolDetail(
+                            success: result.success,
+                            data: dataWithSector,
+                            timestamp: result.timestamp
+                        )
+                    }
+                }
+                
+                for try await result in group{
+                    sectorSymbol.append(result)
+                }
+            }
+            sectorSymbolEnum = .loaded(portfolioTickers: sectorSymbol)
+            
+            for remainingTicker in remaining {
+                
+                let result = try await self.psxServiceManager.getSymbolDetail(market: "REG", symbol: remainingTicker)
+                
+                let dataWithSector = SymbolDataClass(market: result.data.market, st: result.data.st, symbol: result.data.symbol, price: result.data.price, change: result.data.change, changePercent: result.data.changePercent, volume: result.data.volume, trades: result.data.trades, value: result.data.value, high: result.data.high, low: result.data.low, bid: result.data.bid, ask: result.data.ask, bidVol: result.data.bidVol, askVol: result.data.askVol, timestamp: result.timestamp,sectorName: "",portfolioVolume: 1)
+                
+                let symbolDetail = SymbolDetail(
+                    success: result.success,
+                    data: dataWithSector,
+                    timestamp: result.timestamp
+                )
+                
+                sectorSymbol.append(symbolDetail)
+                
+                sectorSymbolEnum = .loaded(portfolioTickers: sectorSymbol)
+                
+                try await Task.sleep(for: .milliseconds(700))
+                
+            }
+            
+        }catch{
+            sectorSymbolEnum = .error(errorMessage: error.localizedDescription)
+        }
+    }
+
 }

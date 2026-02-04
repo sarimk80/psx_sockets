@@ -20,28 +20,13 @@ struct PortfolioView: View {
     @State private var sheetNavigation:SheetNavigation = SheetNavigation()
     
     
-    private var totalStockCount:Int{
-        socketManager.portfolioUpdate.map{$0.tick.volume ?? 0}.reduce(0, +)
-    }
     
-    private var totalStockValue:Double{
-        let stockPrice = socketManager.portfolioUpdate.map{$0.tick.c}
-        let stockCount = socketManager.portfolioUpdate.map{$0.tick.volume ?? 0}
-        
-        let totalStockWorth = zip(stockPrice, stockCount).map{Double($1) * $0}
-            .reduce(0, +)
-        
-        return totalStockWorth
-    }
+    
     
     
     var body: some View {
         VStack {
-            if socketManager.isLoading {
-                ProgressView()
-            } else {
-                portfolioListView
-            }
+            portfolioListView
         }
         
         .background(Color(.systemGroupedBackground))
@@ -74,8 +59,14 @@ struct PortfolioView: View {
             
         }
         .task {
-            await psxVM.getAllSymbols()
-            await socketManager.getRealTimeTickersUpdate()
+            if case PsxSearchSymbolEnum.initial = psxVM.psxSearch{
+                await psxVM.getAllSymbols()
+            }
+            
+            if case PortfolioTickerEnum.initial = psxVM.portfolioEnums{
+                await psxVM.getPortfolioSymbolDetail()
+            }
+            
             stopTimer()
             startTimer()
         }
@@ -92,7 +83,7 @@ struct PortfolioView: View {
     func startTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 40, repeats: true) { _ in
             Task {
-                await socketManager.getRealTimeTickersUpdate()
+                await psxVM.getPortfolioSymbolDetail()
             }
         }
     }
@@ -141,19 +132,47 @@ struct PortfolioView: View {
     
     private var portfolioListView: some View {
         
+        
         List {
             
-            if socketManager.portfolioUpdate.isEmpty{
-                EmptyView()
-            }else{
+            switch psxVM.portfolioEnums {
+            case .initial, .loading:
                 Section {
-                    Chart(socketManager.portfolioUpdate, id: \.symbol) { result in
+                    ChartLoading()
+                }
+                
+                Section {
+                    ForEach(0..<6) { _ in
+                        PortfolioStockRow(result: SymbolDataClass.mock, isShowHolding: true)
+                            .redacted(reason: .placeholder)
+                    }
+                }
+                    
+            
+            case .loaded(let data):
+                
+                var totalStockCount:Int{
+                    data.map{$0.data.portfolioVolume ?? 0}.reduce(0, +)
+                }
+                
+                var totalStockValue:Double{
+                    let stockPrice = data.map{$0.data.price}
+                    let stockCount = data.map{$0.data.portfolioVolume ?? 0}
+                    
+                    let totalStockWorth = zip(stockPrice, stockCount).map{Double($1) * $0}
+                        .reduce(0, +)
+                    
+                    return totalStockWorth
+                }
+                
+                Section {
+                    Chart(data, id: \.data.symbol) { result in
                         SectorMark(
-                            angle: .value("Holdings", result.tick.volume ?? 1),
+                            angle: .value("Holdings", result.data.portfolioVolume ?? 1),
                             innerRadius: .ratio(0.75),
                             angularInset: 1
                         )
-                        .foregroundStyle(by: .value("Symbol", result.symbol))
+                        .foregroundStyle(by: .value("Symbol", result.data.symbol))
                     }
                     .chartBackground { chartProxy in
                         GeometryReader { geometry in
@@ -182,15 +201,16 @@ struct PortfolioView: View {
                     .frame(height: 250)
                     
                 }
-            }
+            
+            
             // portfolio list
             Section {
-                ForEach(socketManager.portfolioUpdate, id: \.symbol) { result in
-                    PortfolioStockRow(result: result,isShowHolding: true)
+                ForEach(data, id: \.data.symbol) { result in
+                    PortfolioStockRow(result: result.data,isShowHolding: true)
                     
                         .contentShape(Rectangle())
                         .onTapGesture {
-                            appNavigation.push(route: PortfolioNavigationEnums.tickerDetail(symbol: result.symbol))
+                            appNavigation.push(route: PortfolioNavigationEnums.tickerDetail(symbol: result.data.symbol))
                         }
                         .listRowInsets(EdgeInsets(top: 12, leading: 4, bottom: 12, trailing: 4))
                         .listRowSeparator(.hidden)
@@ -209,13 +229,19 @@ struct PortfolioView: View {
                         .font(.headline)
                         .foregroundColor(.primary)
                     
-                    Text("\(socketManager.portfolioUpdate.count) stocks")
+                    Text("\(data.count) stocks")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
                 
                 .padding(.bottom, 8)
             }
+            case .error(let errorMessage):
+                ErrorView(message: errorMessage)
+            }
+            
+          
+              
             
         }
         .navigationTitle("Portfolio")
@@ -240,15 +266,15 @@ struct PortfolioView: View {
 }
 
 struct PortfolioStockRow: View {
-    let result: TickerUpdate
+    let result: SymbolDataClass
     var isShowHolding:Bool = false
     
     private var totalStock: Double {
-        result.tick.c * Double(result.tick.volume ?? 0)
+        result.price * Double(result.portfolioVolume ?? 0)
     }
     
     private var isPositive: Bool {
-        result.tick.ch > 0
+        result.change > 0
     }
     
     private var trendColor: Color {
@@ -287,7 +313,7 @@ struct PortfolioStockRow: View {
                 
                 // Stock holdings info
                 if (isShowHolding) {    HStack(spacing: 4) {
-                    Text("\(result.tick.volume ?? 0)")
+                    Text("\(result.portfolioVolume ?? 0)")
                         .font(.system(.caption, design: .monospaced))
                         .fontWeight(.medium)
                         .foregroundColor(.secondary)
@@ -296,13 +322,13 @@ struct PortfolioStockRow: View {
                         .font(.system(.caption, design: .monospaced))
                         .foregroundColor(.secondary.opacity(0.7))
                     
-                    Text(result.tick.c, format: .number.precision(.fractionLength(2)))
+                    Text(result.price, format: .number.precision(.fractionLength(2)))
                         .font(.system(.caption, design: .monospaced))
                         .fontWeight(.medium)
                         .foregroundColor(.secondary)
                 }
                 }else{
-                    Text(result.tick.sectorName ?? "")
+                    Text(result.sectorName ?? "")
                         .font(.system(.caption, design: .monospaced))
                         .fontWeight(.medium)
                         .foregroundColor(.secondary)
@@ -322,7 +348,7 @@ struct PortfolioStockRow: View {
                 // Change indicators - more compact
                 HStack(spacing: 6) {
                     // Percentage change pill
-                    Text("\(result.tick.pch > 0 ? "+" : "")\(result.tick.pch, specifier: "%.2f")%")
+                    Text("\(result.change > 0 ? "+" : "")\(result.changePercent, specifier: "%.2f")%")
                         .font(.system(.caption2, design: .monospaced))
                         .fontWeight(.medium)
                         .foregroundColor(trendColor)
@@ -343,7 +369,7 @@ struct PortfolioStockRow: View {
                         )
                     
                     // Absolute change
-                    Text(result.tick.ch, format: .number.precision(.fractionLength(2)))
+                    Text(result.changePercent, format: .number.precision(.fractionLength(2)))
                         .font(.system(.caption, design: .monospaced))
                         .fontWeight(.medium)
                         .foregroundColor(trendColor)

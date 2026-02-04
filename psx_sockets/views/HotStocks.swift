@@ -42,9 +42,6 @@ struct HotStocks: View {
             // Header Section
             headerSection
             
-            // Stats Cards Section
-            //statsCardsSection
-            
             // Stocks List Section
             stocksListSection
         }
@@ -186,7 +183,19 @@ struct HotStocks: View {
     private var stocksListView: some View {
         switch psxViewModel.hotStockEnum {
         case .initial, .loading:
-            loadingView
+            ForEach(0..<5) { _ in
+                StocksListView(sectorStock: SectorStocks.mock)
+                    .redacted(reason: .placeholder)
+                    .listRowInsets(EdgeInsets(top: 12, leading: 0, bottom: 12, trailing: 0))
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color(.systemBackground))
+                            .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 4)
+                    )
+            }
             
         case .loaded(let gainers, let losers, let active):
             let stocks: [SectorStocks] = {

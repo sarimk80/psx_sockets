@@ -19,7 +19,7 @@ struct DividendModel: Codable, Hashable,Identifiable {
     let eps, profitLossBeforeTax, profitLossAfterTax: String
     let yearEnded: String
     let id = UUID()
-
+    
     enum CodingKeys: String, CodingKey {
         case company = "Company"
         case dividend = "Dividend"
@@ -28,4 +28,12 @@ struct DividendModel: Codable, Hashable,Identifiable {
         case eps = "Eps"
         case profitLossBeforeTax, profitLossAfterTax, yearEnded
     }
+}
+
+extension DividendModel{
+    static let mockDividendModel = [
+        DividendModel(company: "", dividend: "", date: "", boardMeeting: "", eps: "", profitLossBeforeTax: "", profitLossAfterTax: "", yearEnded: ""),
+        DividendModel(company: "", dividend: "", date: "", boardMeeting: "", eps: "", profitLossBeforeTax: "", profitLossAfterTax: "", yearEnded: ""),
+        DividendModel(company: "", dividend: "", date: "", boardMeeting: "", eps: "", profitLossBeforeTax: "", profitLossAfterTax: "", yearEnded: "")
+    ]
 }
