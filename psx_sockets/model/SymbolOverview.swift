@@ -20,13 +20,18 @@ enum ChartSelector{
 
 struct SymbolOverview : Codable {
     let announcements: [Announcement]
-        let financials: Financials
-        let ratios: [Ratio]
-        let timestamp: String
+    let financials: Financials
+    let ratios: [Ratio]
+    let timestamp: String
 }
 
-struct Announcement : Codable{
+struct Announcement : Codable,Hashable,Identifiable{
+    
     let date, title, documentLink, pdfLink: String
+    
+    var id: String { pdfLink }
+    
+    
 }
 
 struct Financials : Codable{

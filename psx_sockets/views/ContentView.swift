@@ -223,17 +223,8 @@ struct IndexView: View {
                         
                         .padding(.horizontal, 20)
                         .padding(.vertical, 16)
-                        .background(
-                            RoundedRectangle(cornerRadius: 20)
-                                .fill(
-                                    LinearGradient(
-                                        colors: [Color(.systemBackground), Color(.systemGray6)],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                )
-                                .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
-                        )
+                        .background(Color(.systemBackground))
+                        .clipShape(RoundedRectangle(cornerRadius: 20))
                         .padding(.horizontal, 16)
                         .onTapGesture {
                             appNavigation.tickerNavigation.append(TickerDetailRoute.indexDetail(indexName: StringToIndexEnum(indexName: result.data.symbol)))

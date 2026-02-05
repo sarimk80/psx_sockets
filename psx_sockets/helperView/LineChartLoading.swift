@@ -85,7 +85,7 @@ struct ChartLoading: View {
                     .frame(width: 60, height: 10)
             }
         }
-        .frame(maxWidth: .infinity,maxHeight: 250)
+        .frame(maxWidth: .infinity,maxHeight: 350)
 
     }
 }
