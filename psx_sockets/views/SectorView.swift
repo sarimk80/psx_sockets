@@ -11,28 +11,32 @@ struct SectorView: View {
     
     @State private var psxViewModel: PsxViewModel = PsxViewModel(psxServiceManager: PsxServiceManager())
     
+    @Environment(SectorNavigation.self) private var appNavigation
+    
     var body: some View {
         List {
             switch psxViewModel.psxSector {
-            case .initial:
-                ProgressView("Loading sectors...")
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .listRowSeparator(.hidden)
+            case .initial, .loading:
+                ForEach(0..<5) { _ in
+                    SectorListView(sectorName: "", data: SectorDataModel.mock)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                        .listRowBackground(Color.clear)
+                }
                 
-            case .loading:
-                ProgressView("Loading sectors...")
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .listRowSeparator(.hidden)
                 
             case .loaded(let response):
                 if response.data.isEmpty {
                     emptyStateView
                 } else {
                     ForEach(Array(response.data.keys.sorted()), id: \.self) { key in
-                        SectorCardView(
+                        SectorListView(
                             sectorName: key,
                             data: response.data[key]!
                         )
+                        .onTapGesture {
+                            appNavigation.push(route: SectorNavigationEnums.sectorDetail(sector: response.data[key]!,sectorName: key))
+                        }
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                         .listRowBackground(Color.clear)
@@ -49,7 +53,10 @@ struct SectorView: View {
         .navigationBarTitleDisplayMode(.large)
         .background(Color(.systemGroupedBackground))
         .task {
-            await psxViewModel.getPsxSector()
+            if case PsxSectorEnum.initial = psxViewModel.psxSector {
+                await psxViewModel.getPsxSector()
+            }
+            
         }
         .refreshable {
             await psxViewModel.getPsxSector()
@@ -98,6 +105,86 @@ struct SectorView: View {
         .frame(maxWidth: .infinity, minHeight: 300)
     }
 }
+
+struct SectorListView: View {
+    let sectorName: String
+    let data: SectorDataModel
+    
+    var body: some View {
+        HStack(spacing: 8) {
+            // Sector name with icon
+            HStack(spacing: 6) {
+                Image(systemName: iconForSector(sectorName))
+                    .foregroundStyle(sectorColor)
+                
+                Text(sectorName)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .lineLimit(1)
+            }
+            
+            Spacer()
+            
+            // Gainers/Losers indicators
+            HStack(spacing: 6) {
+                IndicatorPill(
+                    count: data.gainers,
+                    color: .green,
+                    icon: "arrow.up"
+                )
+                
+                IndicatorPill(
+                    count: data.losers,
+                    color: .red,
+                    icon: "arrow.down"
+                )
+            }
+            
+            // Percentage change
+            Text(data.avgChangePercent, format: .percent.precision(.fractionLength(1)))
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(data.avgChangePercent >= 0 ? .green : .red)
+                .frame(minWidth: 50, alignment: .trailing)
+        }
+        .padding(.vertical, 24)
+        .padding(.horizontal, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.systemBackground))
+        )
+    }
+    // Color based on sector name (optional)
+     private var sectorColor: Color {
+         let colors: [Color] = [.blue, .green, .orange, .purple, .pink, .teal]
+         let index = abs(sectorName.hashValue) % colors.count
+         return colors[index]
+     }
+ }
+
+struct IndicatorPill: View {
+    let count: Int
+    let color: Color
+    let icon: String
+    
+    var body: some View {
+        HStack(spacing: 2) {
+            Image(systemName: icon)
+                .font(.caption2)
+            Text("\(count)")
+                .font(.caption2)
+                .fontWeight(.medium)
+        }
+        .padding(.horizontal, 6)
+        .padding(.vertical, 2)
+        .background(
+            Capsule()
+                .fill(color.opacity(0.1))
+        )
+        .foregroundColor(color)
+    }
+}
+
 
 struct SectorCardView: View {
     let sectorName: String

@@ -37,7 +37,7 @@ struct SectorModel: Codable {
 }
 
 // MARK: - Datum
-struct SectorDataModel: Codable,Identifiable {
+struct SectorDataModel: Codable,Hashable,Identifiable {
     let totalVolume: Int
     let totalValue: Double
     let totalTrades, gainers, losers: Int
@@ -45,4 +45,8 @@ struct SectorDataModel: Codable,Identifiable {
     let symbols: [String]
     
     var id:String {symbols.first ?? ""}
+}
+
+extension SectorDataModel{
+    static let mock = SectorDataModel(totalVolume: 0, totalValue: 0.0, totalTrades: 0, gainers: 0, losers: 0, avgChange: 0.0, avgChangePercent: 0.0, unchanged: 0.0, symbols: [])
 }
