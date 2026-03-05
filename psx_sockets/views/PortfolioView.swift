@@ -11,6 +11,7 @@ import Charts
 struct PortfolioView: View {
     
     @State private var showSymbolsheet = false
+    @State private var showVolumeSheet = false
     @State private var psxVM: PsxViewModel = PsxViewModel(psxServiceManager: PsxServiceManager())
     @State private var portfolioVM = PortfolioViewModel()
     @Environment(PortfolioNavigation.self) private var appNavigation
@@ -43,13 +44,15 @@ struct PortfolioView: View {
                     switch destination {
                     case .openVolumeSheet(let symbol, let volume):
                         
-                        VolumeSheet(symbol: symbol) { value in
-                            portfolioVM.addTicker(ticker: symbol,volume: value)
-                            Task {
-                                try await Task.sleep(for: .seconds(2))
-                                await socketManager.getRealTimeTickersUpdate()
-                            }
-                        }
+                        VolumeSheet(symbol: symbol, onSubmit: { volume, date,selectedSymbol, _ in
+                            portfolioVM.addTicker(ticker: selectedSymbol,volume: volume,data: date.ISO8601Format())
+                                Task {
+                                    try await Task.sleep(for: .seconds(2))
+                                    await psxVM.getPortfolioSymbolDetail()
+                                                        }
+                        }, portfolioModel: portfolioVM.savedTicker,psxVM: psxVM)
+                        
+                        
                         
                     }
                 })
@@ -81,7 +84,7 @@ struct PortfolioView: View {
     }
     
     func startTimer() {
-        timer = Timer.scheduledTimer(withTimeInterval: 40, repeats: true) { _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 90, repeats: true) { _ in
             Task {
                 await psxVM.getPortfolioSymbolDetail()
             }
@@ -150,6 +153,7 @@ struct PortfolioView: View {
                     
             
             case .loaded(let data):
+                
                 
                 var totalStockCount:Int{
                     data.map{$0.data.portfolioVolume ?? 0}.reduce(0, +)
@@ -224,15 +228,34 @@ struct PortfolioView: View {
                 }
             }
             header: {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Your Holdings")
-                        .font(.headline)
-                        .foregroundColor(.primary)
+                HStack{
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Your Holdings")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        
+                        Text("\(data.count) stocks")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    Spacer()
                     
-                    Text("\(data.count) stocks")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                    Button {
+                        showVolumeSheet.toggle()
+                        } label: {
+                            Label("Add Transaction", systemImage: "plus")
+                                .font(.subheadline.weight(.semibold))
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .foregroundStyle(Color.accentColor)
+                                .background(
+                                    Capsule()
+                                        .fill(Color.accentColor.opacity(0.1))
+                                )
+                        }
+                        .buttonStyle(.plain)
                 }
+                
                 
                 .padding(.bottom, 8)
             }
@@ -257,6 +280,16 @@ struct PortfolioView: View {
         }
         .listStyle(.insetGrouped)
         .contentMargins(8.0, for: .automatic)
+        .sheet(isPresented: $showVolumeSheet, content: {
+            VolumeSheet(symbol: "", onSubmit: { volume, date,selectedSymbol,selectedPortfolio in
+                portfolioVM.addTransaction(portfolio: selectedPortfolio!, volume: volume, date: date.ISO8601Format())
+                Task {
+                    try await Task.sleep(for: .seconds(2))
+                    await psxVM.getPortfolioSymbolDetail()
+                }
+            }, portfolioModel: portfolioVM.savedTicker,
+                        psxVM: psxVM)
+        })
         .scrollContentBackground(.hidden)
     }
     
@@ -502,14 +535,22 @@ struct SymbolListView: View {
                         isInPortfolio: portfolioViewModel.savedTicker.contains { $0.ticker == symbol },
                         onAdd: {
                             // check is symbol exist -- important
-                            if(portfolioViewModel.savedTicker.contains{$0.ticker == symbol}){
-                                portfolioViewModel.addTicker(ticker: symbol,volume: 0)
-                                onDismiss()
-                            }else{
+//                            if(portfolioViewModel.savedTicker.contains{$0.ticker == symbol}){
+//                                portfolioViewModel.addTicker(ticker: symbol,volume: 0)
+//                                onDismiss()
+//                            }else{
                                 path.append(SheetNavigationEnums.openVolumeSheet(symbol: symbol, volume: 0))
+                            //}
+                            
+                            
+                        },
+                        onDelete: {
+                            portfolioViewModel.deletePortfolio(ticker: symbol)
+                            Task{
+                                try await Task.sleep(for: .seconds(2))
+                                await psxViewModel.getPortfolioSymbolDetail()
                             }
-                            
-                            
+                            onDismiss()
                         }
                     )
                     .listRowSeparator(.hidden)
@@ -532,6 +573,7 @@ struct SymbolRow: View {
     let symbol: String
     let isInPortfolio: Bool
     let onAdd: () -> Void
+    let onDelete: () -> Void
     
     var body: some View {
         HStack(spacing: 16) {
@@ -559,22 +601,22 @@ struct SymbolRow: View {
             Spacer()
             
             Button {
-                onAdd()
+                isInPortfolio ? onDelete() : onAdd()
             } label: {
                 HStack(spacing: 6) {
-                    Image(systemName: isInPortfolio ? "checkmark.circle.fill" : "plus.circle.fill")
+                    Image(systemName: isInPortfolio ? "trash" : "plus.circle.fill")
                         .font(.body)
                     
-                    Text(isInPortfolio ? "Added" : "Add")
+                    Text(isInPortfolio ? "Delete" : "Add")
                         .font(.subheadline)
                         .fontWeight(.medium)
                 }
-                .foregroundColor(isInPortfolio ? .green : .blue)
+                .foregroundColor(isInPortfolio ? .red : .blue)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
                 .background(
                     Capsule()
-                        .fill((isInPortfolio ? Color.green : Color.blue).opacity(0.1))
+                        .fill((isInPortfolio ? Color.red : Color.blue).opacity(0.1))
                 )
             }
         }
@@ -585,11 +627,22 @@ struct SymbolRow: View {
 
 struct VolumeSheet: View {
     let symbol: String
-    let onSubmit: (Int) -> Void
+    let onSubmit: (Int,Date,String,PortfolioModel?) -> Void
+    let portfolioModel:[PortfolioModel]
+    let psxVM: PsxViewModel
     
     @State private var volume: String = ""
+    @State private var tickerPrice:Double = 0.0
+    @State private var selectedDate: Date = Date()
     @FocusState private var isFocused: Bool
+    @FocusState private var isPriceFocus: Bool
     @Environment(\.dismiss) private var dismiss
+    @State private var selectedSymbol: String = ""
+    @State private var selectedPortfolioModel:PortfolioModel?
+    
+    var portfolioSymbol:[String]{
+        portfolioModel.map({$0.ticker})
+    }
     
     
     var body: some View {
@@ -605,6 +658,21 @@ struct VolumeSheet: View {
                     .foregroundColor(.blue)
             }
             .padding(.top, 16)
+            
+            if symbol.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                Text("Select Symbol")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                
+                Picker("Select Symbol", selection: $selectedSymbol) {
+                    ForEach(portfolioSymbol, id: \.self) { ticker in
+                        Text(ticker).tag(ticker)
+                    }
+                }
+                .pickerStyle(.menu)
+            }
+        }
             
             // Input section
             VStack(spacing: 12) {
@@ -624,12 +692,72 @@ struct VolumeSheet: View {
                 
                 TextField("Enter number of shares", text: $volume)
                     .keyboardType(.numberPad)
-                    .textFieldStyle(.roundedBorder)
+                    .textFieldStyle(.plain)
                     .font(.body)
                     .multilineTextAlignment(.center)
                     .focused($isFocused)
                     .onAppear { isFocused = true }
+                    .padding(.vertical, 10)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(isFocused ? Color.blue.opacity(0.6) : Color.gray.opacity(0.3), lineWidth: 1.5)
+                        )
+                    
+                    .animation(.easeInOut(duration: 0.2), value: isFocused)
+                    .animation(.spring(response: 0.25), value: volume.isEmpty)
             }
+            
+            // Price
+            switch psxVM.tickerPriceEnum {
+            case .initial:
+                ProgressView()
+            case .loading:
+                ProgressView()
+            case .loaded(let tickerResponse):
+                let price = tickerResponse.data.first?.price
+                VStack(alignment:.leading, spacing: 12){
+                    
+                    Text("Price:")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    
+                    TextField("Enter Price", value: $tickerPrice,format: .number.precision(.fractionLength(2)))
+                        .keyboardType(.decimalPad)
+                        .textFieldStyle(.plain)
+                        .font(.body)
+                        .multilineTextAlignment(.center)
+                        .focused($isPriceFocus)
+                        .onAppear{
+                            tickerPrice = price ?? 0.0
+                        }
+                        .padding(.vertical, 10)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(isPriceFocus ? Color.blue.opacity(0.6) : Color.gray.opacity(0.3), lineWidth: 1.5)
+                            )
+                        .animation(.easeInOut(duration: 0.2), value: isPriceFocus)
+                        .animation(.spring(response: 0.25), value: volume.isEmpty)
+                }
+
+                    
+            case .error(let errorMessage):
+                Text(errorMessage)
+            }
+            
+            VStack(alignment: .leading, spacing: 8) {
+                            Text("Transaction Date")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            
+                            DatePicker(
+                                "",
+                                selection: $selectedDate,
+                                displayedComponents: [.date]
+                            )
+                            .datePickerStyle(.compact)
+                        }
             
             Divider()
             
@@ -659,7 +787,7 @@ struct VolumeSheet: View {
                 .padding()
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(canSubmit ? Color.blue : Color.gray)
+                        .fill(canSubmit ? Color.blue : Color.gray.opacity(0.3))
                 )
             }
             .disabled(!canSubmit)
@@ -668,6 +796,25 @@ struct VolumeSheet: View {
         .padding()
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
+        .onAppear {
+            if !symbol.isEmpty {
+                selectedSymbol = symbol
+                            
+            } else {
+                selectedSymbol = portfolioSymbol.first ?? ""
+                selectedPortfolioModel = portfolioModel.first(where: {$0.ticker == selectedSymbol})
+
+            }
+            Task{
+                await psxVM.getTickerPrice(ticker: selectedSymbol)
+            }
+        }
+        .onChange(of: selectedSymbol) { _, newValue in
+            Task{
+                await psxVM.getTickerPrice(ticker: newValue)
+                selectedPortfolioModel = portfolioModel.first(where: {$0.ticker == newValue})
+            }
+        }
     }
     
     private var canSubmit: Bool {
@@ -679,7 +826,7 @@ struct VolumeSheet: View {
     
     private func submit() {
         if let value = Int(volume.trimmingCharacters(in: .whitespaces)), value > 0 {
-            onSubmit(value)
+            onSubmit(value,selectedDate,selectedSymbol,selectedPortfolioModel)
             dismiss()
             dismiss()
         }

@@ -24,10 +24,11 @@ struct SymbolDataClass: Codable {
     let timestamp: Int
     let sectorName:String?
     let portfolioVolume:Int?
+    let fullName:String?
 }
 
 
 extension SymbolDataClass {
-    static let mock = SymbolDataClass(market: "", st: "", symbol: "", price: 0.0, change: 0.8, changePercent: 0.0, volume: 0, trades: 0, value: 0.0, high: 0.0, low: 0.0, bid: 0.0, ask: 0.0, bidVol: 0, askVol: 0, timestamp: 0, sectorName: "", portfolioVolume: 0)
+    static let mock = SymbolDataClass(market: "", st: "", symbol: "", price: 0.0, change: 0.8, changePercent: 0.0, volume: 0, trades: 0, value: 0.0, high: 0.0, low: 0.0, bid: 0.0, ask: 0.0, bidVol: 0, askVol: 0, timestamp: 0, sectorName: "", portfolioVolume: 0,fullName: "")
 }
 
