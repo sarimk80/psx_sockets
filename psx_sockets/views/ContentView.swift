@@ -69,7 +69,7 @@ struct ContentView: View {
         while !Task.isCancelled {
             await psxViewModel.getIndexSymbolDetail(indices: ["KSE100","KMI30","PSXDIV20","KSE30","MII30"])
             
-            try? await Task.sleep(for: .seconds(60))
+            try? await Task.sleep(for: .seconds(120))
             
         }
     }
@@ -209,8 +209,9 @@ struct IndexView: View {
         switch psxViewModel.indicesEnums {
         case .initial, .loading:
             TickerView(tickerDetail: SymbolDataClass.mock)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
+                .background(Color(.systemBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 20))
+                .padding(.horizontal, 16)
                 .redacted(reason: .placeholder)
         
         case .loaded(let data):
@@ -220,9 +221,7 @@ struct IndexView: View {
                     let result = data[index]
                     
                     TickerView(tickerDetail: result.data)
-                        
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 16)
+                        .frame(height: 200)
                         .background(Color(.systemBackground))
                         .clipShape(RoundedRectangle(cornerRadius: 20))
                         .padding(.horizontal, 16)
@@ -234,7 +233,7 @@ struct IndexView: View {
             }
             .tabViewStyle(.page)
             .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .never))
-            .frame(height: 180)
+            .frame(height: 200)
         case .error(let errorMessage):
             ErrorView(message: errorMessage)
         }
@@ -291,7 +290,7 @@ struct TickerView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     priceMetric(title: "High", value: tickerDetail?.high ?? 0.0)
                     priceMetric(title: "Low", value: tickerDetail?.low ?? 0.0)
-                    priceMetric(title: "Volume", value: Double(tickerDetail?.volume ?? 0))
+                    priceMetric(title: "Volume", value: Double(tickerDetail?.volume ?? 0),isVolume: true)
                 }
                 
                 Spacer()
@@ -310,7 +309,7 @@ struct TickerView: View {
         .padding()
     }
     
-    private func priceMetric(title: String, value: Double) -> some View {
+    private func priceMetric(title: String, value: Double,isVolume:Bool = false) -> some View {
         HStack {
             if title.contains("Bid") || title.contains("Ask") {
                 Spacer()
@@ -319,7 +318,7 @@ struct TickerView: View {
             Text(title)
                 .foregroundColor(.secondary)
             
-            Text(value, format: .number.precision(.fractionLength(2)))
+            Text(value, format: isVolume ? .number.notation(.compactName) : .number.precision(.fractionLength(2)))
                 .font(.system(.caption, design: .monospaced))
                 .fontWeight(.medium)
                 .foregroundColor(.primary)

@@ -8,10 +8,17 @@
 import SwiftUI
 import Charts
 
+struct SheetSymbol:Identifiable {
+    let symbol:String
+    let id = UUID()
+}
+
 struct PortfolioView: View {
     
     @State private var showSymbolsheet = false
     @State private var showVolumeSheet = false
+    @State private var showDetailSheet = false
+    @State private var selectedSymbol : SheetSymbol?
     @State private var psxVM: PsxViewModel = PsxViewModel(psxServiceManager: PsxServiceManager())
     @State private var portfolioVM = PortfolioViewModel()
     @Environment(PortfolioNavigation.self) private var appNavigation
@@ -42,7 +49,7 @@ struct PortfolioView: View {
                 )
                 .navigationDestination(for: SheetNavigationEnums.self, destination: { destination in
                     switch destination {
-                    case .openVolumeSheet(let symbol, let volume):
+                    case .openVolumeSheet(let symbol, _):
                         
                         VolumeSheet(symbol: symbol, onSubmit: { volume, date,selectedSymbol, _ in
                             portfolioVM.addTicker(ticker: selectedSymbol,volume: volume,data: date.ISO8601Format())
@@ -84,7 +91,7 @@ struct PortfolioView: View {
     }
     
     func startTimer() {
-        timer = Timer.scheduledTimer(withTimeInterval: 90, repeats: true) { _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 120, repeats: true) { _ in
             Task {
                 await psxVM.getPortfolioSymbolDetail()
             }
@@ -214,7 +221,7 @@ struct PortfolioView: View {
                     
                         .contentShape(Rectangle())
                         .onTapGesture {
-                            appNavigation.push(route: PortfolioNavigationEnums.tickerDetail(symbol: result.data.symbol))
+                            selectedSymbol = SheetSymbol(symbol: result.data.symbol)
                         }
                         .listRowInsets(EdgeInsets(top: 12, leading: 4, bottom: 12, trailing: 4))
                         .listRowSeparator(.hidden)
@@ -289,6 +296,15 @@ struct PortfolioView: View {
                 }
             }, portfolioModel: portfolioVM.savedTicker,
                         psxVM: psxVM)
+        })
+        .sheet(item: $selectedSymbol, content: { result in
+            DetailSheet(selectedSymbol: result.symbol) {
+                appNavigation.push(route: PortfolioNavigationEnums.tickerDetail(symbol: result.symbol))
+                selectedSymbol = nil
+            } onTransactionTap: {
+                selectedSymbol = nil
+            }
+
         })
         .scrollContentBackground(.hidden)
     }
@@ -851,6 +867,103 @@ struct QuickAddButton: View {
                 .foregroundColor(.blue)
         }
     }
+}
+
+struct DetailSheet: View {
+    var selectedSymbol: String = ""
+    var onDetailTap: () -> Void
+    var onTransactionTap: () -> Void
+    
+    
+    var body: some View{
+        VStack(spacing: 24) {
+            
+            // Drag indicator (common in sheets)
+            Capsule()
+                .fill(Color.secondary.opacity(0.3))
+                .frame(width: 40, height: 5)
+                .padding(.top, 8)
+
+            VStack(spacing: 6) {
+                Text("Explore \(selectedSymbol)")
+                    .font(.title3)
+                    .fontWeight(.semibold)
+
+                Text("Select what you would like to view")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+
+            VStack(spacing: 14) {
+
+                HStack(spacing: 16) {
+                    Image(systemName: "chart.bar.fill")
+                        .font(.title3)
+                        .foregroundColor(.blue)
+                        .frame(width: 42, height: 42)
+                        .background(Color.blue.opacity(0.15))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("Ticker details")
+                            .font(.headline)
+
+                        Text("View price info, market data and metrics")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.secondary)
+                }
+                .padding()
+                .background(Color(.secondarySystemBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .onTapGesture {
+                    onDetailTap()
+                }
+
+
+                HStack(spacing: 16) {
+                    Image(systemName: "arrow.left.arrow.right")
+                        .font(.title3)
+                        .foregroundColor(.green)
+                        .frame(width: 42, height: 42)
+                        .background(Color.green.opacity(0.15))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("Transaction history")
+                            .font(.headline)
+
+                        Text("View past trades and activity")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.secondary)
+                }
+                .padding()
+                .background(Color(.secondarySystemBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .onTapGesture {
+                    onTransactionTap()
+                }
+
+            }
+
+            Spacer()
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .presentationDetents([.height(330)])
+    }
+    
 }
 
 

@@ -300,7 +300,15 @@ class PsxViewModel{
         do{
             let data = try await psxServiceManager.getSymbolOverview(symbol: symbol)
             
-            self.symbolOverviewEnums = .loaded(overview: data)
+            let sortedAnnouncements = data.announcements.sorted { $0.date < $1.date }
+            let sortedRatios = data.ratios.sorted { ($0.period ?? "") < ($1.period ?? "") }
+            let sortedAnnual = data.financials.annual.sorted{ ($0.period ?? "") < ($1.period ?? "") }
+            
+            let sortedQuatelry = data.financials.quarterly.sorted{ ($0.period ?? "") < ($1.period ?? "") }
+            
+            let symbolOverview = SymbolOverview(announcements: sortedAnnouncements, financials: Financials(annual: sortedAnnual, quarterly: sortedQuatelry), ratios: sortedRatios, timestamp: data.timestamp)
+            
+            self.symbolOverviewEnums = .loaded(overview: symbolOverview)
         }catch(let error){
             self.symbolOverviewEnums = .error(errorMessage: error.localizedDescription)
             print(error.localizedDescription)

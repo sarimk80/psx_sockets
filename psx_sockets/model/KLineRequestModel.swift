@@ -54,6 +54,10 @@ struct KLineDatum: Codable,Identifiable {
                 return date
             }
         }
+    
+  
+    
+   
 
     enum CodingKeys: String, CodingKey {
         case symbol, timeframe, timestamp

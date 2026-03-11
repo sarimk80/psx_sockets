@@ -18,6 +18,7 @@ enum TickerDetailRoute:Hashable {
 enum PortfolioNavigationEnums:Hashable{
     case tickerDetail(symbol:String)
     case addTickerVolume(symbol:String)
+    case tickerTransaction(portfolioModel:PortfolioModel)
 }
 
 enum SectorNavigationEnums:Hashable{

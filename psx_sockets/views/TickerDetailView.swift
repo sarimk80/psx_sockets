@@ -332,62 +332,163 @@ struct KlineChartView: View {
     var kline: KLineRequestModel
     @Binding var scrollPosition: Date
     
+    @State private var selectedDate: Date? = nil
+    @State private var selectedPrice: Double? = nil
+    @State private var selectedVolume: Int? = nil
+    
     var body: some View {
         let closes = kline.data.map { $0.close }
+        let volumes = kline.data.map { $0.volume }
         let open = kline.data.map{ $0.datumOpen}
         let minClose = closes.min() ?? 0.0
         let maxClose = closes.max() ?? 0.0
+        let maxVolume = volumes.max() ?? 1
+        let minVolume = volumes.min() ?? 1
+        let averageClose = kline.data.reduce(0.0) {$0 + $1.close } / Double(kline.data.count)
         let lastDate = kline.data.last?.adjustedDate ?? .now
         
         let isPositive = closes.last ?? 0.0 >= open.last ?? 0.0
         let lineColor:Color = isPositive ? .green : .red
         
-        Chart {
-            ForEach(kline.data) { data in
-                
-                LineMark(x: .value("Date", data.adjustedDate), y: .value("Price", data.close))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [.blue, lineColor],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                    .lineStyle(StrokeStyle(lineWidth: 2))
-                    .interpolationMethod(.cardinal)
-                    .annotation(position:.top) {
-                        Text("\(data.close)")
-                            .foregroundStyle(.secondary)
-                    }
-                
-                AreaMark(x: .value("Date", data.adjustedDate), y: .value("Price", data.close))
-                    .foregroundStyle(
-                        .linearGradient(
-                            colors: [lineColor.opacity(0.3), lineColor.opacity(0.05)],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-            }
+        var selectedItem: KLineDatum? {
+            guard let selectedDate else { return nil }
+
+            return kline.data.min(by: {
+                abs($0.adjustedDate.timeIntervalSince(selectedDate)) <
+                abs($1.adjustedDate.timeIntervalSince(selectedDate))
+            })
         }
-        .chartYScale(domain: [minClose * 0.98, maxClose * 1.02])
-        .chartScrollableAxes(.horizontal)
-        .chartScrollPosition(x: $scrollPosition)
-        .chartXVisibleDomain(length: 60 * 60 * 24 * 30)
-        .chartYAxis {
-            AxisMarks(position: .leading) { value in
-                AxisGridLine()
-                AxisTick()
-                AxisValueLabel {
-                    if let doubleValue = value.as(Double.self) {
-                        Text(doubleValue, format: .number.precision(.fractionLength(2)))
+        
+        // Determine annotation position dynamically
+        var annotationPosition: AnnotationPosition {
+            let range = maxClose - minClose
+            let threshold = minClose + (range * 0.75) // top 25% of chart
+            return selectedItem?.close ?? 0.0 > threshold ? .bottom : .top
+        }
+        
+        
+        VStack(spacing: 0) {
+            // Price chart (70% height)
+            Chart {
+                
+                RuleMark(y: .value("Average", averageClose))
+                    .foregroundStyle(lineColor.opacity(0.4))
+                    .lineStyle(StrokeStyle(lineWidth:2, dash: [6,3]))
+                
+                ForEach(kline.data.indices, id: \.self) { indexes in
+                    let data = kline.data[indexes]
+                    LineMark(x: .value("Date", data.adjustedDate), y: .value("Price", data.close))
+                        .foregroundStyle(LinearGradient(colors: [.blue, lineColor], startPoint: .leading, endPoint: .trailing))
+                        .lineStyle(StrokeStyle(lineWidth: 2))
+                        .interpolationMethod(.cardinal)
+                    AreaMark(x: .value("Date", data.adjustedDate), y: .value("Price", data.close))
+                        .foregroundStyle(.linearGradient(colors: [lineColor.opacity(0.25), lineColor.opacity(0.02)], startPoint: .top, endPoint: .bottom))
+                    
+                    
+                }
+                
+                if let selectedValue = selectedItem{
+                    RuleMark(x: .value("date", selectedValue.adjustedDate))
+                        .foregroundStyle(.gray.opacity(0.4))
+                        .lineStyle(StrokeStyle(lineWidth: 1, dash: [4]))
+                    
+                    PointMark(
+                        x: .value("Date", selectedValue.adjustedDate),
+                        y: .value("Price", selectedValue.close)
+                    )
+                    .foregroundStyle(lineColor)
+                    .symbolSize(60)
+                    .annotation(position: annotationPosition , spacing:6) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(selectedValue.adjustedDate, format: .dateTime.month(.abbreviated).day())
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                            Text(selectedValue.close, format: .number.precision(.fractionLength(2)))
+                                .font(.caption.bold())
+                                .foregroundStyle(lineColor)
+                            Text(selectedValue.volume, format: .number.notation(.compactName))
+                                .font(.caption.bold())
+                                .foregroundStyle(lineColor)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 4)
+                        .background(.white.opacity(0.6), in: RoundedRectangle(cornerRadius: 6))
                     }
                 }
             }
-        }
-        .frame(height: 350)
-        .onAppear {
-            self.scrollPosition = lastDate
+            .chartYScale(domain: minClose * 0.98 ... maxClose * 1.04)
+            .chartXAxis {
+                AxisMarks(values: .automatic) { value in
+                    AxisGridLine()
+                    AxisTick()
+                    AxisValueLabel {
+                        if let date = value.as(Date.self) {
+                            Text(date, format: .dateTime.month(.abbreviated).day())
+                        }
+                    }
+                }
+            }
+            .chartYAxis {
+                AxisMarks(position: .trailing) { value in
+                    AxisGridLine()
+                    AxisTick()
+                    AxisValueLabel {
+                        if let v = value.as(Double.self) {
+                            Text(v, format: .number.precision(.fractionLength(2)))
+                        }
+                    }
+                }
+            }
+            .chartXVisibleDomain(length: 60 * 24 * 60 * 60)
+            .chartScrollPosition(x: $scrollPosition)
+            .chartScrollableAxes(.horizontal)
+            .chartGesture({ proxy in
+                SpatialTapGesture()
+                    .onEnded { value in
+                        
+                        let xPos = value.location.x
+                        if let date: Date = proxy.value(atX: xPos) {
+                            selectedDate = date
+                        }
+                        
+                    }
+            })
+            .frame(height: 250)
+            
+            // Volume chart (30% height)
+            Chart {
+                ForEach(kline.data.indices, id: \.self) { indexes in
+                    let data = kline.data[indexes]
+                    BarMark(x: .value("Date", data.adjustedDate), y: .value("Volume", data.volume))
+                        .foregroundStyle(.gray.opacity(0.3))
+                }
+            }
+            .chartYScale(domain: minVolume * Int(0.98) ... maxVolume * Int(1.2))
+            .chartYAxis {
+                AxisMarks(position: .automatic) { value in
+                    AxisGridLine()
+                    AxisTick()
+                    AxisValueLabel {
+                        if let v = value.as(Double.self) {
+                            Text(v, format: .number.notation(.compactName))
+                        }
+                    }
+                }
+            }
+            .chartXAxis {
+                AxisMarks(values: .automatic) { value in
+                    AxisGridLine()
+                    AxisTick()
+                    AxisValueLabel {
+                        if let date = value.as(Date.self) {
+                            Text(date, format: .dateTime.month(.abbreviated).day())
+                        }
+                    }
+                }
+            }
+            .chartScrollableAxes(.horizontal)
+            .chartScrollPosition(x: $scrollPosition)
+            .frame(height: 110)
         }
     }
 }
@@ -499,7 +600,7 @@ struct FinancialCharts: View {
                                 }
                             }
                             .frame(width:20)
-
+                            
                         }
                         .padding()
                         .background(
@@ -513,7 +614,7 @@ struct FinancialCharts: View {
             }
             .listStyle(.plain)
             .frame(height:400)
-
+            
             
             
         }
@@ -533,322 +634,322 @@ struct FinancialCharts: View {
                 }
             }
         }
-            
-        }
+        
+    }
+}
+
+struct BarChart: View {
+    
+    var item:[Annual]
+    
+    
+    @State var selectedYear: String?
+    
+    func selectedItem(from annual: [Annual]) -> Annual? {
+        guard let selectedYear else { return nil }
+        return annual.first { $0.period == selectedYear }
     }
     
-    struct BarChart: View {
-        
-        var item:[Annual]
-        
-        
-        @State var selectedYear: String?
-        
-        func selectedItem(from annual: [Annual]) -> Annual? {
-            guard let selectedYear else { return nil }
-            return annual.first { $0.period == selectedYear }
-        }
-        
-        var body: some View {
-            Chart {
-                ForEach(item,id: \.period) { value in
-                    BarMark(x: .value("Year", value.period ?? "2026"), y: .value("Amount", value.sales ?? 0)
-                    )
-                    .foregroundStyle(by: .value("Type", "Sales"))
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .position(by: .value("Type", "Sales"))
-                    .annotation {
-                        Text(value.sales ?? 0,format:.number.notation(.compactName))
-                            .font(.caption2)
-                            .fontWeight(.medium)
-                            .foregroundColor(.blue)
-                            .padding(.horizontal, 4)
-                            .padding(.vertical, 2)
-                            .background(
-                                Capsule()
-                                    .fill(Color.blue.opacity(0.1))
-                            )
-                    }
-                    
-                    BarMark(x: .value("Year", value.period ?? "2026"), y: .value("Amount", value.profitAfterTax ?? 0)
-                    )
-                    .foregroundStyle(by: .value("Type", "Profit"))
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .position(by: .value("Type", "Profit"))
-                    .annotation {
-                        Text(value.profitAfterTax ?? 0,format:.number.notation(.compactName))
-                            .font(.caption2)
-                            .fontWeight(.medium)
-                            .foregroundColor(.green)
-                            .padding(.horizontal, 4)
-                            .padding(.vertical, 2)
-                            .background(
-                                Capsule()
-                                    .fill(Color.green.opacity(0.1))
-                            )
-                    }
-                }
-                
-                
-            }
-            .chartYScale(domain: calculateYScaleDomain(for: item))
-            .frame(height: 300)
-            .chartYAxis {
-                AxisMarks{ value in
-                    if let doubleValue = value.as(Double.self) {
-                        AxisValueLabel {
-                            Text(doubleValue.formatted(
-                                .number.notation(.compactName)
-                            ))
-                        }
-                    }
-                    
-                }
-            }
-            .chartForegroundStyleScale([
-                "Sales": .blue,
-                "Profit": .green
-            ])
-            .chartLegend(position: .bottom, alignment: .leading)
-            .padding(.horizontal, 16)
-            .padding(.vertical,4)
-        }
-    }
-    
-    struct EPSChart: View {
-        let items: [Annual]
-        
-        var body: some View {
-            Chart {
-                ForEach(items, id: \.period) { value in
-                    LineMark(
-                        x: .value("Year", value.period ?? ""),
-                        y: .value("EPS", value.eps ?? 0)
-                    )
-                    .foregroundStyle(.pink)
-                    .interpolationMethod(.catmullRom)
-                    
-                    PointMark(
-                        x: .value("Year", value.period ?? ""),
-                        y: .value("EPS", value.eps ?? 0)
-                    )
-                    .foregroundStyle(.pink)
-                    .annotation {
-                        Text(value.eps ?? 0,format:.number.notation(.compactName))
-                            .font(.caption2)
-                            .fontWeight(.medium)
-                            .foregroundColor(.pink)
-                            .padding(.horizontal, 4)
-                            .padding(.vertical, 2)
-                            .background(
-                                Capsule()
-                                    .fill(Color.pink.opacity(0.1))
-                            )
-                    }
-                }
-            }
-            .frame(height: 300)
-        }
-    }
-    
-    
-    struct ChartCard<Content: View>: View {
-        let content: Content
-        
-        init(@ViewBuilder content: () -> Content) {
-            self.content = content()
-        }
-        
-        var body: some View {
-            content
-                .padding()
-                .background(
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color(.systemBackground))
-                        .shadow(color: .black.opacity(0.06), radius: 6, y: 3)
+    var body: some View {
+        Chart {
+            ForEach(item,id: \.period) { value in
+                BarMark(x: .value("Year", value.period ?? "2026"), y: .value("Amount", value.sales ?? 0)
                 )
-        }
-    }
-    
-    
-    struct ChartSectionHeader: View {
-        let title: String
-        
-        var body: some View {
-            Text(title)
-                .font(.title3.weight(.semibold))
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal)
-                .padding(.top, 12)
-        }
-    }
-    
-    
-    struct RatioChart: View {
-        let data: [Ratio]
-        
-        var body: some View {
-            Chart {
-                // 1.  Margins – left axis
-                ForEach(data, id: \.period) { d in
-                    BarMark(
-                        x: .value("Year", d.period ?? ""),
-                        y: .value("GrossProfit", d.grossProfitMargin ?? 0.0)
-                    )
-                    .foregroundStyle(by: .value("Type", "GrossProfit"))
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .position(by: .value("Type", "GrossProfit"))
-                    .annotation {
-                        Text(d.grossProfitMargin ?? 0,format:.number.notation(.compactName))
-                            .font(.caption2)
-                            .fontWeight(.medium)
-                            .foregroundColor(.indigo)
-                            .padding(.horizontal, 4)
-                            .padding(.vertical, 2)
-                            .background(
-                                Capsule()
-                                    .fill(Color.indigo.opacity(0.1))
-                            )
-                    }
-                    
-                    BarMark(
-                        x: .value("Year", d.period ?? ""),
-                        y: .value("NetProfit", d.netProfitMargin ?? 0.0)
-                    )
-                    .foregroundStyle(by: .value("Type", "NetProfit"))
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .position(by: .value("Type", "NetProfit"))
-                    .annotation {
-                        Text(d.netProfitMargin ?? 0,format:.number.notation(.compactName))
-                            .font(.caption2)
-                            .fontWeight(.medium)
-                            .foregroundColor(.orange)
-                            .padding(.horizontal, 4)
-                            .padding(.vertical, 2)
-                            .background(
-                                Capsule()
-                                    .fill(Color.orange.opacity(0.1))
-                            )
-                    }
+                .foregroundStyle(by: .value("Type", "Sales"))
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .position(by: .value("Type", "Sales"))
+                .annotation {
+                    Text(value.sales ?? 0,format:.number.notation(.compactName))
+                        .font(.caption2)
+                        .fontWeight(.medium)
+                        .foregroundColor(.blue)
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 2)
+                        .background(
+                            Capsule()
+                                .fill(Color.blue.opacity(0.1))
+                        )
                 }
-            }
-            .chartForegroundStyleScale([
-                "GrossProfit": .indigo,
-                "NetProfit": .orange
-            ])
-            .chartLegend(position: .bottom, alignment: .leading)
-            .frame(height: 300)
-            .padding()
-        }
-    }
-    
-    
-    struct RatioLineChart: View {
-        
-        let data: [Ratio]
-        
-        var body: some View {
-            Chart {
                 
-                ForEach(data, id: \.period) { d in
-                    LineMark(
-                        x: .value("Year", d.period ?? ""),
-                        y: .value("Growth", d.epsGrowth ?? 0.0)
-                    )
-                    .foregroundStyle(.gray)
-                    .interpolationMethod(.catmullRom)
-                    
-                    PointMark(
-                        x: .value("Year", d.period ?? ""),
-                        y: .value("Growth", d.epsGrowth ?? 0.0))
-                    .foregroundStyle(.gray)
-                    .annotation {
-                        Text(d.epsGrowth ?? 0,format:.number.notation(.compactName))
-                            .font(.caption2)
-                            .fontWeight(.medium)
-                            .foregroundColor(.gray)
-                            .padding(.horizontal, 4)
-                            .padding(.vertical, 2)
-                            .background(
-                                Capsule()
-                                    .fill(Color.gray.opacity(0.1))
-                            )
-                    }
-                    
-                    
+                BarMark(x: .value("Year", value.period ?? "2026"), y: .value("Amount", value.profitAfterTax ?? 0)
+                )
+                .foregroundStyle(by: .value("Type", "Profit"))
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .position(by: .value("Type", "Profit"))
+                .annotation {
+                    Text(value.profitAfterTax ?? 0,format:.number.notation(.compactName))
+                        .font(.caption2)
+                        .fontWeight(.medium)
+                        .foregroundColor(.green)
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 2)
+                        .background(
+                            Capsule()
+                                .fill(Color.green.opacity(0.1))
+                        )
                 }
             }
             
-            .chartLegend(position: .bottom)
-            .frame(height: 300)
-            .padding()
+            
         }
-    }
-    
-    struct EpsRatioChart: View {
-        
-        let data: [Ratio]
-        
-        var body: some View {
-            Chart {
-                
-                ForEach(data, id: \.period) { d in
-                    LineMark(
-                        x: .value("Year", d.period ?? ""),
-                        y: .value("Growth", d.peg ?? 0.0)
-                    )
-                    .foregroundStyle(.mint)
-                    .interpolationMethod(.catmullRom)
-                    
-                    PointMark(
-                        x: .value("Year", d.period ?? ""),
-                        y: .value("Growth", d.peg ?? 0.0))
-                    .foregroundStyle(.mint)
-                    .annotation {
-                        Text(d.peg ?? 0,format:.number.notation(.compactName))
-                            .font(.caption2)
-                            .fontWeight(.medium)
-                            .foregroundColor(.mint)
-                            .padding(.horizontal, 4)
-                            .padding(.vertical, 2)
-                            .background(
-                                Capsule()
-                                    .fill(Color.mint.opacity(0.1))
-                            )
+        .chartYScale(domain: calculateYScaleDomain(for: item))
+        .frame(height: 300)
+        .chartYAxis {
+            AxisMarks{ value in
+                if let doubleValue = value.as(Double.self) {
+                    AxisValueLabel {
+                        Text(doubleValue.formatted(
+                            .number.notation(.compactName)
+                        ))
                     }
                 }
-            }
-            
-            .chartLegend(position: .bottom)
-            .frame(height: 300)
-            .padding()
-        }
-    }
-    
-    
-    
-    
-    
-    struct LegendItem: View {
-        let color: Color
-        let label: String
-        
-        var body: some View {
-            HStack(spacing: 6) {
-                Rectangle()
-                    .fill(color)
-                    .frame(width: 12, height: 4)
-                    .cornerRadius(2)
                 
-                Text(label)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
             }
         }
+        .chartForegroundStyleScale([
+            "Sales": .blue,
+            "Profit": .green
+        ])
+        .chartLegend(position: .bottom, alignment: .leading)
+        .padding(.horizontal, 16)
+        .padding(.vertical,4)
+    }
+}
+
+struct EPSChart: View {
+    let items: [Annual]
+    
+    var body: some View {
+        Chart {
+            ForEach(items, id: \.period) { value in
+                LineMark(
+                    x: .value("Year", value.period ?? ""),
+                    y: .value("EPS", value.eps ?? 0)
+                )
+                .foregroundStyle(.pink)
+                .interpolationMethod(.catmullRom)
+                
+                PointMark(
+                    x: .value("Year", value.period ?? ""),
+                    y: .value("EPS", value.eps ?? 0)
+                )
+                .foregroundStyle(.pink)
+                .annotation {
+                    Text(value.eps ?? 0,format:.number.notation(.compactName))
+                        .font(.caption2)
+                        .fontWeight(.medium)
+                        .foregroundColor(.pink)
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 2)
+                        .background(
+                            Capsule()
+                                .fill(Color.pink.opacity(0.1))
+                        )
+                }
+            }
+        }
+        .frame(height: 300)
+    }
+}
+
+
+struct ChartCard<Content: View>: View {
+    let content: Content
+    
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
     }
     
-    
-    
-    #Preview {
-        TickerDetailView(symbol: "DCR")
+    var body: some View {
+        content
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color(.systemBackground))
+                    .shadow(color: .black.opacity(0.06), radius: 6, y: 3)
+            )
     }
+}
+
+
+struct ChartSectionHeader: View {
+    let title: String
+    
+    var body: some View {
+        Text(title)
+            .font(.title3.weight(.semibold))
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal)
+            .padding(.top, 12)
+    }
+}
+
+
+struct RatioChart: View {
+    let data: [Ratio]
+    
+    var body: some View {
+        Chart {
+            // 1.  Margins – left axis
+            ForEach(data, id: \.period) { d in
+                BarMark(
+                    x: .value("Year", d.period ?? ""),
+                    y: .value("GrossProfit", d.grossProfitMargin ?? 0.0)
+                )
+                .foregroundStyle(by: .value("Type", "GrossProfit"))
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .position(by: .value("Type", "GrossProfit"))
+                .annotation {
+                    Text(d.grossProfitMargin ?? 0,format:.number.notation(.compactName))
+                        .font(.caption2)
+                        .fontWeight(.medium)
+                        .foregroundColor(.indigo)
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 2)
+                        .background(
+                            Capsule()
+                                .fill(Color.indigo.opacity(0.1))
+                        )
+                }
+                
+                BarMark(
+                    x: .value("Year", d.period ?? ""),
+                    y: .value("NetProfit", d.netProfitMargin ?? 0.0)
+                )
+                .foregroundStyle(by: .value("Type", "NetProfit"))
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .position(by: .value("Type", "NetProfit"))
+                .annotation {
+                    Text(d.netProfitMargin ?? 0,format:.number.notation(.compactName))
+                        .font(.caption2)
+                        .fontWeight(.medium)
+                        .foregroundColor(.orange)
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 2)
+                        .background(
+                            Capsule()
+                                .fill(Color.orange.opacity(0.1))
+                        )
+                }
+            }
+        }
+        .chartForegroundStyleScale([
+            "GrossProfit": .indigo,
+            "NetProfit": .orange
+        ])
+        .chartLegend(position: .bottom, alignment: .leading)
+        .frame(height: 300)
+        .padding()
+    }
+}
+
+
+struct RatioLineChart: View {
+    
+    let data: [Ratio]
+    
+    var body: some View {
+        Chart {
+            
+            ForEach(data, id: \.period) { d in
+                LineMark(
+                    x: .value("Year", d.period ?? ""),
+                    y: .value("Growth", d.epsGrowth ?? 0.0)
+                )
+                .foregroundStyle(.gray)
+                .interpolationMethod(.catmullRom)
+                
+                PointMark(
+                    x: .value("Year", d.period ?? ""),
+                    y: .value("Growth", d.epsGrowth ?? 0.0))
+                .foregroundStyle(.gray)
+                .annotation {
+                    Text(d.epsGrowth ?? 0,format:.number.notation(.compactName))
+                        .font(.caption2)
+                        .fontWeight(.medium)
+                        .foregroundColor(.gray)
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 2)
+                        .background(
+                            Capsule()
+                                .fill(Color.gray.opacity(0.1))
+                        )
+                }
+                
+                
+            }
+        }
+        
+        .chartLegend(position: .bottom)
+        .frame(height: 300)
+        .padding()
+    }
+}
+
+struct EpsRatioChart: View {
+    
+    let data: [Ratio]
+    
+    var body: some View {
+        Chart {
+            
+            ForEach(data, id: \.period) { d in
+                LineMark(
+                    x: .value("Year", d.period ?? ""),
+                    y: .value("Growth", d.peg ?? 0.0)
+                )
+                .foregroundStyle(.mint)
+                .interpolationMethod(.catmullRom)
+                
+                PointMark(
+                    x: .value("Year", d.period ?? ""),
+                    y: .value("Growth", d.peg ?? 0.0))
+                .foregroundStyle(.mint)
+                .annotation {
+                    Text(d.peg ?? 0,format:.number.notation(.compactName))
+                        .font(.caption2)
+                        .fontWeight(.medium)
+                        .foregroundColor(.mint)
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 2)
+                        .background(
+                            Capsule()
+                                .fill(Color.mint.opacity(0.1))
+                        )
+                }
+            }
+        }
+        
+        .chartLegend(position: .bottom)
+        .frame(height: 300)
+        .padding()
+    }
+}
+
+
+
+
+
+struct LegendItem: View {
+    let color: Color
+    let label: String
+    
+    var body: some View {
+        HStack(spacing: 6) {
+            Rectangle()
+                .fill(color)
+                .frame(width: 12, height: 4)
+                .cornerRadius(2)
+            
+            Text(label)
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+    }
+}
+
+
+
+#Preview {
+    TickerDetailView(symbol: "DCR")
+}
