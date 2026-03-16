@@ -32,14 +32,16 @@ class Transaction{
     var volume:Int
     var date:String
     var price: Double?
+    var status: String?
     
     var portfolio: PortfolioModel?
     
-    init(ticker: String, volume: Int, date: String,portfolio: PortfolioModel? = nil,price: Double? = 1) {
+    init(ticker: String, volume: Int, date: String,portfolio: PortfolioModel? = nil,price: Double? = 1,status:String? = "Buy") {
         self.ticker = ticker
         self.volume = volume
         self.date = date
         self.portfolio = portfolio
         self.price = price
+        self.status = status
     }
 }

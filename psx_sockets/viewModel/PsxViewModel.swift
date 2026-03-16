@@ -113,6 +113,13 @@ enum TickerPriceEnum {
     case error(errorMessage:String)
 }
 
+enum TransactionDetailEnums {
+    case initial
+    case loading
+    case loaded(portfolioTickers : [Transaction])
+    case error(errorMessage:String)
+}
+
 
 @MainActor
 @Observable
@@ -132,6 +139,7 @@ class PsxViewModel{
     var symbolDetailEnum : SymbolDetailEnums = .initial
     var sectorSymbolEnum : SectorSymbolEnum = .initial
     var tickerPriceEnum : TickerPriceEnum = .initial
+    var transactionDetailEnum : TransactionDetailEnums = .initial
     
     // for Index Detail symbols
     
@@ -532,6 +540,46 @@ class PsxViewModel{
         }
         catch(let error){
             self.tickerPriceEnum = TickerPriceEnum.error(errorMessage: error.localizedDescription)
+        }
+    }
+    
+    func getSingleTransactionDetail(ticker:String) async{
+        
+        transactionDetailEnum = TransactionDetailEnums.loading
+        
+        let singlePortfolio =  swiftDataService.getSingleTicker(ticker: ticker)
+        
+        
+        let transaction = singlePortfolio?.transaction ?? []
+        
+        
+        
+        
+//        var symbolResponse:[SymbolDetail] =  []
+//        symbolResponse.reserveCapacity(transaction.count)
+        
+        do{
+//            for result in transaction{
+//                let response = try await psxServiceManager.getSymbolDetail(market: "REG", symbol: result.ticker)
+//                
+//                let dataWithSector = SymbolDataClass(market: response.data.market, st: response.data.st, symbol: response.data.symbol, price: response.data.price, change: response.data.change, changePercent: response.data.changePercent, volume: response.data.volume, trades: response.data.trades, value: response.data.value, high: response.data.high, low: response.data.low, bid: response.data.bid, ask: response.data.ask, bidVol: response.data.bidVol, askVol: response.data.askVol, timestamp: response.timestamp,sectorName: nil,portfolioVolume: result.volume,fullName: "")
+//                
+//                symbolResponse.append(  SymbolDetail(
+//                        success: response.success,
+//                        data: dataWithSector,
+//                        timestamp: response.timestamp
+//                        )
+//                  )
+//                
+//                try await Task.sleep(for: .milliseconds(600))
+//               
+//            }
+            
+            transactionDetailEnum = .loaded(portfolioTickers: transaction)
+            
+        }catch{
+            print(error.localizedDescription)
+            transactionDetailEnum = .error(errorMessage: error.localizedDescription)
         }
     }
 

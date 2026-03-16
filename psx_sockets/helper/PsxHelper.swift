@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 
 func StringToIndexEnum(indexName:String) -> IndexEnums {
@@ -143,6 +144,18 @@ func iconForSector(_ sector: String) -> String {
     default:
         // ⭐ VERY IMPORTANT fallback
         return "circle"
+    }
+}
+
+struct SpringButtonStyle: ButtonStyle {
+    
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.94 : 1)
+            .animation(
+                .spring(response: 0.25, dampingFraction: 0.6),
+                value: configuration.isPressed
+            )
     }
 }
 

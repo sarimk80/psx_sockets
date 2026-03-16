@@ -48,8 +48,8 @@ struct RootView: View {
 
                             case .addTickerVolume(let symbol):
                                 Text("Hello world \(symbol)")
-                            case .tickerTransaction(let portfolioModel):
-                                Text("")
+                            case .tickerTransaction(let symbol):
+                                TransactionDetailView(symbol: symbol)
                             }
                         }
                 }
@@ -114,7 +114,7 @@ struct RootView: View {
                 
             }
         }
-        .tabBarMinimizeBehavior(.onScrollDown)
+        .tabBarMinimizeBehavior(.automatic)
     }
 }
 

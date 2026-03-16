@@ -220,15 +220,20 @@ struct IndexView: View {
                     
                     let result = data[index]
                     
-                    TickerView(tickerDetail: result.data)
-                        .frame(height: 200)
-                        .background(Color(.systemBackground))
-                        .clipShape(RoundedRectangle(cornerRadius: 20))
-                        .padding(.horizontal, 16)
-                        .onTapGesture {
-                            appNavigation.tickerNavigation.append(TickerDetailRoute.indexDetail(indexName: StringToIndexEnum(indexName: result.data.symbol)))
-                        }
-                        .tag(index)
+                    Button {
+                        appNavigation.tickerNavigation.append(TickerDetailRoute.indexDetail(indexName: StringToIndexEnum(indexName: result.data.symbol)))
+                    } label: {
+                        TickerView(tickerDetail: result.data)
+                            .frame(height: 200)
+                            .background(Color(.systemBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 20))
+                            .padding(.horizontal, 16)
+                            .tag(index)
+                    }
+                    .buttonStyle(SpringButtonStyle())
+
+                    
+                    
                 }
             }
             .tabViewStyle(.page)

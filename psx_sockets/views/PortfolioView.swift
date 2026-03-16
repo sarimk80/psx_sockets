@@ -51,12 +51,12 @@ struct PortfolioView: View {
                     switch destination {
                     case .openVolumeSheet(let symbol, _):
                         
-                        VolumeSheet(symbol: symbol, onSubmit: { volume, date,selectedSymbol, _ in
+                        VolumeSheet(symbol: symbol, onSubmit: { volume, date,selectedSymbol, _ , _ in
                             portfolioVM.addTicker(ticker: selectedSymbol,volume: volume,data: date.ISO8601Format())
-                                Task {
-                                    try await Task.sleep(for: .seconds(2))
-                                    await psxVM.getPortfolioSymbolDetail()
-                                                        }
+                            Task {
+                                try await Task.sleep(for: .seconds(2))
+                                await psxVM.getPortfolioSymbolDetail()
+                            }
                         }, portfolioModel: portfolioVM.savedTicker,psxVM: psxVM)
                         
                         
@@ -82,6 +82,9 @@ struct PortfolioView: View {
         }
         .onDisappear {
             stopTimer()
+        }
+        .refreshable {
+            await psxVM.getPortfolioSymbolDetail()
         }
     }
     
@@ -157,8 +160,8 @@ struct PortfolioView: View {
                             .redacted(reason: .placeholder)
                     }
                 }
-                    
-            
+                
+                
             case .loaded(let data):
                 
                 
@@ -200,6 +203,7 @@ struct PortfolioView: View {
                                         .fontWeight(.semibold)
                                         .lineLimit(1)
                                         .minimumScaleFactor(0.7)
+                                        .contentTransition(.numericText())
                                     
                                     Text("\(totalStockCount) Stocks")
                                         .font(.caption2)
@@ -212,43 +216,43 @@ struct PortfolioView: View {
                     .frame(height: 250)
                     
                 }
-            
-            
-            // portfolio list
-            Section {
-                ForEach(data, id: \.data.symbol) { result in
-                    PortfolioStockRow(result: result.data,isShowHolding: true)
-                    
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            selectedSymbol = SheetSymbol(symbol: result.data.symbol)
-                        }
-                        .listRowInsets(EdgeInsets(top: 12, leading: 4, bottom: 12, trailing: 4))
-                        .listRowSeparator(.hidden)
-                        .listRowBackground(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color(.systemBackground))
-                                .padding(.horizontal, 2)
-                                .padding(.vertical, 4)
-                        )
-                    
-                }
-            }
-            header: {
-                HStack{
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Your Holdings")
-                            .font(.headline)
-                            .foregroundColor(.primary)
+                
+                
+                // portfolio list
+                Section {
+                    ForEach(data, id: \.data.symbol) { result in
+                        PortfolioStockRow(result: result.data,isShowHolding: true)
                         
-                        Text("\(data.count) stocks")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                selectedSymbol = SheetSymbol(symbol: result.data.symbol)
+                            }
+                            .listRowInsets(EdgeInsets(top: 12, leading: 4, bottom: 12, trailing: 4))
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color(.systemBackground))
+                                    .padding(.horizontal, 2)
+                                    .padding(.vertical, 4)
+                            )
+                        
                     }
-                    Spacer()
-                    
-                    Button {
-                        showVolumeSheet.toggle()
+                }
+                header: {
+                    HStack{
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Your Holdings")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                            
+                            Text("\(data.count) stocks")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer()
+                        
+                        Button {
+                            showVolumeSheet.toggle()
                         } label: {
                             Label("Add Transaction", systemImage: "plus")
                                 .font(.subheadline.weight(.semibold))
@@ -260,18 +264,18 @@ struct PortfolioView: View {
                                         .fill(Color.accentColor.opacity(0.1))
                                 )
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(SpringButtonStyle())
+                    }
+                    
+                    
+                    .padding(.bottom, 8)
                 }
-                
-                
-                .padding(.bottom, 8)
-            }
             case .error(let errorMessage):
                 ErrorView(message: errorMessage)
             }
             
-          
-              
+            
+            
             
         }
         .navigationTitle("Portfolio")
@@ -288,8 +292,8 @@ struct PortfolioView: View {
         .listStyle(.insetGrouped)
         .contentMargins(8.0, for: .automatic)
         .sheet(isPresented: $showVolumeSheet, content: {
-            VolumeSheet(symbol: "", onSubmit: { volume, date,selectedSymbol,selectedPortfolio in
-                portfolioVM.addTransaction(portfolio: selectedPortfolio!, volume: volume, date: date.ISO8601Format())
+            VolumeSheet(symbol: "", onSubmit: { volume, date,selectedSymbol,selectedPortfolio,price in
+                portfolioVM.addTransaction(portfolio: selectedPortfolio!, volume: volume, date: date.ISO8601Format(),price: price)
                 Task {
                     try await Task.sleep(for: .seconds(2))
                     await psxVM.getPortfolioSymbolDetail()
@@ -302,9 +306,10 @@ struct PortfolioView: View {
                 appNavigation.push(route: PortfolioNavigationEnums.tickerDetail(symbol: result.symbol))
                 selectedSymbol = nil
             } onTransactionTap: {
+                appNavigation.push(route: PortfolioNavigationEnums.tickerTransaction(symbol: result.symbol))
                 selectedSymbol = nil
             }
-
+            
         })
         .scrollContentBackground(.hidden)
     }
@@ -551,11 +556,11 @@ struct SymbolListView: View {
                         isInPortfolio: portfolioViewModel.savedTicker.contains { $0.ticker == symbol },
                         onAdd: {
                             // check is symbol exist -- important
-//                            if(portfolioViewModel.savedTicker.contains{$0.ticker == symbol}){
-//                                portfolioViewModel.addTicker(ticker: symbol,volume: 0)
-//                                onDismiss()
-//                            }else{
-                                path.append(SheetNavigationEnums.openVolumeSheet(symbol: symbol, volume: 0))
+                            //                            if(portfolioViewModel.savedTicker.contains{$0.ticker == symbol}){
+                            //                                portfolioViewModel.addTicker(ticker: symbol,volume: 0)
+                            //                                onDismiss()
+                            //                            }else{
+                            path.append(SheetNavigationEnums.openVolumeSheet(symbol: symbol, volume: 0))
                             //}
                             
                             
@@ -643,7 +648,7 @@ struct SymbolRow: View {
 
 struct VolumeSheet: View {
     let symbol: String
-    let onSubmit: (Int,Date,String,PortfolioModel?) -> Void
+    let onSubmit: (Int,Date,String,PortfolioModel?,Double) -> Void
     let portfolioModel:[PortfolioModel]
     let psxVM: PsxViewModel
     
@@ -652,46 +657,80 @@ struct VolumeSheet: View {
     @State private var selectedDate: Date = Date()
     @FocusState private var isFocused: Bool
     @FocusState private var isPriceFocus: Bool
+    @State private var transactionType: String = "Buy"
     @Environment(\.dismiss) private var dismiss
     @State private var selectedSymbol: String = ""
     @State private var selectedPortfolioModel:PortfolioModel?
+    
     
     var portfolioSymbol:[String]{
         portfolioModel.map({$0.ticker})
     }
     
+    var sellError: Bool {
+        guard transactionType == "Sell",
+              let qty = Int(volume),
+              let owned = selectedPortfolioModel?.volume else { return false }
+        
+        return qty > owned
+    }
+    
     
     var body: some View {
-        VStack(spacing: 20) {
-            // Header
-            VStack(spacing: 4) {
-                Text("Add Shares")
-                    .font(.title3)
-                    .fontWeight(.semibold)
-                
-                Text(symbol)
-                    .font(.headline)
-                    .foregroundColor(.blue)
+        
+        
+        Form {
+            
+            Section {
+                Text(symbol.isEmpty ? selectedSymbol : symbol)
             }
-            .padding(.top, 16)
             
             if symbol.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
-                Text("Select Symbol")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
                 
-                Picker("Select Symbol", selection: $selectedSymbol) {
-                    ForEach(portfolioSymbol, id: \.self) { ticker in
-                        Text(ticker).tag(ticker)
+                Section("Trades") {
+                    Picker("Status", selection: $transactionType) {
+                        Text("Buy").tag("Buy")
+                        Text("Sell").tag("Sell")
+                    }
+                    
+                    Picker("Select Symbol", selection: $selectedSymbol) {
+                        ForEach(portfolioSymbol, id: \.self) { ticker in
+                            Text(ticker).tag(ticker)
+                        }
                     }
                 }
-                .pickerStyle(.menu)
+                
+                
             }
-        }
             
-            // Input section
-            VStack(spacing: 12) {
+            
+            
+            Section {
+                TextField("Enter number of shares", text: $volume)
+                    .keyboardType(.numberPad)
+                    .textFieldStyle(.roundedBorder)
+                    .focused($isFocused)
+                    .animation(.easeInOut(duration: 0.2), value: isFocused)
+                    .animation(.spring(response: 0.25), value: volume.isEmpty)
+                
+                if sellError {
+                    
+                    Text("Volume cannot exceed available shares")
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
+                
+                HStack(spacing: 12) {
+                    QuickAddButton(value: 10, current: $volume)
+                    QuickAddButton(value: 50, current: $volume)
+                    QuickAddButton(value: 100, current: $volume)
+                    QuickAddButton(value: 200, current: $volume)
+                    QuickAddButton(value: 500, current: $volume)
+                }
+                
+                
+                
+            } header: {
                 HStack {
                     Text("Quantity:")
                         .font(.subheadline)
@@ -699,127 +738,94 @@ struct VolumeSheet: View {
                     
                     Spacer()
                     
-                    if let parsedVolume = Int(volume), parsedVolume > 0 {
-                        Text("× \(parsedVolume)")
-                            .font(.caption)
-                            .foregroundColor(.blue)
+                    if let qty = Int(volume), qty > 0 {
+                        Text("Total: \((Double(qty) * tickerPrice), format: .currency(code: "PKR"))")
+                            .font(.headline)
+                            .foregroundStyle(transactionType == "Buy" ? .green : .red)
                     }
                 }
-                
-                TextField("Enter number of shares", text: $volume)
-                    .keyboardType(.numberPad)
-                    .textFieldStyle(.plain)
-                    .font(.body)
-                    .multilineTextAlignment(.center)
-                    .focused($isFocused)
-                    .onAppear { isFocused = true }
-                    .padding(.vertical, 10)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(isFocused ? Color.blue.opacity(0.6) : Color.gray.opacity(0.3), lineWidth: 1.5)
-                        )
-                    
-                    .animation(.easeInOut(duration: 0.2), value: isFocused)
-                    .animation(.spring(response: 0.25), value: volume.isEmpty)
             }
             
-            // Price
-            switch psxVM.tickerPriceEnum {
-            case .initial:
-                ProgressView()
-            case .loading:
-                ProgressView()
-            case .loaded(let tickerResponse):
-                let price = tickerResponse.data.first?.price
-                VStack(alignment:.leading, spacing: 12){
+            
+            
+            Section("Price") {
+                // Price
+                switch psxVM.tickerPriceEnum {
+                case .initial:
+                    ProgressView()
+                case .loading:
+                    ProgressView()
+                case .loaded(let tickerResponse):
+                    let price = tickerResponse.data.first?.price ?? 0.0
                     
-                    Text("Price:")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+                    let step:Double = 0.5
+                    
+                    let stepperRange = (price - 10)...(price + 10)
                     
                     TextField("Enter Price", value: $tickerPrice,format: .number.precision(.fractionLength(2)))
                         .keyboardType(.decimalPad)
-                        .textFieldStyle(.plain)
-                        .font(.body)
-                        .multilineTextAlignment(.center)
+                        .textFieldStyle(.roundedBorder)
                         .focused($isPriceFocus)
                         .onAppear{
-                            tickerPrice = price ?? 0.0
+                            tickerPrice = price
                         }
-                        .padding(.vertical, 10)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(isPriceFocus ? Color.blue.opacity(0.6) : Color.gray.opacity(0.3), lineWidth: 1.5)
-                            )
+                    
                         .animation(.easeInOut(duration: 0.2), value: isPriceFocus)
                         .animation(.spring(response: 0.25), value: volume.isEmpty)
-                }
-
                     
-            case .error(let errorMessage):
-                Text(errorMessage)
-            }
-            
-            VStack(alignment: .leading, spacing: 8) {
-                            Text("Transaction Date")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                            
-                            DatePicker(
-                                "",
-                                selection: $selectedDate,
-                                displayedComponents: [.date]
-                            )
-                            .datePickerStyle(.compact)
-                        }
-            
-            Divider()
-            
-            // Quick actions
-            Text("Quick add")
-                .font(.caption)
-                .foregroundColor(.secondary)
-            
-            HStack(spacing: 12) {
-                QuickAddButton(value: 10, current: $volume)
-                QuickAddButton(value: 50, current: $volume)
-                QuickAddButton(value: 100, current: $volume)
-                QuickAddButton(value: 500, current: $volume)
-            }
-            
-            Spacer()
-            
-            // Submit button
-            Button(action: submit) {
-                HStack {
-                    Image(systemName: "checkmark.circle.fill")
-                    Text("Add to Portfolio")
+                    
+                    Stepper("Adjust price", value: $tickerPrice, in: stepperRange,step:step)
+                    
+                    
+                case .error(let errorMessage):
+                    Text(errorMessage)
                 }
-                .font(.headline)
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(canSubmit ? Color.blue : Color.gray.opacity(0.3))
-                )
             }
-            .disabled(!canSubmit)
-            .animation(.easeInOut, value: canSubmit)
-        }
-        .padding()
+            
+            
+            Section("Date") {
+                DatePicker(
+                    "Transaction Date",
+                    selection: $selectedDate,
+                    displayedComponents: [.date]
+                )
+                .datePickerStyle(.compact)
+            }
+            
+            
+            Section{
+                Button(action: submit) {
+                    HStack {
+                        Image(systemName: "checkmark.circle.fill")
+                        Text("Add to Portfolio")
+                    }
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(canSubmit
+                                  ? (transactionType == "Buy" ? Color.green : Color.red)
+                                  : Color.gray.opacity(0.3)
+                                 )
+                    )
+                }
+                .disabled(!canSubmit)
+                .animation(.easeInOut, value: canSubmit)
+            }
+            
+        }        
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
         .onAppear {
             if !symbol.isEmpty {
                 selectedSymbol = symbol
-                            
+                
             } else {
                 selectedSymbol = portfolioSymbol.first ?? ""
                 selectedPortfolioModel = portfolioModel.first(where: {$0.ticker == selectedSymbol})
-
+                
             }
             Task{
                 await psxVM.getTickerPrice(ticker: selectedSymbol)
@@ -842,10 +848,17 @@ struct VolumeSheet: View {
     
     private func submit() {
         if let value = Int(volume.trimmingCharacters(in: .whitespaces)), value > 0 {
-            onSubmit(value,selectedDate,selectedSymbol,selectedPortfolioModel)
+            onSubmit(value,selectedDate,selectedSymbol,selectedPortfolioModel,tickerPrice)
             dismiss()
             dismiss()
         }
+    }
+}
+
+struct PriveView: View {
+    let price: Double
+    var body: some View{
+        
     }
 }
 
@@ -883,80 +896,88 @@ struct DetailSheet: View {
                 .fill(Color.secondary.opacity(0.3))
                 .frame(width: 40, height: 5)
                 .padding(.top, 8)
-
+            
             VStack(spacing: 6) {
                 Text("Explore \(selectedSymbol)")
                     .font(.title3)
                     .fontWeight(.semibold)
-
+                
                 Text("Select what you would like to view")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
-
+            
             VStack(spacing: 14) {
-
-                HStack(spacing: 16) {
-                    Image(systemName: "chart.bar.fill")
-                        .font(.title3)
-                        .foregroundColor(.blue)
-                        .frame(width: 42, height: 42)
-                        .background(Color.blue.opacity(0.15))
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text("Ticker details")
-                            .font(.headline)
-
-                        Text("View price info, market data and metrics")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-
-                    Spacer()
-
-                    Image(systemName: "chevron.right")
-                        .foregroundColor(.secondary)
-                }
-                .padding()
-                .background(Color(.secondarySystemBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 14))
-                .onTapGesture {
+                
+                Button {
                     onDetailTap()
-                }
-
-
-                HStack(spacing: 16) {
-                    Image(systemName: "arrow.left.arrow.right")
-                        .font(.title3)
-                        .foregroundColor(.green)
-                        .frame(width: 42, height: 42)
-                        .background(Color.green.opacity(0.15))
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text("Transaction history")
-                            .font(.headline)
-
-                        Text("View past trades and activity")
-                            .font(.caption)
+                } label:{
+                    HStack(spacing: 16) {
+                        Image(systemName: "chart.bar.fill")
+                            .font(.title3)
+                            .foregroundColor(.blue)
+                            .frame(width: 42, height: 42)
+                            .background(Color.blue.opacity(0.15))
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                        
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Ticker details")
+                                .font(.headline)
+                            
+                            Text("View price info, market data and metrics")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        Spacer()
+                        
+                        Image(systemName: "chevron.right")
                             .foregroundColor(.secondary)
                     }
-
-                    Spacer()
-
-                    Image(systemName: "chevron.right")
-                        .foregroundColor(.secondary)
+                    .padding()
+                    .background(Color(.secondarySystemBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
                 }
-                .padding()
-                .background(Color(.secondarySystemBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 14))
-                .onTapGesture {
+                .buttonStyle(SpringButtonStyle())
+                
+                
+                
+                Button {
                     onTransactionTap()
+                } label: {
+                    HStack(spacing: 16) {
+                        Image(systemName: "arrow.left.arrow.right")
+                            .font(.title3)
+                            .foregroundColor(.green)
+                            .frame(width: 42, height: 42)
+                            .background(Color.green.opacity(0.15))
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                        
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Transaction history")
+                                .font(.headline)
+                            
+                            Text("View past trades and activity")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        Spacer()
+                        
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.secondary)
+                    }
+                    .padding()
+                    .background(Color(.secondarySystemBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    
                 }
-
+                .buttonStyle(SpringButtonStyle())
+                
+                
+                
             }
-
+            
             Spacer()
         }
         .padding()

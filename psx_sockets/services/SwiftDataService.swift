@@ -79,16 +79,28 @@ class SwiftDataService{
         }
     }
     
-    func addTransaction(portfolio:PortfolioModel,volume:Int,date:String){
+    func addTransaction(portfolio:PortfolioModel,volume:Int,date:String,price:Double){
         guard let modelContext = modelContext else {
                 return
             }
         
-        let transaction = Transaction(ticker: portfolio.ticker, volume: volume, date: date,portfolio: portfolio)
+        let transaction = Transaction(ticker: portfolio.ticker, volume: volume, date: date,portfolio: portfolio,price: price)
         
         modelContext.insert(transaction)
         
         saveData()
+        
+    }
+    
+    func getSingleTicker(ticker:String) -> PortfolioModel? {
+        
+        guard let modelContext = modelContext else { return nil}
+        
+        let descriptor = FetchDescriptor<PortfolioModel>(
+            predicate: #Predicate { $0.ticker == ticker }
+        )
+        
+        return try? modelContext.fetch(descriptor).first
         
     }
     
