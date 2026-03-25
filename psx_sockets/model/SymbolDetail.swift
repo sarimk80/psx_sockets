@@ -15,7 +15,7 @@ struct SymbolDetail: Codable {
 }
 
 // MARK: - DataClass
-struct SymbolDataClass: Codable {
+struct SymbolDataClass: Codable,Hashable,Identifiable {
     let market, st, symbol: String
     let price, change, changePercent: Double
     let volume, trades: Int
@@ -25,6 +25,8 @@ struct SymbolDataClass: Codable {
     let sectorName:String?
     let portfolioVolume:Int?
     let fullName:String?
+    
+    var id:String { symbol }
 }
 
 

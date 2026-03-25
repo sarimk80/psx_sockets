@@ -221,7 +221,7 @@ struct IndexView: View {
                     let result = data[index]
                     
                     Button {
-                        appNavigation.tickerNavigation.append(TickerDetailRoute.indexDetail(indexName: StringToIndexEnum(indexName: result.data.symbol)))
+                        appNavigation.tickerNavigation.append(TickerDetailRoute.indexDetail(indexName: StringToIndexEnum(indexName: result.data.symbol),tickerDetail: result.data))
                     } label: {
                         TickerView(tickerDetail: result.data)
                             .frame(height: 200)
