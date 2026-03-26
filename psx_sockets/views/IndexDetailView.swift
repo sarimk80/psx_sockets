@@ -31,11 +31,21 @@ struct IndexDetailView: View {
 
                     // MARK: - Chart Skeleton
                     Section {
-                        ChartLoading()
+                        HStack(alignment: .top, spacing: 8) {
+                            
+                            BigCardSkeleton()
+                                .frame(maxWidth: .infinity)
+                            
+                            VStack(spacing: 8) {
+                                SmallCardSkeleton()
+                                SmallCardSkeleton()
+                            }
                             .frame(maxWidth: .infinity)
-                            .listRowInsets(EdgeInsets(top: 16, leading: 16, bottom: 16, trailing: 16))
-                            .listRowSeparator(.hidden)
+                        }
                     }
+                    .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
+                    .listRowBackground(Color(.secondarySystemBackground))
+                    .listRowSeparator(.hidden)
 
                     // MARK: - Rows Skeleton
                     Section {
@@ -134,19 +144,31 @@ struct IndexDetailView: View {
             await psxViewModel.getIndexSymbolAllDetail(indexEnum: indexName)
         }
         .sheet(isPresented: $showSectorSheet) {
-            chartView
+            SheetContainer(title: "Sector Breakdown", content: {
+                chartView
+            }, onClose: {
+                showSectorSheet = false
+            })
                 .presentationDetents([indexName == .kse_100 ? .large : .medium])
                 .presentationBackground(Color(.systemBackground))
                 .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $showIndexSheet) {
-            statsView
+            SheetContainer(title: "Index Overview", content: {
+                statsView
+            }, onClose: {
+                showIndexSheet = false
+            })
                 .presentationDetents([.height(260)])
                 .presentationBackground(Color(.systemBackground))
                 .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $showLineSheet) {
-            lineView
+            SheetContainer(title: "Performance Trend", content: {
+                lineView
+            }, onClose: {
+                showLineSheet = false
+            })
                 .presentationDetents([.medium])
                 .presentationBackground(Color(.systemBackground))
                 .presentationDragIndicator(.visible)
@@ -161,20 +183,7 @@ struct IndexDetailView: View {
             
         case .loaded(_, let groupData):
             VStack(alignment: .center, spacing: 16) {
-                HStack{
-                    Button {
-                        showSectorSheet.toggle()
-                    } label: {
-                        Image(systemName: "xmark.circle")
-                            .fontWeight(.medium)
-                    }
-                    .buttonBorderShape(.circle)
-                    .buttonStyle(.glass)
-                    
-                    Spacer()
-
-                    
-                }
+                
                 Chart(groupData, id: \.sectorName) { result in
                     SectorMark(
                         angle: .value("Count", result.sectorStockCount),
@@ -213,19 +222,6 @@ struct IndexDetailView: View {
     private var statsView: some View{
         VStack(alignment:.leading){
             
-            Button {
-                showIndexSheet.toggle()
-            } label: {
-                Image(systemName: "xmark.circle")
-                    .fontWeight(.medium)
-            }
-            .buttonBorderShape(.circle)
-            .buttonStyle(.glass)
-            .padding(.horizontal,8)
-            .padding(.top,8)
-            
-            Spacer()
-            
             TickerView(tickerDetail: tickerDetail)
                 .frame(height: 200)
                 .background(Color(.secondarySystemBackground))
@@ -244,8 +240,7 @@ struct IndexDetailView: View {
         case .loading:
             ProgressView()
         case .loaded(let data):
-            KlineChartView(kline: data, scrollPosition: $scrollPosition)
-                .padding()
+            KlineChartView(kline: data, scrollPosition: $scrollPosition,showVolume: false)
         case .error(let errorMessage):
             Text(errorMessage)
         }
@@ -309,3 +304,87 @@ struct SmallCard: View {
     }
 }
 
+
+
+struct SheetContainer<Content: View>: View {
+    let title: String
+    let content: Content
+    let onClose: () -> Void
+    
+    init(title: String,
+         @ViewBuilder content: () -> Content,
+         onClose: @escaping () -> Void) {
+        self.title = title
+        self.content = content()
+        self.onClose = onClose
+    }
+
+    var body: some View {
+        VStack(spacing: 16) {
+            HStack {
+                Text(title).font(.headline)
+                Spacer()
+                Button(action: onClose) {
+                    Image(systemName: "xmark")
+                        .padding(8)
+                        .background(.ultraThinMaterial)
+                        .clipShape(Circle())
+                }
+            }
+
+            content
+        }
+        .padding()
+    }
+}
+
+
+struct BigCardSkeleton: View {
+    var body: some View {
+        VStack(spacing: 16) {
+            
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.gray.opacity(0.3))
+                .frame(width: 40, height: 40)
+            
+            RoundedRectangle(cornerRadius: 6)
+                .fill(Color.gray.opacity(0.3))
+                .frame(width: 140, height: 16)
+            
+            RoundedRectangle(cornerRadius: 6)
+                .fill(Color.gray.opacity(0.25))
+                .frame(width: 110, height: 14)
+        }
+        .frame(maxWidth: .infinity, minHeight: 150)
+        .background(Color(.systemBackground))
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.04), radius: 6, x: 0, y: 3)
+    }
+}
+
+struct SmallCardSkeleton: View {
+    var body: some View {
+        HStack(spacing: 12) {
+            
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color.gray.opacity(0.3))
+                .frame(width: 36, height: 36)
+            
+            VStack(alignment: .leading, spacing: 8) {
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 100, height: 14)
+                
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(Color.gray.opacity(0.25))
+                    .frame(width: 80, height: 12)
+            }
+            
+            Spacer()
+        }
+        .padding(12)
+        .background(Color(.systemBackground))
+        .cornerRadius(14)
+        .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 2)
+    }
+}

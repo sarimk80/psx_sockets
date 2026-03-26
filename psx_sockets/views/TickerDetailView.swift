@@ -331,6 +331,7 @@ struct KlineChart: View {
 struct KlineChartView: View {
     var kline: KLineRequestModel
     @Binding var scrollPosition: Date
+    var showVolume:Bool = true
     
     @State private var selectedDate: Date? = nil
     @State private var selectedPrice: Double? = nil
@@ -456,7 +457,7 @@ struct KlineChartView: View {
             .frame(height: 250)
             
             // Volume chart (30% height)
-            Chart {
+            if (showVolume) {  Chart {
                 ForEach(kline.data.indices, id: \.self) { indexes in
                     let data = kline.data[indexes]
                     BarMark(x: .value("Date", data.adjustedDate), y: .value("Volume", data.volume))
@@ -489,6 +490,7 @@ struct KlineChartView: View {
             .chartScrollableAxes(.horizontal)
             .chartScrollPosition(x: $scrollPosition)
             .frame(height: 110)
+            }
         }
     }
 }

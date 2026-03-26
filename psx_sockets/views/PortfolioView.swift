@@ -51,8 +51,8 @@ struct PortfolioView: View {
                     switch destination {
                     case .openVolumeSheet(let symbol, _):
                         
-                        VolumeSheet(symbol: symbol, onSubmit: { volume, date,selectedSymbol, _ , _ in
-                            portfolioVM.addTicker(ticker: selectedSymbol,volume: volume,data: date.ISO8601Format())
+                        VolumeSheet(symbol: symbol, onSubmit: { volume, date,selectedSymbol, _ , price in
+                            portfolioVM.addTicker(ticker: selectedSymbol,volume: volume,data: date.ISO8601Format(),price: price)
                             Task {
                                 try await Task.sleep(for: .seconds(2))
                                 await psxVM.getPortfolioSymbolDetail()

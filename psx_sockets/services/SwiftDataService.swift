@@ -49,14 +49,14 @@ class SwiftDataService{
          
     }
     
-    func addTicker(ticker:String,volume:Int,date:String)  {
+    func addTicker(ticker:String,volume:Int,date:String,price:Double)  {
         guard let modelContext = modelContext else {
                 return
             }
        
         let portfolioModel = PortfolioModel(ticker: ticker, isSelected: true,volume: volume)
         
-        let transaction = Transaction(ticker: ticker, volume: volume, date: date, portfolio: portfolioModel)
+        let transaction = Transaction(ticker: ticker, volume: volume, date: date, portfolio: portfolioModel,price: price)
         
         portfolioModel.transaction.append(transaction)
         

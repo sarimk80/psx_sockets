@@ -553,27 +553,7 @@ class PsxViewModel{
         let transaction = singlePortfolio?.transaction ?? []
         
         
-        
-        
-//        var symbolResponse:[SymbolDetail] =  []
-//        symbolResponse.reserveCapacity(transaction.count)
-        
         do{
-//            for result in transaction{
-//                let response = try await psxServiceManager.getSymbolDetail(market: "REG", symbol: result.ticker)
-//                
-//                let dataWithSector = SymbolDataClass(market: response.data.market, st: response.data.st, symbol: response.data.symbol, price: response.data.price, change: response.data.change, changePercent: response.data.changePercent, volume: response.data.volume, trades: response.data.trades, value: response.data.value, high: response.data.high, low: response.data.low, bid: response.data.bid, ask: response.data.ask, bidVol: response.data.bidVol, askVol: response.data.askVol, timestamp: response.timestamp,sectorName: nil,portfolioVolume: result.volume,fullName: "")
-//                
-//                symbolResponse.append(  SymbolDetail(
-//                        success: response.success,
-//                        data: dataWithSector,
-//                        timestamp: response.timestamp
-//                        )
-//                  )
-//                
-//                try await Task.sleep(for: .milliseconds(600))
-//               
-//            }
             
             transactionDetailEnum = .loaded(portfolioTickers: transaction)
             
