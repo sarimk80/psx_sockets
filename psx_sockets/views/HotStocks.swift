@@ -213,13 +213,13 @@ struct HotStocks: View {
                     StocksListView(sectorStock: result)
                         .listRowInsets(EdgeInsets(top: 12, leading: 0, bottom: 12, trailing: 0))
                         .listRowSeparator(.hidden)
-                        .listRowBackground(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color(.systemBackground))
-                                .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
-                                .padding(.horizontal, 4)
-                                .padding(.vertical, 4)
-                        )
+//                        .listRowBackground(
+//                            RoundedRectangle(cornerRadius: 12)
+//                                .fill(Color(.systemBackground))
+//                                .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+//                                .padding(.horizontal, 4)
+//                                .padding(.vertical, 4)
+//                        )
                 }
             }
             
@@ -373,7 +373,7 @@ struct StocksListView: View {
         .padding(.vertical, 12)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
+                .fill(Color(.tertiarySystemBackground))
         )
     }
     

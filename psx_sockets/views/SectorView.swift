@@ -151,7 +151,7 @@ struct SectorListView: View {
         .padding(.horizontal, 12)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.systemBackground))
+                .fill(Color(.tertiarySystemBackground))
         )
     }
     // Color based on sector name (optional)
@@ -257,7 +257,7 @@ struct SectorCardView: View {
         .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.systemBackground))
+                .fill(Color(.tertiarySystemBackground))
                 .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 2)
         )
     }

@@ -15,6 +15,11 @@ struct ContentView: View {
     @Environment(WebSocketManager.self) private var webSocketManager
     @State private var selectedTab: Int = 0
     
+    init() {
+        UIPageControl.appearance().currentPageIndicatorTintColor = .clear
+        UIPageControl.appearance().pageIndicatorTintColor = .clear
+    }
+    
     var body: some View {
         List {
             VStack(spacing: 20) {
@@ -209,7 +214,7 @@ struct IndexView: View {
         switch psxViewModel.indicesEnums {
         case .initial, .loading:
             TickerView(tickerDetail: SymbolDataClass.mock)
-                .background(Color(.systemBackground))
+                .background(Color(.tertiarySystemBackground))
                 .clipShape(RoundedRectangle(cornerRadius: 20))
                 .padding(.horizontal, 16)
                 .redacted(reason: .placeholder)
@@ -225,7 +230,7 @@ struct IndexView: View {
                     } label: {
                         TickerView(tickerDetail: result.data)
                             .frame(height: 200)
-                            .background(Color(.systemBackground))
+                            .background(Color(.tertiarySystemBackground))
                             .clipShape(RoundedRectangle(cornerRadius: 20))
                             .padding(.horizontal, 16)
                             .tag(index)
@@ -237,7 +242,7 @@ struct IndexView: View {
                 }
             }
             .tabViewStyle(.page)
-            .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .never))
+            .indexViewStyle(.page(backgroundDisplayMode: .never))
             .frame(height: 200)
         case .error(let errorMessage):
             ErrorView(message: errorMessage)
@@ -497,7 +502,7 @@ struct DividendCard: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
+                .fill(Color(.tertiarySystemBackground))
                 .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
         )
     }
@@ -575,7 +580,7 @@ struct EpsCard: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
+                .fill(Color(.tertiarySystemBackground))
                 .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
         )
     }
@@ -655,7 +660,7 @@ struct ProfitLossCard: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
+                .fill(Color(.tertiarySystemBackground))
                 .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
         )
     }
@@ -716,7 +721,7 @@ struct MeetingCard: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
+                .fill(Color(.tertiarySystemBackground))
                 .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
         )
     }

@@ -57,7 +57,7 @@ struct CorporationDetailView: View {
                 .padding()
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(.systemBackground))
+                        .fill(Color(.tertiarySystemBackground))
                         .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
                 )
                 .padding(.horizontal)
@@ -181,7 +181,7 @@ struct CorporationDetailCard: View {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
+                .fill(Color(.tertiarySystemBackground))
                 .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
         )
     }

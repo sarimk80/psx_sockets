@@ -30,7 +30,7 @@ struct TransactionDetailView: View {
                             .listRowSeparator(.hidden)
                             .listRowBackground(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color(.systemBackground))
+                                    .fill(Color(.tertiarySystemBackground))
                                     .padding(.horizontal, 2)
                                     .padding(.vertical, 4)
                             )

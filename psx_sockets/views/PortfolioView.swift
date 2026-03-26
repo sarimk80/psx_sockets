@@ -228,13 +228,13 @@ struct PortfolioView: View {
                                 selectedSymbol = SheetSymbol(symbol: result.data.symbol)
                             }
                             .listRowInsets(EdgeInsets(top: 12, leading: 4, bottom: 12, trailing: 4))
-                            .listRowSeparator(.hidden)
-                            .listRowBackground(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color(.systemBackground))
-                                    .padding(.horizontal, 2)
-                                    .padding(.vertical, 4)
-                            )
+                            //.listRowSeparator(.hidden)
+//                            .listRowBackground(
+//                                RoundedRectangle(cornerRadius: 12)
+//                                    .fill(Color(.secondarySystemBackground))
+//                                    .padding(.horizontal, 2)
+//                                    .padding(.vertical, 4)
+//                            )
                         
                     }
                 }
@@ -261,7 +261,7 @@ struct PortfolioView: View {
                                 .foregroundStyle(Color.accentColor)
                                 .background(
                                     Capsule()
-                                        .fill(Color.accentColor.opacity(0.1))
+                                        .fill(Color.accentColor.opacity(0.2))
                                 )
                         }
                         .buttonStyle(SpringButtonStyle())
@@ -432,11 +432,11 @@ struct PortfolioStockRow: View {
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 4)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
-                .shadow(color: .black.opacity(0.03), radius: 4, x: 0, y: 2)
-        )
+//        .background(
+//            RoundedRectangle(cornerRadius: 12)
+//                .fill(Color(.systemGroupedBackground))
+//                //.shadow(color: .black.opacity(0.03), radius: 4, x: 0, y: 2)
+//        )
         .padding(.horizontal, 4)
     }
 }
@@ -578,7 +578,7 @@ struct SymbolListView: View {
                     .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                     .listRowBackground(
                         RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(.systemBackground))
+                            .fill(Color(.tertiarySystemBackground))
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
                     )

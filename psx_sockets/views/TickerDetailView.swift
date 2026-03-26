@@ -25,10 +25,12 @@ struct TickerDetailView: View {
                 switch psxViewModel.symbolDetailEnum {
                 case .initial, .loading:
                     TickerView(tickerDetail: SymbolDataClass.mock)
+                        //.background(Color(.tertiarySystemBackground))
                         .redacted(reason: .placeholder)
                     
                 case .loaded(let portfolioTickers):
                     TickerView(tickerDetail: portfolioTickers.data)
+                        //.background(Color(.tertiarySystemBackground))
                         .padding(.horizontal, 16)
                 case .error(let errorMessage):
                     ErrorView(message: errorMessage)
@@ -413,7 +415,7 @@ struct KlineChartView: View {
                         }
                         .padding(.horizontal, 16)
                         .padding(.vertical, 4)
-                        .background(.white.opacity(0.6), in: RoundedRectangle(cornerRadius: 6))
+                        .background(Color(.systemGray6).opacity(0.6), in: RoundedRectangle(cornerRadius: 6))
                     }
                 }
             }

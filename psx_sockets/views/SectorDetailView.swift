@@ -26,9 +26,7 @@ struct SectorDetailView: View {
                 ForEach(0..<5) { _ in
                     PortfolioStockRow(result: SymbolDataClass.mock)
                         .redacted(reason: .placeholder)
-                        .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                        .listRowBackground(Color.clear)
                 }
                 
             case .loaded(let portfolioTickers):
@@ -37,9 +35,7 @@ struct SectorDetailView: View {
                         .onTapGesture {
                             appNavigation.push(route: SectorNavigationEnums.tickerDetail(symbol: result.data.symbol))
                         }
-                        .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                        .listRowBackground(Color.clear)
                 }
             case .error(let errorMessage):
                 ErrorView(message: errorMessage)

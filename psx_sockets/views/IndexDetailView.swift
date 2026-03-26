@@ -44,7 +44,7 @@ struct IndexDetailView: View {
                         }
                     }
                     .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
-                    .listRowBackground(Color(.secondarySystemBackground))
+                    .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
 
                     // MARK: - Rows Skeleton
@@ -56,7 +56,7 @@ struct IndexDetailView: View {
                                 .listRowSeparator(.hidden)
                                 .listRowBackground(
                                     RoundedRectangle(cornerRadius: 12)
-                                        .fill(Color(.systemBackground))
+                                        .fill(Color(.tertiarySystemBackground))
                                         .padding(.horizontal, 8)
                                         .padding(.vertical, 4)
                                 )
@@ -93,7 +93,7 @@ struct IndexDetailView: View {
                         
                     }
                     .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
-                    .listRowBackground(Color(.secondarySystemBackground))
+                    .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
 
                     // MARK: - Real Rows
@@ -101,6 +101,10 @@ struct IndexDetailView: View {
                         ForEach(psxViewModel.indexSymbols, id: \.data.symbol) { result in
                             PortfolioStockRow(result: result.data)
                                 .contentShape(Rectangle())
+                                .background(
+                                    RoundedRectangle(cornerRadius : 16)
+                                        .fill(Color(.tertiarySystemBackground))
+                                )
                                 .onTapGesture {
                                     appNavigation.tickerNavigation.append(
                                         TickerDetailRoute.tickerDetail(symbol: result.data.symbol)
@@ -264,7 +268,7 @@ struct BigCard: View {
                 .foregroundColor(.gray)
         }
         .frame(maxWidth: .infinity, minHeight: 150)
-        .background(Color(.systemBackground))
+        .background(Color(.tertiarySystemBackground))
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.04), radius: 6, x: 0, y: 3)
     }
@@ -298,7 +302,7 @@ struct SmallCard: View {
             Spacer()
         }
         .padding(12)
-        .background(Color(.systemBackground))
+        .background(Color(.tertiarySystemBackground))
         .cornerRadius(14)
         .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 2)
     }
