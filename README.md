@@ -29,6 +29,49 @@ Built on top of [psx-terminal](https://github.com/mumtazkahn/psx-terminal) for A
 ## 📱 Screenshots
 
 <p align="center">
+  <img src="https://github.com/user-attachments/assets/5f92af5c-7920-4fa1-b21b-51f2ce0d047a" width="250" />
+  <img src="https://github.com/user-attachments/assets/54b3e479-6e0f-4876-98cc-23d99af33687" width="250" />
+  
+  <img src="https://github.com/user-attachments/assets/2fa841ec-594b-46f5-a0a5-d0467479514b" width="250" />
+  <img src="https://github.com/user-attachments/assets/ee7c166a-1914-4e78-af89-ed200cf62b09" width="250" />
+  
+  <img src="https://github.com/user-attachments/assets/7bb2ceee-6c86-4fb3-a5b9-17b25281903b" width="250" />
+  <img src="https://github.com/user-attachments/assets/5a8fabf1-4047-4a0b-b711-5ddd425d97eb" width="250" />
+</p>
+
+
+
+<p align="center">
+    <img src="https://github.com/user-attachments/assets/c2b82faf-a21a-4d70-bc19-04b7efc5b38e" width="250" />
+
+  <img src="https://github.com/user-attachments/assets/89b657ef-88f2-4c0e-b581-44aacb16ab6d" width="250" />
+
+  <img src="https://github.com/user-attachments/assets/d0a338a5-9fcf-453d-915d-2459a8fb2cd9" width="250" />
+</p>
+
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/6e329282-3bbb-490c-9a24-850c5259fc9b" width="250" />
+  <img src="https://github.com/user-attachments/assets/8e2f1208-bc58-4b26-96d1-f8fa11a284bf" width="250" />
+  
+  <img src="https://github.com/user-attachments/assets/a798b0db-e812-4d7b-ab56-b96dc1d01df3" width="250" />
+  <img src="https://github.com/user-attachments/assets/e8e13279-80a0-4cc3-beec-3f3b49928ccd" width="250" />
+  
+  <img src="https://github.com/user-attachments/assets/eb1c8fc6-9e72-4259-bc15-f52e1f051342" width="250" />
+  <img src="https://github.com/user-attachments/assets/eb175600-3c13-4b20-bcc6-d15e35089b98" width="250" />
+</p>
+
+<p align="center">
+    <img src="https://github.com/user-attachments/assets/47d600b7-64d1-4911-a5fb-1ff6403f8835" width="250" />
+
+  <img src="https://github.com/user-attachments/assets/abfd1c96-ded3-4eda-a26d-d3efc306bc97" width="250" />
+
+</p>
+
+
+
+
+<p align="center">
   <img src="https://github.com/user-attachments/assets/c07ad966-4f71-46fa-ae53-c6a51a467017" width="250" />
   <img src="https://github.com/user-attachments/assets/1dd8430a-bf34-4f14-b68f-62cc6a172930" width="250" />
   
