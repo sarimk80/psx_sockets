@@ -57,7 +57,7 @@ struct PortfolioView: View {
                                 try await Task.sleep(for: .seconds(2))
                                 await psxVM.getPortfolioSymbolDetail()
                             }
-                        }, portfolioModel: portfolioVM.savedTicker,psxVM: psxVM)
+                        }, portfolioModel: portfolioVM.savedTicker,psxVM: psxVM,isOnlyVolume: false)
                         
                         
                         
@@ -299,7 +299,7 @@ struct PortfolioView: View {
                     await psxVM.getPortfolioSymbolDetail()
                 }
             }, portfolioModel: portfolioVM.savedTicker,
-                        psxVM: psxVM)
+                        psxVM: psxVM,isOnlyVolume: true)
         })
         .sheet(item: $selectedSymbol, content: { result in
             DetailSheet(selectedSymbol: result.symbol) {
@@ -651,6 +651,7 @@ struct VolumeSheet: View {
     let onSubmit: (Int,Date,String,PortfolioModel?,Double) -> Void
     let portfolioModel:[PortfolioModel]
     let psxVM: PsxViewModel
+    let isOnlyVolume: Bool
     
     @State private var volume: String = ""
     @State private var tickerPrice:Double = 0.0
@@ -681,10 +682,44 @@ struct VolumeSheet: View {
         
         Form {
             
-            Section {
-                Text(symbol.isEmpty ? selectedSymbol : symbol)
+            if isOnlyVolume {
+                Section {
+                    HStack {
+                        
+                        // Close button (left aligned)
+                        Button {
+                            dismiss()
+                        } label: {
+                            Image(systemName: "xmark")
+                                .font(.headline)
+                                .frame(width: 32, height: 32)
+                                .background(.ultraThinMaterial, in: Circle())
+                        }
+                        .glassEffect()
+                        
+                        Spacer()
+                        
+                        // Title (perfectly centered)
+                        VStack(spacing: 2) {
+                            Text(transactionType == "Buy" ? "Buy Shares" : "Sell Shares")
+                                .font(.headline)
+                            
+                            Text(selectedSymbol)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        
+                        Spacer()
+                        
+                        // Spacer to balance close button width
+                        Color.clear
+                            .frame(width: 32, height: 32)
+                    }
+                }
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
             }
-            
+
             if symbol.isEmpty {
                 
                 Section("Trades") {
@@ -699,8 +734,6 @@ struct VolumeSheet: View {
                         }
                     }
                 }
-                
-                
             }
             
             
@@ -814,8 +847,12 @@ struct VolumeSheet: View {
                 .disabled(!canSubmit)
                 .animation(.easeInOut, value: canSubmit)
             }
+            .listRowBackground(Color(.clear))
             
-        }        
+        }
+        .navigationTitle(transactionType == "Buy" ? "Buy Shares" : "Sell Shares")
+        .navigationSubtitle(selectedSymbol)
+        .navigationBarTitleDisplayMode(.inline)
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
         .onAppear {
