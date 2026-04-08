@@ -14,6 +14,7 @@ struct ContentView: View {
     @Environment(AppNavigation.self) private var appNavigation
     @Environment(WebSocketManager.self) private var webSocketManager
     @State private var selectedTab: Int = 0
+    @State private var marketStatus: String = "OPN"
     
     init() {
         UIPageControl.appearance().currentPageIndicatorTintColor = .clear
@@ -25,7 +26,7 @@ struct ContentView: View {
             VStack(spacing: 20) {
                 
                 // Index Carousel Section
-                IndexView(psxWebSocket: webSocketManager, selectedTab: $selectedTab,appNavigation: appNavigation,psxViewModel: psxViewModel)
+                IndexView(psxWebSocket: webSocketManager, selectedTab: $selectedTab,appNavigation: appNavigation,psxViewModel: psxViewModel,marketStatus: $marketStatus)
                 
                 // Custom Page Indicators
                 HStack(spacing: 8) {
@@ -52,6 +53,7 @@ struct ContentView: View {
         }
         .listStyle(.plain)
         .navigationTitle("Market Overview")
+        .navigationSubtitle("\(marketStatusString(market: marketStatus)) • \(Date.now.formatted(date:.abbreviated,time:.omitted))")
         .navigationBarTitleDisplayMode(.large)
         .background(Color(.systemGroupedBackground))
         .task {
@@ -208,6 +210,7 @@ struct IndexView: View {
     @Binding var selectedTab: Int
     var appNavigation: AppNavigation
     var psxViewModel: PsxViewModel
+    @Binding var marketStatus: String
     
     var body: some View {
         
@@ -241,6 +244,9 @@ struct IndexView: View {
                     
                 }
             }
+            .onAppear(perform: {
+                marketStatus = data.first?.data.st ?? "Open"
+            })
             .tabViewStyle(.page)
             .indexViewStyle(.page(backgroundDisplayMode: .never))
             .frame(height: 200)
@@ -263,7 +269,7 @@ struct TickerView: View {
                         .fontWeight(.bold)
                         .foregroundColor(.primary)
                     
-                    Text(tickerDetail?.st ?? "")
+                    Text(marketStatusString(market: tickerDetail?.st ?? ""))
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .padding(.horizontal, 8)

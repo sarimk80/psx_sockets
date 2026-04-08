@@ -30,6 +30,13 @@ enum SheetNavigationEnums:Hashable{
     case openVolumeSheet(symbol:String,volume:Int)
 }
 
+enum MoreNavigationEnums: Hashable{
+    case searchView
+    case tickerDetail(symbol:String)
+    // Comment for now
+    //case privacyPolicy
+}
+
 @MainActor
 @Observable
 class AppNavigation{
@@ -88,5 +95,23 @@ class SheetNavigation{
     
     func root(){
         sheetNav = NavigationPath()
+    }
+}
+
+@MainActor
+@Observable
+class MoreNavigation{
+    var moreNav = NavigationPath()
+    
+    func push(route:MoreNavigationEnums){
+        moreNav.append(route)
+    }
+    
+    func pop(){
+        moreNav.removeLast()
+    }
+    
+    func root(){
+        moreNav = NavigationPath()
     }
 }

@@ -10,9 +10,8 @@ import SwiftUI
 struct SearchView: View {
     
     @State private var psxViewModel = PsxViewModel(psxServiceManager: PsxServiceManager())
-    
-    @Environment(AppNavigation.self) private var appNavigation
-    
+    @Binding var moreNavigation: MoreNavigation
+        
     var body: some View {
         VStack{
             switch psxViewModel.psxSearch {
@@ -24,7 +23,7 @@ struct SearchView: View {
                 List(data,id: \.self){result in
                     Text(result)
                         .onTapGesture {
-                            appNavigation.tickerNavigation.append(TickerDetailRoute.tickerDetail(symbol: result))
+                            moreNavigation.push(route: .tickerDetail(symbol: result))
                         }
                     
                 }
@@ -34,7 +33,7 @@ struct SearchView: View {
                 List(allSymbol,id: \.self){result in
                     Text(result)
                         .onTapGesture {
-                            appNavigation.tickerNavigation.append(TickerDetailRoute.tickerDetail(symbol: result))
+                            moreNavigation.push(route: .tickerDetail(symbol: result))
                         }
                     
                 }
@@ -55,6 +54,3 @@ struct SearchView: View {
     }
 }
 
-#Preview {
-    SearchView()
-}

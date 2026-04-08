@@ -159,3 +159,23 @@ struct SpringButtonStyle: ButtonStyle {
     }
 }
 
+func marketStatusString(market:String) -> String {
+    switch market {
+    case "PRE":
+        "Pre-market"
+    case "OPN":
+        "Open"
+    case "SUS":
+        "Suspended"
+    case "CLS":
+        "Closed"
+    default:
+        "Open"
+    }
+}
+
+
+//PRE    Pre-market
+//OPN    Open
+//SUS    Suspended
+//CLS    Closed

@@ -424,11 +424,11 @@ struct KlineChartView: View {
                 AxisMarks(values: .automatic) { value in
                     AxisGridLine()
                     AxisTick()
-                    AxisValueLabel {
-                        if let date = value.as(Date.self) {
-                            Text(date, format: .dateTime.month(.abbreviated).day())
-                        }
-                    }
+//                    AxisValueLabel {
+//                        if let date = value.as(Date.self) {
+//                            Text(date, format: .dateTime.month(.abbreviated).day())
+//                        }
+//                    }
                 }
             }
             .chartYAxis {
@@ -466,6 +466,7 @@ struct KlineChartView: View {
                         .foregroundStyle(.gray.opacity(0.3))
                 }
             }
+            .chartXVisibleDomain(length: 60 * 24 * 60 * 60)
             .chartYScale(domain: minVolume * Int(0.98) ... maxVolume * Int(1.2))
             .chartYAxis {
                 AxisMarks(position: .automatic) { value in

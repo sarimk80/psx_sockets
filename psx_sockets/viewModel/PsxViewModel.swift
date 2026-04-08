@@ -106,7 +106,7 @@ enum SectorSymbolEnum{
     case loaded(portfolioTickers : [SymbolDetail])
     case error(errorMessage:String)
 }
-enum TickerPriceEnum {
+enum TickerPriceEnum : Equatable {
     case initial
     case loading
     case loaded(tickerPrice:TickerPriceModel)
@@ -117,6 +117,13 @@ enum TransactionDetailEnums {
     case initial
     case loading
     case loaded(portfolioTickers : [Transaction])
+    case error(errorMessage:String)
+}
+
+enum ClearDataEnums{
+    case initial
+    case loading
+    case loaded
     case error(errorMessage:String)
 }
 
@@ -140,6 +147,7 @@ class PsxViewModel{
     var sectorSymbolEnum : SectorSymbolEnum = .initial
     var tickerPriceEnum : TickerPriceEnum = .initial
     var transactionDetailEnum : TransactionDetailEnums = .initial
+    var clearDataEnum : ClearDataEnums = .initial
     
     // for Index Detail symbols
     
@@ -561,6 +569,13 @@ class PsxViewModel{
             print(error.localizedDescription)
             transactionDetailEnum = .error(errorMessage: error.localizedDescription)
         }
+    }
+    
+    func clearAllData()async{
+        clearDataEnum = .loading
+        swiftDataService.clearAllData()
+        clearDataEnum  = .loaded
+        
     }
 
 }

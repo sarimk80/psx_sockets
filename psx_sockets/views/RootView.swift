@@ -11,6 +11,7 @@ struct RootView: View {
     @State private var appNavigation:AppNavigation = AppNavigation()
     @State private var portfolioNavigation:PortfolioNavigation = PortfolioNavigation()
     @State private var sectorNavigation:SectorNavigation = SectorNavigation()
+    @State private var moreNavigation: MoreNavigation = MoreNavigation()
     
     @State private var selectedTab = 0
     
@@ -56,7 +57,7 @@ struct RootView: View {
                 
             }
             
-            Tab("Stocks",systemImage: "chart.bar.fill",value: 2){
+            Tab("Stocks",systemImage: "chart.bar",value: 2){
 
                 NavigationStack(path: $appNavigation.tickerNavigation) {
                     HotStocks()
@@ -94,21 +95,19 @@ struct RootView: View {
             
             
             
-            Tab("",systemImage: "magnifyingglass",value: 4, role: .search){
+            Tab("More",systemImage: "ellipsis.rectangle.fill",value: 4){
                 
-                NavigationStack(path:$appNavigation.tickerNavigation) {
-                    SearchView()
-                        .environment(appNavigation)
-                        .navigationDestination(for: TickerDetailRoute.self) { route in
+                NavigationStack(path:$moreNavigation.moreNav) {
+                    MoreView()
+                        .environment(moreNavigation)
+                        .navigationDestination(for: MoreNavigationEnums.self) { route in
                             switch route{
+                            case .searchView:
+                                SearchView(moreNavigation: $moreNavigation)
                             case .tickerDetail(let symbol):
                                 TickerDetailView(symbol: symbol)
-                            case .corporationDetail(sectionName: let sectionName, data: let data):
-                                CorporationDetailView(corporation: sectionName, data: data)
-
-                            case .indexDetail(indexName: let _):
-                                Text("")
                             }
+                            
                         }
                 }
                 

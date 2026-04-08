@@ -116,4 +116,18 @@ class SwiftDataService{
         }
     }
     
+    func clearAllData(){
+        guard let modelContext = modelContext else {
+                return
+            }
+        do{
+            try modelContext.delete(model: PortfolioModel.self)
+            saveData()
+
+
+        }catch(let error){
+            print(error.localizedDescription)
+        }
+    }
+    
 }

@@ -7,13 +7,13 @@
 
 import Foundation
 
-struct TickerPriceModel:Codable {
+struct TickerPriceModel:Codable, Equatable {
     let status: Int
-        let message: String
-        let data: [TickerPriceData]
+    let message: String
+    let data: [TickerPriceData]
 }
 
-struct TickerPriceData: Codable {
+struct TickerPriceData: Codable, Equatable {
     let date: Int
     let price: Double
     let volume: Int

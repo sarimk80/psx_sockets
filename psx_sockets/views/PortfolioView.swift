@@ -164,111 +164,109 @@ struct PortfolioView: View {
                 
             case .loaded(let data):
                 
-                
-                var totalStockCount:Int{
-                    data.map{$0.data.portfolioVolume ?? 0}.reduce(0, +)
-                }
-                
-                var totalStockValue:Double{
-                    let stockPrice = data.map{$0.data.price}
-                    let stockCount = data.map{$0.data.portfolioVolume ?? 0}
+                if (data.isEmpty){
+                    emptyPortfolioView
+                }else{
                     
-                    let totalStockWorth = zip(stockPrice, stockCount).map{Double($1) * $0}
-                        .reduce(0, +)
                     
-                    return totalStockWorth
-                }
-                
-                Section {
-                    Chart(data, id: \.data.symbol) { result in
-                        SectorMark(
-                            angle: .value("Holdings", result.data.portfolioVolume ?? 1),
-                            innerRadius: .ratio(0.75),
-                            angularInset: 1
-                        )
-                        .foregroundStyle(by: .value("Symbol", result.data.symbol))
+                    var totalStockCount:Int{
+                        data.map{$0.data.portfolioVolume ?? 0}.reduce(0, +)
                     }
-                    .chartBackground { chartProxy in
-                        GeometryReader { geometry in
-                            if let plotFrame = chartProxy.plotFrame {
-                                let frame = geometry[plotFrame]
-                                
-                                VStack(spacing: 4) {
-                                    Text("Holdings")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
+                    
+                    var totalStockValue:Double{
+                        let stockPrice = data.map{$0.data.price}
+                        let stockCount = data.map{$0.data.portfolioVolume ?? 0}
+                        
+                        let totalStockWorth = zip(stockPrice, stockCount).map{Double($1) * $0}
+                            .reduce(0, +)
+                        
+                        return totalStockWorth
+                    }
+                    
+                    Section {
+                        Chart(data, id: \.data.symbol) { result in
+                            SectorMark(
+                                angle: .value("Holdings", result.data.portfolioVolume ?? 1),
+                                innerRadius: .ratio(0.75),
+                                angularInset: 1
+                            )
+                            .foregroundStyle(by: .value("Symbol", result.data.symbol))
+                        }
+                        .chartBackground { chartProxy in
+                            GeometryReader { geometry in
+                                if let plotFrame = chartProxy.plotFrame {
+                                    let frame = geometry[plotFrame]
                                     
-                                    Text(totalStockValue, format: .currency(code: "PKR"))
-                                        .font(.headline)
-                                        .fontWeight(.semibold)
-                                        .lineLimit(1)
-                                        .minimumScaleFactor(0.7)
-                                        .contentTransition(.numericText())
-                                    
-                                    Text("\(totalStockCount) Stocks")
-                                        .font(.caption2)
-                                        .foregroundStyle(.secondary)
+                                    VStack(spacing: 4) {
+                                        Text("Holdings")
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                        
+                                        Text(totalStockValue, format: .currency(code: "PKR"))
+                                            .font(.headline)
+                                            .fontWeight(.semibold)
+                                            .lineLimit(1)
+                                            .minimumScaleFactor(0.7)
+                                            .contentTransition(.numericText())
+                                        
+                                        Text("\(totalStockCount) Stocks")
+                                            .font(.caption2)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    .position(x: frame.midX, y: frame.midY)
                                 }
-                                .position(x: frame.midX, y: frame.midY)
                             }
                         }
+                        .frame(height: 250)
+                        
                     }
-                    .frame(height: 250)
                     
-                }
-                
-                
-                // portfolio list
-                Section {
-                    ForEach(data, id: \.data.symbol) { result in
-                        PortfolioStockRow(result: result.data,isShowHolding: true)
-                        
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                selectedSymbol = SheetSymbol(symbol: result.data.symbol)
-                            }
-                            .listRowInsets(EdgeInsets(top: 12, leading: 4, bottom: 12, trailing: 4))
-                            //.listRowSeparator(.hidden)
-//                            .listRowBackground(
-//                                RoundedRectangle(cornerRadius: 12)
-//                                    .fill(Color(.secondarySystemBackground))
-//                                    .padding(.horizontal, 2)
-//                                    .padding(.vertical, 4)
-//                            )
-                        
-                    }
-                }
-                header: {
-                    HStack{
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Your Holdings")
-                                .font(.headline)
-                                .foregroundColor(.primary)
+                    
+                    // portfolio list
+                    Section {
+                        ForEach(data, id: \.data.symbol) { result in
+                            PortfolioStockRow(result: result.data,isShowHolding: true)
                             
-                            Text("\(data.count) stocks")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    selectedSymbol = SheetSymbol(symbol: result.data.symbol)
+                                }
+                                .listRowInsets(EdgeInsets(top: 12, leading: 4, bottom: 12, trailing: 4))
+                            
                         }
-                        Spacer()
-                        
-                        Button {
-                            showVolumeSheet.toggle()
-                        } label: {
-                            Label("Add Transaction", systemImage: "plus")
-                                .font(.subheadline.weight(.semibold))
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 8)
-                                .foregroundStyle(Color.accentColor)
-                                .background(
-                                    Capsule()
-                                        .fill(Color.accentColor.opacity(0.2))
-                                )
-                        }
-                        .buttonStyle(SpringButtonStyle())
                     }
-                    
-                    
-                    .padding(.bottom, 8)
+                    header: {
+                        HStack{
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Your Holdings")
+                                    .font(.headline)
+                                    .foregroundColor(.primary)
+                                
+                                Text("\(data.count) stocks")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            Spacer()
+                            
+                            Button {
+                                showVolumeSheet.toggle()
+                            } label: {
+                                Label("Add Transaction", systemImage: "plus")
+                                    .font(.subheadline.weight(.semibold))
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 8)
+                                    .foregroundStyle(Color.accentColor)
+                                    .background(
+                                        Capsule()
+                                            .fill(Color.accentColor.opacity(0.2))
+                                    )
+                            }
+                            .buttonStyle(SpringButtonStyle())
+                        }
+                        
+                        
+                        .padding(.bottom, 8)
+                    }
                 }
             case .error(let errorMessage):
                 ErrorView(message: errorMessage)
@@ -752,7 +750,7 @@ struct VolumeSheet: View {
                         .font(.caption)
                         .foregroundStyle(.red)
                 }
-                
+                                
                 HStack(spacing: 12) {
                     QuickAddButton(value: 10, current: $volume)
                     QuickAddButton(value: 50, current: $volume)
@@ -799,10 +797,9 @@ struct VolumeSheet: View {
                         .keyboardType(.decimalPad)
                         .textFieldStyle(.roundedBorder)
                         .focused($isPriceFocus)
-                        .onAppear{
-                            tickerPrice = price
-                        }
-                    
+//                        .onAppear{
+//                            tickerPrice = price
+//                        }
                         .animation(.easeInOut(duration: 0.2), value: isPriceFocus)
                         .animation(.spring(response: 0.25), value: volume.isEmpty)
                     
@@ -874,6 +871,11 @@ struct VolumeSheet: View {
                 selectedPortfolioModel = portfolioModel.first(where: {$0.ticker == newValue})
             }
         }
+        .onChange(of: psxVM.tickerPriceEnum) { _, newValue in
+            if case .loaded(let tickerResponse) = newValue {
+                tickerPrice = tickerResponse.data.first?.price ?? 0.0
+            }
+        }
     }
     
     private var canSubmit: Bool {
@@ -916,6 +918,7 @@ struct QuickAddButton: View {
                 )
                 .foregroundColor(.blue)
         }
+        .buttonStyle(.plain)
     }
 }
 
