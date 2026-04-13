@@ -73,6 +73,16 @@ struct MoreView: View {
                             openURL(url)
                         }
                     }
+                    
+//                    Divider()
+//
+//                    MoreRow(
+//                        icon: "globe",
+//                        iconColor: .purple,
+//                        title: "Change Language",
+//                        subtitle: "Remove all cached data",
+//                    ) {
+//                    }
 
                     Divider()
 
@@ -85,6 +95,8 @@ struct MoreView: View {
                     ) {
                         showConfirmDialog.toggle()
                     }
+                    
+                    
                 }
 
                 // MARK: - App Info Footer
@@ -115,18 +127,6 @@ struct MoreView: View {
         }, message: {
             Text("All cached data will be permanently removed. This action cannot be undone.")
         })
-//        .confirmationDialog("Clear All Data", isPresented: $showConfirmDialog, actions: {
-//            Button("Clear All Data", role: .destructive) {
-//                Task{
-//                   //await psxVM.clearAllData()
-//                }
-//            }
-//            Button("Cancel", role: .cancel) {
-//                showConfirmDialog.toggle()
-//            }
-//        }, message: {
-//            Text("All cached data will be permanently removed. This action cannot be undone.")
-//        })
         .background(Color(.systemGroupedBackground))
         .navigationTitle("More")
         

@@ -113,7 +113,7 @@ struct RootView: View {
                 
             }
         }
-        .tabBarMinimizeBehavior(.automatic)
+        .tabBarMinimizeBehavior(.onScrollDown)
     }
 }
 

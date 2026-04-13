@@ -749,7 +749,7 @@ struct SectionHeader: View {
                 .font(.headline)
                 .foregroundColor(color)
             
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.headline)
                 .fontWeight(.semibold)
                 .foregroundColor(.primary)

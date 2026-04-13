@@ -1,0 +1,1209 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "" : {
+
+    },
+    "%@ • %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ • %2$@"
+          }
+        }
+      }
+    },
+    "%@%.2f%%" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@%2$.2f%%"
+          }
+        }
+      }
+    },
+    "%lld" : {
+
+    },
+    "%lld announcements" : {
+
+    },
+    "%lld shares @ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld shares @ %2$@"
+          }
+        }
+      }
+    },
+    "%lld stocks" : {
+
+    },
+    "%lld Stocks" : {
+
+    },
+    "×" : {
+
+    },
+    "Add" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "شامل کریں"
+          }
+        }
+      }
+    },
+    "Add First Stock" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "پہلا اسٹاک شامل کریں"
+          }
+        }
+      }
+    },
+    "Add stocks to your portfolio to track their performance" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "کارکردگی کو ٹریک کرنے کے لیے اپنے پورٹ فولیو میں اسٹاک شامل کریں"
+          }
+        }
+      }
+    },
+    "Add Symbol" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سمبل شامل کریں"
+          }
+        }
+      }
+    },
+    "Add Symbols" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سمبلز شامل کریں"
+          }
+        }
+      }
+    },
+    "Add to Portfolio" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "پورٹ فولیو میں شامل کریں"
+          }
+        }
+      }
+    },
+    "Add Transaction" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ٹرانزیکشن شامل کریں"
+          }
+        }
+      }
+    },
+    "Adjust price" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قیمت ایڈجسٹ کریں"
+          }
+        }
+      }
+    },
+    "After Tax:" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ٹیکس کے بعد:"
+          }
+        }
+      }
+    },
+    "All cached data will be permanently removed. This action cannot be undone." : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تمام کیش ڈیٹا مستقل طور پر حذف کر دیا جائے گا۔ یہ عمل واپس نہیں لیا جا سکتا۔"
+          }
+        }
+      }
+    },
+    "Amount" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "رقم"
+          }
+        }
+      }
+    },
+    "Annual" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سالانہ"
+          }
+        }
+      }
+    },
+    "Average" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اوسط"
+          }
+        }
+      }
+    },
+    "Before Tax:" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ٹیکس سے پہلے:"
+          }
+        }
+      }
+    },
+    "Board Meeting" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بورڈ میٹنگ"
+          }
+        }
+      }
+    },
+    "Buy" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خریدیں"
+          }
+        }
+      }
+    },
+    "Buy Shares" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "شیئرز خریدیں"
+          }
+        }
+      }
+    },
+    "Cancel" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "منسوخ کریں"
+          }
+        }
+      }
+    },
+    "Clear All Data" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تمام ڈیٹا صاف کریں"
+          }
+        }
+      }
+    },
+    "Clear data" : {
+
+    },
+    "Company Details" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "کمپنی کی تفصیلات"
+          }
+        }
+      }
+    },
+    "Count" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تعداد"
+          }
+        }
+      }
+    },
+    "Current Price" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "موجودہ قیمت"
+          }
+        }
+      }
+    },
+    "Current Trend" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "موجودہ رجحان"
+          }
+        }
+      }
+    },
+    "date" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تاریخ"
+          }
+        }
+      }
+    },
+    "Date" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تاریخ"
+          }
+        }
+      }
+    },
+    "Delete" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حذف کریں"
+          }
+        }
+      }
+    },
+    "Detail View" : {
+
+    },
+    "Dividend" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ڈیویڈنڈ"
+          }
+        }
+      }
+    },
+    "Dividend:" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ڈیویڈنڈ:"
+          }
+        }
+      }
+    },
+    "Dividends" : {
+
+    },
+    "Done" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مکمل"
+          }
+        }
+      }
+    },
+    "Enter number of shares" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "شیئرز کی تعداد درج کریں"
+          }
+        }
+      }
+    },
+    "Enter Price" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قیمت درج کریں"
+          }
+        }
+      }
+    },
+    "Enter ticker here..." : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "یہاں ٹکر درج کریں..."
+          }
+        }
+      }
+    },
+    "EPS" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ای پی ایس"
+          }
+        }
+      }
+    },
+    "EPS:" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ای پی ایس:"
+          }
+        }
+      }
+    },
+    "Error Loading Data" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ڈیٹا لوڈ کرنے میں خرابی"
+          }
+        }
+      }
+    },
+    "Error Loading Symbols" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سمبلز لوڈ کرنے میں خرابی"
+          }
+        }
+      }
+    },
+    "Explore %@" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دریافت کریں"
+          }
+        }
+      }
+    },
+    "Financial Dashboard" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مالیاتی ڈیش بورڈ"
+          }
+        }
+      }
+    },
+    "GrossProfit" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مجموعی منافع"
+          }
+        }
+      }
+    },
+    "Growth" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ترقی"
+          }
+        }
+      }
+    },
+    "H: %@" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "H:"
+          }
+        }
+      }
+    },
+    "hello" : {
+
+    },
+    "Hello world %@" : {
+
+    },
+    "hello_world" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hello, World"
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ہیلو_دنیا"
+          }
+        }
+      }
+    },
+    "Hello, World!" : {
+
+    },
+    "Holdings" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ہولڈنگز"
+          }
+        }
+      }
+    },
+    "Home" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ہوم"
+          }
+        }
+      }
+    },
+    "Home detail" : {
+
+    },
+    "Hot Stocks" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ہاٹ اسٹاکس"
+          }
+        }
+      }
+    },
+    "Index Activity" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "انڈیکس سرگرمی"
+          }
+        }
+      }
+    },
+    "Indices" : {
+
+    },
+    "Indistries" : {
+
+    },
+    "KSE30" : {
+
+    },
+    "KSE100" : {
+
+    },
+    "L: %@" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L:"
+          }
+        }
+      }
+    },
+    "Loading market data..." : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مارکیٹ ڈیٹا لوڈ ہو رہا ہے..."
+          }
+        }
+      }
+    },
+    "Loading symbols..." : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سمبلز لوڈ ہو رہے ہیں..."
+          }
+        }
+      }
+    },
+    "LTP: %@" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ایل ٹی پی:"
+          }
+        }
+      }
+    },
+    "Market Overview" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مارکیٹ کا جائزہ"
+          }
+        }
+      }
+    },
+    "Market Performance" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مارکیٹ کارکردگی"
+          }
+        }
+      }
+    },
+    "Market Sectors" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مارکیٹ سیکٹرز"
+          }
+        }
+      }
+    },
+    "Meeting" : {
+
+    },
+    "Meeting:" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "میٹنگ"
+          }
+        }
+      }
+    },
+    "Menu" : {
+
+    },
+    "More" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مزید"
+          }
+        }
+      }
+    },
+    "NetProfit" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خالص منافع"
+          }
+        }
+      }
+    },
+    "No %@ Data" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "کا کوئی ڈیٹا نہیں"
+          }
+        }
+      }
+    },
+    "No %@ found" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نہیں ملا"
+          }
+        }
+      }
+    },
+    "No Sector Data" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "کوئی سیکٹر ڈیٹا نہیں"
+          }
+        }
+      }
+    },
+    "No Stocks in Portfolio" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "پورٹ فولیو میں کوئی اسٹاک نہیں"
+          }
+        }
+      }
+    },
+    "No Symbols Found" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "کوئی سمبل نہیں ملا"
+          }
+        }
+      }
+    },
+    "O: %@" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ":O"
+          }
+        }
+      }
+    },
+    "Payment Date" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ادائیگی کی تاریخ"
+          }
+        }
+      }
+    },
+    "Payment:" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ادائیگی"
+          }
+        }
+      }
+    },
+    "Period:" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مدت"
+          }
+        }
+      }
+    },
+    "Picker" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "منتخب کنندہ"
+          }
+        }
+      }
+    },
+    "Portfolio" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "پورٹ فولیو"
+          }
+        }
+      }
+    },
+    "Portfolio detail" : {
+
+    },
+    "Price" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قیمت"
+          }
+        }
+      }
+    },
+    "Profit/loss" : {
+
+    },
+    "Profit/Loss After Tax" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ٹیکس کے بعد منافع/نقصان"
+          }
+        }
+      }
+    },
+    "Profit/Loss Before Tax" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ٹیکس سے پہلے منافع/نقصان"
+          }
+        }
+      }
+    },
+    "Quantity:" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مقدار:"
+          }
+        }
+      }
+    },
+    "Quaterly" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سہ ماہی"
+          }
+        }
+      }
+    },
+    "Search" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تلاش کریں"
+          }
+        }
+      }
+    },
+    "Search for stock symbols..." : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اسٹاک سمبلز تلاش کریں..."
+          }
+        }
+      }
+    },
+    "Searching..." : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تلاش جاری ہے..."
+          }
+        }
+      }
+    },
+    "Sector" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سیکٹر"
+          }
+        }
+      }
+    },
+    "Sector information is currently unavailable" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سیکٹر کی معلومات فی الحال دستیاب نہیں"
+          }
+        }
+      }
+    },
+    "Sectors" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سیکٹرز"
+          }
+        }
+      }
+    },
+    "Select Symbol" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سمبل منتخب کریں"
+          }
+        }
+      }
+    },
+    "Select what you would like to view" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "منتخب کریں کہ آپ کیا دیکھنا چاہتے ہیں"
+          }
+        }
+      }
+    },
+    "Sell" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فروخت کریں"
+          }
+        }
+      }
+    },
+    "Sell Shares" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "شیئرز فروخت کریں"
+          }
+        }
+      }
+    },
+    "Settings detail" : {
+
+    },
+    "Status" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حالت"
+          }
+        }
+      }
+    },
+    "Stock Symbol" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اسٹاک سمبل"
+          }
+        }
+      }
+    },
+    "Stocks" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اسٹاکس"
+          }
+        }
+      }
+    },
+    "Stokistan" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اسٹوکستان"
+          }
+        }
+      }
+    },
+    "Symbol" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سمبل"
+          }
+        }
+      }
+    },
+    "There are currently no %@ announcements" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فی الحال %1$@ کے کوئی اعلانات نہیں ہیں"
+          }
+        }
+      }
+    },
+    "There are currently no %@ in the market" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فی الحال مارکیٹ میں کوئی %1$@ نہیں ہیں"
+          }
+        }
+      }
+    },
+    "Ticker details" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ٹکر کی تفصیلات"
+          }
+        }
+      }
+    },
+    "Top performing stocks in the market" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مارکیٹ کے بہترین کارکردگی والے اسٹاکس"
+          }
+        }
+      }
+    },
+    "Total: %@" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "کل:"
+          }
+        }
+      }
+    },
+    "Trades" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ٹریڈز"
+          }
+        }
+      }
+    },
+    "Transaction Date" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ٹرانزیکشن کی تاریخ"
+          }
+        }
+      }
+    },
+    "Transaction history" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ٹرانزیکشن ہسٹری"
+          }
+        }
+      }
+    },
+    "Try Again" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دوبارہ کوشش کریں"
+          }
+        }
+      }
+    },
+    "Try searching for a different symbol" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "کسی مختلف سمبل کی تلاش کریں"
+          }
+        }
+      }
+    },
+    "Type" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قسم"
+          }
+        }
+      }
+    },
+    "Unable to Load" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لوڈ کرنے سے قاصر"
+          }
+        }
+      }
+    },
+    "Unable to Load Chart" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "چارٹ لوڈ کرنے سے قاصر"
+          }
+        }
+      }
+    },
+    "Unable to load data" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ڈیٹا لوڈ کرنے سے قاصر"
+          }
+        }
+      }
+    },
+    "Version 1.0.0" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ورژن"
+          }
+        }
+      }
+    },
+    "View all" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سب دیکھیں"
+          }
+        }
+      }
+    },
+    "View past trades and activity" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "گزشتہ ٹریڈز اور سرگرمیاں دیکھیں"
+          }
+        }
+      }
+    },
+    "View price info, market data and metrics" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قیمت، مارکیٹ ڈیٹا اور میٹرکس دیکھیں"
+          }
+        }
+      }
+    },
+    "Vol: %@" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حجم:"
+          }
+        }
+      }
+    },
+    "Volume" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حجم"
+          }
+        }
+      }
+    },
+    "Volume cannot exceed available shares" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حجم دستیاب شیئرز سے زیادہ نہیں ہو سکتا"
+          }
+        }
+      }
+    },
+    "Year" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سال"
+          }
+        }
+      }
+    },
+    "Your Holdings" : {
+      "localizations" : {
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "آپ کی ہولڈنگز"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.1"
+}
