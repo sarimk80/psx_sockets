@@ -68,7 +68,7 @@ struct RootView: View {
                                 TickerDetailView(symbol: symbol)
                             case .corporationDetail(let corporation,let data):
                                 CorporationDetailView(corporation: corporation, data: data)
-                            case .indexDetail(indexName: let indexName):
+                            case .indexDetail(indexName: _):
                                 Text("")
                             }
                         }

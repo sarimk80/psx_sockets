@@ -570,7 +570,7 @@ struct SymbolListView: View {
                                 await psxViewModel.getPortfolioSymbolDetail()
                             }
                             onDismiss()
-                        }
+                        },
                     )
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
@@ -638,6 +638,7 @@ struct SymbolRow: View {
                         .fill((isInPortfolio ? Color.red : Color.blue).opacity(0.1))
                 )
             }
+            
         }
         .padding(.vertical, 8)
         .contentShape(Rectangle())

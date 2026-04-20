@@ -12,9 +12,20 @@ enum CompanyOverviews {
     case CompanyFinancials
 }
 
-enum ChartSelector{
+enum ChartSelector{ 
     case Annual
     case Quaterly
+}
+
+enum ChartTimeFrame : String,CaseIterable,Identifiable{
+    case M1 = "1m"
+    case M5 = "5m"
+    case M15 = "15m"
+    case H1 = "1h"
+    case H4 = "4h"
+    case D1 = "1d"
+    
+    var id: String { rawValue }
 }
 
 

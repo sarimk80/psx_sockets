@@ -179,3 +179,24 @@ func marketStatusString(market:String) -> String {
 //OPN    Open
 //SUS    Suspended
 //CLS    Closed
+
+func visibleDomainLenght(chartTimeFrame:ChartTimeFrame) -> TimeInterval {
+    let minute: TimeInterval = 60
+    let hour = 60 * minute
+    let day = 24 * hour
+    
+    switch chartTimeFrame {
+    case .M1:
+        return hour              // 60 candles (1h)
+    case .M5:
+        return 5 * hour          // 5h
+    case .M15:
+        return 15 * hour         // 15h
+    case .H1:
+        return day               // 1 day
+    case .H4:
+        return 4 * day           // 4 days
+    case .D1:
+        return 60 * day          // 60 days
+    }
+}

@@ -335,10 +335,14 @@ struct SheetContainer<Content: View>: View {
                         .clipShape(Circle())
                 }
             }
+            Divider()
 
             content
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding()
+        .padding(.horizontal)
+        .padding(.top, 20)
+        .padding(.bottom, 20)
     }
 }
 

@@ -17,6 +17,7 @@ struct TickerDetailView: View {
     @Environment(WebSocketManager.self) private var psxSocketManager
     
     @State private var companyOverview = CompanyOverviews.CompanyDetail
+    @State private var chartTimeFrame = ChartTimeFrame.D1
     
     var body: some View {
         ScrollView {
@@ -36,9 +37,18 @@ struct TickerDetailView: View {
                     ErrorView(message: errorMessage)
                 }
                 
+//                Picker("TimeFrame", selection: $chartTimeFrame) {
+//                    ForEach(ChartTimeFrame.allCases) { value in
+//                        Text(value.rawValue)
+//                            .tag(value)
+//                    }
+//                }
+//                .pickerStyle(.segmented)
+//                .padding(.horizontal, 16)
+                
                 
                 // Chart Section
-                KlineChart(psxSocketManager: psxSocketManager, psxViewModel: psxViewModel)
+                KlineChart(psxSocketManager: psxSocketManager, psxViewModel: psxViewModel,chartTimeFrame: chartTimeFrame)
                     .padding(.horizontal, 16)
                     .padding(.vertical,8)
                     .background(
@@ -77,6 +87,11 @@ struct TickerDetailView: View {
             await psxViewModel.getKlineSymbol(symbol: symbol, timeFrame: "1d")
             await psxViewModel.getSymbolOverview(symbol: symbol)
             await psxViewModel.getSymbolDetail(ticker: symbol)
+        }
+        .onChange(of: chartTimeFrame) { _, newValue in
+            Task{
+                await psxViewModel.getKlineSymbol(symbol: symbol, timeFrame: newValue.rawValue)
+            }
         }
     }
 }
@@ -313,6 +328,7 @@ struct ErrorView: View {
 struct KlineChart: View {
     var psxSocketManager: WebSocketManager
     var psxViewModel: PsxViewModel
+    var chartTimeFrame: ChartTimeFrame = .D1
     
     @State private var scrollPosition: Date = .now
     
@@ -322,7 +338,7 @@ struct KlineChart: View {
             case .initial, .loading:
                 LineChartLoading()
             case .loaded(let kline):
-                KlineChartView(kline: kline, scrollPosition: $scrollPosition)
+                KlineChartView(kline: kline, scrollPosition: $scrollPosition,chartTimeFrame: chartTimeFrame)
             case .error(let errorMessage):
                 ErrorView(message: errorMessage)
             }
@@ -334,6 +350,7 @@ struct KlineChartView: View {
     var kline: KLineRequestModel
     @Binding var scrollPosition: Date
     var showVolume:Bool = true
+    var chartTimeFrame: ChartTimeFrame = .D1
     
     @State private var selectedDate: Date? = nil
     @State private var selectedPrice: Double? = nil
@@ -348,7 +365,7 @@ struct KlineChartView: View {
         let maxVolume = volumes.max() ?? 1
         let minVolume = volumes.min() ?? 1
         let averageClose = kline.data.reduce(0.0) {$0 + $1.close } / Double(kline.data.count)
-        let lastDate = kline.data.last?.adjustedDate ?? .now
+        //let lastDate = kline.data.last?.adjustedDate ?? .now
         
         let isPositive = closes.last ?? 0.0 >= open.last ?? 0.0
         let lineColor:Color = isPositive ? .green : .red
@@ -442,7 +459,7 @@ struct KlineChartView: View {
                     }
                 }
             }
-            .chartXVisibleDomain(length: 60 * 24 * 60 * 60)
+            .chartXVisibleDomain(length: visibleDomainLenght(chartTimeFrame: chartTimeFrame))
             .chartScrollPosition(x: $scrollPosition)
             .chartScrollableAxes(.horizontal)
             .chartGesture({ proxy in
@@ -466,7 +483,7 @@ struct KlineChartView: View {
                         .foregroundStyle(.gray.opacity(0.3))
                 }
             }
-            .chartXVisibleDomain(length: 60 * 24 * 60 * 60)
+            .chartXVisibleDomain(length: visibleDomainLenght(chartTimeFrame: chartTimeFrame))
             .chartYScale(domain: minVolume * Int(0.98) ... maxVolume * Int(1.2))
             .chartYAxis {
                 AxisMarks(position: .automatic) { value in
