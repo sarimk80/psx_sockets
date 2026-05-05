@@ -10,6 +10,59 @@ import Foundation
 
 class PsxServiceManager:PsxProtocol{
     
+    func getAllEtf() async throws -> EtfModel {
+        
+        guard let url = URL(string: "https://sarim-pix.hf.space/get_all_etfs")
+        else {  throw URLError(.badURL) }
+              
+        let (data,response) = try await URLSession.shared.data(from: url)
+              
+              
+        guard let response = response as? HTTPURLResponse,
+                    
+                response.statusCode == 200
+                      
+                      
+        else { throw URLError(.badServerResponse) }
+              
+        if let string = String(data: data, encoding: .utf8) {
+                    print(string)
+                }
+              
+              
+        let decodeResponse = try JSONDecoder().decode(EtfModel.self, from: data)
+              
+        return decodeResponse
+        
+    }
+    
+    func getAllIndex() async throws -> [SymbolDetail] {
+        
+        guard let url = URL(string: "https://sarim-pix.hf.space/indices")
+        else {  throw URLError(.badURL) }
+              
+        let (data,response) = try await URLSession.shared.data(from: url)
+              
+              
+        guard let response = response as? HTTPURLResponse,
+                    
+                response.statusCode == 200
+                      
+                      
+        else { throw URLError(.badServerResponse) }
+              
+        if let string = String(data: data, encoding: .utf8) {
+                    print(string)
+                }
+              
+              
+        let decodeResponse = try JSONDecoder().decode([SymbolDetail].self, from: data)
+              
+        return decodeResponse
+        
+    }
+    
+    
     func getTickerPrice(symbol: String) async throws -> TickerPriceModel {
         guard let url = URL(string: "https://sarim-pix.hf.space/get_index_price/\(symbol)")
         else {  throw URLError(.badURL) }
@@ -280,7 +333,7 @@ class PsxServiceManager:PsxProtocol{
     }
     
     func getSymbolDetail(market:String,symbol:String)async throws -> SymbolDetail {
-        guard let url = URL(string: "https://psxterminal.com/api/ticks/\(market)/\(symbol)")
+        guard let url = URL(string: "https://sarim-pix.hf.space/ticker/\(symbol)")
         else {  throw URLError(.badURL) }
               
         let (data,response) = try await URLSession.shared.data(from: url)

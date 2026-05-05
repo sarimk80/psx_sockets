@@ -106,6 +106,12 @@ struct RootView: View {
                                 SearchView(moreNavigation: $moreNavigation)
                             case .tickerDetail(let symbol):
                                 TickerDetailView(symbol: symbol)
+                            case .etfView:
+                                EtfView()
+                                    .environment(moreNavigation)
+                            case .etfDetailView(let indexName,let etf):
+                                EtfDetailView(etf: etf)
+                                    .environment(moreNavigation)
                             }
                             
                         }

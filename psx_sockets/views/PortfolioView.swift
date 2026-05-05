@@ -742,6 +742,7 @@ struct VolumeSheet: View {
                     .keyboardType(.numberPad)
                     .textFieldStyle(.roundedBorder)
                     .focused($isFocused)
+                    .monospacedDigit()
                     .animation(.easeInOut(duration: 0.2), value: isFocused)
                     .animation(.spring(response: 0.25), value: volume.isEmpty)
                 
@@ -798,6 +799,7 @@ struct VolumeSheet: View {
                         .keyboardType(.decimalPad)
                         .textFieldStyle(.roundedBorder)
                         .focused($isPriceFocus)
+                        .monospacedDigit()
 //                        .onAppear{
 //                            tickerPrice = price
 //                        }

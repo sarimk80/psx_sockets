@@ -311,7 +311,7 @@ struct TickerView: View {
                 
                 Spacer()
                 
-                if tickerDetail?.market != "IDX" {
+                if tickerDetail?.st == "T+2" {
                     VStack(alignment: .trailing, spacing: 6) {
                         priceMetric(title: "Bid", value: Double(tickerDetail?.bid ?? 0))
                         priceMetric(title: "Bid Vol", value: Double(tickerDetail?.bidVol ?? 0))

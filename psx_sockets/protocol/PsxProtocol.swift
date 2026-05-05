@@ -35,4 +35,8 @@ protocol PsxProtocol{
     func getSymbolOverview(symbol:String) async throws -> SymbolOverview
     
     func getTickerPrice(symbol:String) async throws -> TickerPriceModel
+    
+    func getAllIndex() async throws -> [SymbolDetail]
+    
+    func getAllEtf() async throws -> EtfModel
 }

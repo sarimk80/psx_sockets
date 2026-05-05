@@ -4,6 +4,9 @@
     "" : {
 
     },
+    "%.2f%%" : {
+
+    },
     "%@ • %@" : {
       "localizations" : {
         "en" : {
@@ -169,6 +172,9 @@
         }
       }
     },
+    "ASK" : {
+
+    },
     "Average" : {
       "localizations" : {
         "ur" : {
@@ -189,6 +195,9 @@
         }
       }
     },
+    "BID" : {
+
+    },
     "Board Meeting" : {
       "localizations" : {
         "ur" : {
@@ -198,6 +207,9 @@
           }
         }
       }
+    },
+    "Browse all available ETFs listed on PSX. ETFs are grouped by category to help you explore fund types easily." : {
+
     },
     "Buy" : {
       "localizations" : {
@@ -418,6 +430,12 @@
         }
       }
     },
+    "ETFs" : {
+
+    },
+    "Exchange Traded Funds" : {
+
+    },
     "Explore %@" : {
       "localizations" : {
         "ur" : {
@@ -437,6 +455,9 @@
           }
         }
       }
+    },
+    "Fund Size: %@" : {
+
     },
     "GrossProfit" : {
       "localizations" : {
@@ -469,6 +490,9 @@
       }
     },
     "hello" : {
+
+    },
+    "Hello" : {
 
     },
     "Hello world %@" : {
@@ -589,6 +613,9 @@
         }
       }
     },
+    "Market Cap: %@" : {
+
+    },
     "Market Overview" : {
       "localizations" : {
         "ur" : {
@@ -644,6 +671,9 @@
           }
         }
       }
+    },
+    "N/A" : {
+
     },
     "NetProfit" : {
       "localizations" : {
@@ -821,6 +851,9 @@
         }
       }
     },
+    "Retry" : {
+
+    },
     "Search" : {
       "localizations" : {
         "ur" : {
@@ -922,6 +955,12 @@
       }
     },
     "Settings detail" : {
+
+    },
+    "Something went wrong" : {
+
+    },
+    "SPREAD" : {
 
     },
     "Status" : {
@@ -1183,6 +1222,9 @@
           }
         }
       }
+    },
+    "Weight" : {
+
     },
     "Year" : {
       "localizations" : {

@@ -28,6 +28,17 @@ struct MoreView: View {
                         moreNavigation.push(route: .searchView)
                     }
                     
+                    Divider()
+                    
+                    MoreRow(
+                        icon: "square.stack.3d.up",
+                        iconColor: .blue,
+                        title: "ETF's",
+                        subtitle: "Find stocks, sectors & more"
+                    ) {
+                        moreNavigation.push(route: .etfView)
+                    }
+                    
 //                    Divider()
 //                    
 //                    MoreRow(

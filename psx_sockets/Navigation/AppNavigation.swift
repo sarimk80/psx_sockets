@@ -33,6 +33,8 @@ enum SheetNavigationEnums:Hashable{
 enum MoreNavigationEnums: Hashable{
     case searchView
     case tickerDetail(symbol:String)
+    case etfView
+    case etfDetailView(indexName:String,etf:Etf)
     // Comment for now
     //case privacyPolicy
 }
