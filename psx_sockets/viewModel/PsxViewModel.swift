@@ -106,6 +106,33 @@ enum SectorSymbolEnum{
     case loaded(portfolioTickers : [SymbolDetail])
     case error(errorMessage:String)
 }
+enum TickerPriceEnum : Equatable {
+    case initial
+    case loading
+    case loaded(tickerPrice:TickerPriceModel)
+    case error(errorMessage:String)
+}
+
+enum TransactionDetailEnums {
+    case initial
+    case loading
+    case loaded(portfolioTickers : [Transaction])
+    case error(errorMessage:String)
+}
+
+enum ClearDataEnums{
+    case initial
+    case loading
+    case loaded
+    case error(errorMessage:String)
+}
+
+enum AllEtfEnums {
+    case initial
+    case loading
+    case loaded(etfModel:EtfModel,groupData:[String : [Etf]])
+    case error(errorMessage:String)
+}
 
 
 @MainActor
@@ -125,6 +152,10 @@ class PsxViewModel{
     var portfolioEnums: PortfolioTickerEnum = .initial
     var symbolDetailEnum : SymbolDetailEnums = .initial
     var sectorSymbolEnum : SectorSymbolEnum = .initial
+    var tickerPriceEnum : TickerPriceEnum = .initial
+    var transactionDetailEnum : TransactionDetailEnums = .initial
+    var clearDataEnum : ClearDataEnums = .initial
+    var allEtfEnum: AllEtfEnums = .initial
     
     // for Index Detail symbols
     
@@ -293,7 +324,15 @@ class PsxViewModel{
         do{
             let data = try await psxServiceManager.getSymbolOverview(symbol: symbol)
             
-            self.symbolOverviewEnums = .loaded(overview: data)
+            let sortedAnnouncements = data.announcements.sorted { $0.date < $1.date }
+            let sortedRatios = data.ratios.sorted { ($0.period ?? "") < ($1.period ?? "") }
+            let sortedAnnual = data.financials.annual.sorted{ ($0.period ?? "") < ($1.period ?? "") }
+            
+            let sortedQuatelry = data.financials.quarterly.sorted{ ($0.period ?? "") < ($1.period ?? "") }
+            
+            let symbolOverview = SymbolOverview(announcements: sortedAnnouncements, financials: Financials(annual: sortedAnnual, quarterly: sortedQuatelry), ratios: sortedRatios, timestamp: data.timestamp)
+            
+            self.symbolOverviewEnums = .loaded(overview: symbolOverview)
         }catch(let error){
             self.symbolOverviewEnums = .error(errorMessage: error.localizedDescription)
             print(error.localizedDescription)
@@ -302,17 +341,9 @@ class PsxViewModel{
     
     func getIndexSymbolDetail(indices:[String]) async{
         self.indicesEnums = .loading
-        var response:[SymbolDetail] =  []
-        response.reserveCapacity(indices.count)
         
         do{
-            for index in indices {
-                let data = try await psxServiceManager.getSymbolDetail(market: "IDX", symbol: index)
-                
-                response.append(data)
-                
-                try await Task.sleep(for: .milliseconds(250))
-            }
+            let response  = try await psxServiceManager.getAllIndex()
             self.indicesEnums = .loaded(indicesData: response)
                         
         }catch{
@@ -346,7 +377,7 @@ class PsxViewModel{
                             .getSymbolDetail(market: "REG", symbol: item.symbol)
                         print("   ✅ Got \(item.symbol)")
                         
-                        let dataWithSector = SymbolDataClass(market: result.data.market, st: result.data.st, symbol: result.data.symbol, price: result.data.price, change: result.data.change, changePercent: result.data.changePercent, volume: result.data.volume, trades: result.data.trades, value: result.data.value, high: result.data.high, low: result.data.low, bid: result.data.bid, ask: result.data.ask, bidVol: result.data.bidVol, askVol: result.data.askVol, timestamp: result.timestamp,sectorName: item.sector,portfolioVolume: 1)
+                        let dataWithSector = SymbolDataClass(market: result.data.market, st: result.data.st, symbol: result.data.symbol, price: result.data.price, change: result.data.change, changePercent: result.data.changePercent, volume: result.data.volume, trades: result.data.trades, value: result.data.value, high: result.data.high, low: result.data.low, bid: result.data.bid, ask: result.data.ask, bidVol: result.data.bidVol, askVol: result.data.askVol, timestamp: result.timestamp,sectorName: item.name,portfolioVolume: 1,fullName: item.name,circuit_breaker: result.data.circuit_breaker,day_range: result.data.day_range,week_range_52:result.data.week_range_52, ldcp:result.data.ldcp,haircut: result.data.haircut,price_earning: result.data.price_earning,year_1_change: result.data.year_1_change,ytd_change: result.data.ytd_change)
                         
                         return SymbolDetail(
                             success: result.success,
@@ -379,7 +410,7 @@ class PsxViewModel{
                     .getSymbolDetail(market: "REG", symbol: item.symbol)
                 print("   ✅ Got \(item.symbol)")
                 
-                let dataWithSector = SymbolDataClass(market: result.data.market, st: result.data.st, symbol: result.data.symbol, price: result.data.price, change: result.data.change, changePercent: result.data.changePercent, volume: result.data.volume, trades: result.data.trades, value: result.data.value, high: result.data.high, low: result.data.low, bid: result.data.bid, ask: result.data.ask, bidVol: result.data.bidVol, askVol: result.data.askVol, timestamp: result.timestamp,sectorName: item.sector,portfolioVolume: 1)
+                let dataWithSector = SymbolDataClass(market: result.data.market, st: result.data.st, symbol: result.data.symbol, price: result.data.price, change: result.data.change, changePercent: result.data.changePercent, volume: result.data.volume, trades: result.data.trades, value: result.data.value, high: result.data.high, low: result.data.low, bid: result.data.bid, ask: result.data.ask, bidVol: result.data.bidVol, askVol: result.data.askVol, timestamp: result.timestamp,sectorName: item.sector,portfolioVolume: 1,fullName: item.name,circuit_breaker: result.data.circuit_breaker,day_range: result.data.day_range,week_range_52:result.data.week_range_52, ldcp:result.data.ldcp,haircut: result.data.haircut,price_earning: result.data.price_earning,year_1_change: result.data.year_1_change,ytd_change: result.data.ytd_change)
                 
                 let symbolDetail = SymbolDetail(
                     success: result.success,
@@ -419,7 +450,7 @@ class PsxViewModel{
             for result in data{
              let response = try await psxServiceManager.getSymbolDetail(market: "REG", symbol: result.ticker)
                 
-                let dataWithSector = SymbolDataClass(market: response.data.market, st: response.data.st, symbol: response.data.symbol, price: response.data.price, change: response.data.change, changePercent: response.data.changePercent, volume: response.data.volume, trades: response.data.trades, value: response.data.value, high: response.data.high, low: response.data.low, bid: response.data.bid, ask: response.data.ask, bidVol: response.data.bidVol, askVol: response.data.askVol, timestamp: response.timestamp,sectorName: nil,portfolioVolume: result.volume ?? 1)
+                let dataWithSector = SymbolDataClass(market: response.data.market, st: response.data.st, symbol: response.data.symbol, price: response.data.price, change: response.data.change, changePercent: response.data.changePercent, volume: response.data.volume, trades: response.data.trades, value: response.data.value, high: response.data.high, low: response.data.low, bid: response.data.bid, ask: response.data.ask, bidVol: response.data.bidVol, askVol: response.data.askVol, timestamp: response.timestamp,sectorName: nil,portfolioVolume: result.transaction.reduce(0){$0 + $1.volume},fullName: "",circuit_breaker: response.data.circuit_breaker,day_range: response.data.day_range,week_range_52:response.data.week_range_52, ldcp:response.data.ldcp,haircut: response.data.haircut,price_earning: response.data.price_earning,year_1_change: response.data.year_1_change,ytd_change: response.data.ytd_change)
                 
                 symbolResponse.append(  SymbolDetail(
                         success: response.success,
@@ -468,7 +499,7 @@ class PsxViewModel{
                     group.addTask{
                      let result =  try await self.psxServiceManager.getSymbolDetail(market: "REG", symbol: ticker)
                         
-                        let dataWithSector = SymbolDataClass(market: result.data.market, st: result.data.st, symbol: result.data.symbol, price: result.data.price, change: result.data.change, changePercent: result.data.changePercent, volume: result.data.volume, trades: result.data.trades, value: result.data.value, high: result.data.high, low: result.data.low, bid: result.data.bid, ask: result.data.ask, bidVol: result.data.bidVol, askVol: result.data.askVol, timestamp: result.timestamp,sectorName: "",portfolioVolume: 1)
+                        let dataWithSector = SymbolDataClass(market: result.data.market, st: result.data.st, symbol: result.data.symbol, price: result.data.price, change: result.data.change, changePercent: result.data.changePercent, volume: result.data.volume, trades: result.data.trades, value: result.data.value, high: result.data.high, low: result.data.low, bid: result.data.bid, ask: result.data.ask, bidVol: result.data.bidVol, askVol: result.data.askVol, timestamp: result.timestamp,sectorName: "",portfolioVolume: 1,fullName: "",circuit_breaker: result.data.circuit_breaker,day_range: result.data.day_range,week_range_52:result.data.week_range_52, ldcp:result.data.ldcp,haircut: result.data.haircut,price_earning: result.data.price_earning,year_1_change: result.data.year_1_change,ytd_change: result.data.ytd_change)
                         
                         return SymbolDetail(
                             success: result.success,
@@ -488,7 +519,7 @@ class PsxViewModel{
                 
                 let result = try await self.psxServiceManager.getSymbolDetail(market: "REG", symbol: remainingTicker)
                 
-                let dataWithSector = SymbolDataClass(market: result.data.market, st: result.data.st, symbol: result.data.symbol, price: result.data.price, change: result.data.change, changePercent: result.data.changePercent, volume: result.data.volume, trades: result.data.trades, value: result.data.value, high: result.data.high, low: result.data.low, bid: result.data.bid, ask: result.data.ask, bidVol: result.data.bidVol, askVol: result.data.askVol, timestamp: result.timestamp,sectorName: "",portfolioVolume: 1)
+                let dataWithSector = SymbolDataClass(market: result.data.market, st: result.data.st, symbol: result.data.symbol, price: result.data.price, change: result.data.change, changePercent: result.data.changePercent, volume: result.data.volume, trades: result.data.trades, value: result.data.value, high: result.data.high, low: result.data.low, bid: result.data.bid, ask: result.data.ask, bidVol: result.data.bidVol, askVol: result.data.askVol, timestamp: result.timestamp,sectorName: "",portfolioVolume: 1,fullName: "",circuit_breaker: result.data.circuit_breaker,day_range: result.data.day_range,week_range_52:result.data.week_range_52, ldcp:result.data.ldcp,haircut: result.data.haircut,price_earning: result.data.price_earning,year_1_change: result.data.year_1_change,ytd_change: result.data.ytd_change)
                 
                 let symbolDetail = SymbolDetail(
                     success: result.success,
@@ -506,6 +537,56 @@ class PsxViewModel{
             
         }catch{
             sectorSymbolEnum = .error(errorMessage: error.localizedDescription)
+        }
+    }
+    
+    func getTickerPrice(ticker:String) async{
+        self.tickerPriceEnum = TickerPriceEnum.initial
+        do{
+            let response = try await psxServiceManager.getTickerPrice(symbol: ticker)
+            self.tickerPriceEnum = TickerPriceEnum.loaded(tickerPrice: response)
+        }
+        catch(let error){
+            self.tickerPriceEnum = TickerPriceEnum.error(errorMessage: error.localizedDescription)
+        }
+    }
+    
+    func getSingleTransactionDetail(ticker:String) async{
+        
+        transactionDetailEnum = TransactionDetailEnums.loading
+        
+        let singlePortfolio =  swiftDataService.getSingleTicker(ticker: ticker)
+        
+        
+        let transaction = singlePortfolio?.transaction ?? []
+        
+        
+        do{
+            
+            transactionDetailEnum = .loaded(portfolioTickers: transaction)
+            
+        }catch{
+            print(error.localizedDescription)
+            transactionDetailEnum = .error(errorMessage: error.localizedDescription)
+        }
+    }
+    
+    func clearAllData()async{
+        clearDataEnum = .loading
+        swiftDataService.clearAllData()
+        clearDataEnum  = .loaded
+        
+    }
+    
+    func getAllEtfData()async{
+        self.allEtfEnum = .loading
+        
+        do{
+            let data = try await psxServiceManager.getAllEtf()
+            let groupData = Dictionary(grouping: data.etfs, by: {$0.type})
+            self.allEtfEnum = .loaded(etfModel: data,groupData: groupData)
+        }catch{
+            self.allEtfEnum = .error(errorMessage: error.localizedDescription)
         }
     }
 

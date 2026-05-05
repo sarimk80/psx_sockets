@@ -10,51 +10,47 @@ import SwiftUI
 struct SearchView: View {
     
     @State private var psxViewModel = PsxViewModel(psxServiceManager: PsxServiceManager())
-    
-    @Environment(AppNavigation.self) private var appNavigation
-    
+    @Binding var moreNavigation: MoreNavigation
+        
     var body: some View {
-        VStack{
+        List {
             switch psxViewModel.psxSearch {
-            case .initial:
+            case .initial, .loading:
                 ProgressView()
-            case .loading:
-                ProgressView()
+                
             case .loaded(let data):
-                List(data,id: \.self){result in
+                ForEach(data, id: \.self) { result in
                     Text(result)
                         .onTapGesture {
-                            appNavigation.tickerNavigation.append(TickerDetailRoute.tickerDetail(symbol: result))
+                            moreNavigation.push(route: .tickerDetail(symbol: result))
                         }
-                    
                 }
-            case .error(let errorMessage):
-                Text(errorMessage)
-            case .allSymbolLoaded(allSymbol: let allSymbol):
-                List(allSymbol,id: \.self){result in
+                
+            case .allSymbolLoaded(let allSymbol):
+                ForEach(allSymbol, id: \.self) { result in
                     Text(result)
+                        .font(.headline)
+                        .foregroundColor(.primary)
                         .onTapGesture {
-                            appNavigation.tickerNavigation.append(TickerDetailRoute.tickerDetail(symbol: result))
+                            moreNavigation.push(route: .tickerDetail(symbol: result))
                         }
-                    
                 }
+                
+            case .error(let message):
+                Text(message)
             }
         }
         .navigationTitle("Search")
-        .searchable(text: $psxViewModel.symbolSearch, prompt: "Enter ticker here...")
-        .onChange(of: psxViewModel.symbolSearch, { oldValue, newValue in
+        .searchable(text: $psxViewModel.symbolSearch,
+                    prompt: "Enter ticker here...")
+        .onChange(of: psxViewModel.symbolSearch) { _, _ in
             Task {
                 await psxViewModel.getFilteredSymbols()
             }
-        })
-        
-            .task {
-               await psxViewModel.getAllSymbols()
-            }
-
+        }
+        .task {
+            await psxViewModel.getAllSymbols()
+        }
     }
 }
 
-#Preview {
-    SearchView()
-}

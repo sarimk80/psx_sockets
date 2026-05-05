@@ -28,6 +28,7 @@ struct psx_socketsApp: App {
         WindowGroup {
             RootView()
                 .environment(psxWebSocket)
+                //.environment(\.locale, .init(identifier: "ur"))
                 
         }
         .modelContainer(for: PortfolioModel.self)

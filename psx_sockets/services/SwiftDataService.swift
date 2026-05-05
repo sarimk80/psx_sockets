@@ -49,20 +49,60 @@ class SwiftDataService{
          
     }
     
-    func addTicker(ticker:String,volume:Int)  {
+    func addTicker(ticker:String,volume:Int,date:String,price:Double)  {
         guard let modelContext = modelContext else {
                 return
             }
-       if let filterTicker = getSavedTicker().first(where: {$0.ticker == ticker}){
-           modelContext.delete(filterTicker)
-        }else{
-            let portfolioModel = PortfolioModel(ticker: ticker, isSelected: true,volume: volume)
-            modelContext.insert(portfolioModel)
-
-        }
+       
+        let portfolioModel = PortfolioModel(ticker: ticker, isSelected: true,volume: volume)
+        
+        let transaction = Transaction(ticker: ticker, volume: volume, date: date, portfolio: portfolioModel,price: price)
+        
+        portfolioModel.transaction.append(transaction)
+        
+        modelContext.insert(portfolioModel)
+        
         saveData()
         
         }
+    
+    func deleteTicker(ticker: String) {
+        guard let modelContext = modelContext else { return }
+
+        let descriptor = FetchDescriptor<PortfolioModel>(
+            predicate: #Predicate { $0.ticker == ticker }
+        )
+
+        if let portfolio = try? modelContext.fetch(descriptor).first {
+            modelContext.delete(portfolio)
+            saveData()
+        }
+    }
+    
+    func addTransaction(portfolio:PortfolioModel,volume:Int,date:String,price:Double){
+        guard let modelContext = modelContext else {
+                return
+            }
+        
+        let transaction = Transaction(ticker: portfolio.ticker, volume: volume, date: date,portfolio: portfolio,price: price)
+        
+        modelContext.insert(transaction)
+        
+        saveData()
+        
+    }
+    
+    func getSingleTicker(ticker:String) -> PortfolioModel? {
+        
+        guard let modelContext = modelContext else { return nil}
+        
+        let descriptor = FetchDescriptor<PortfolioModel>(
+            predicate: #Predicate { $0.ticker == ticker }
+        )
+        
+        return try? modelContext.fetch(descriptor).first
+        
+    }
     
     func saveData()  {
         guard let modelContext = modelContext else {
@@ -72,6 +112,20 @@ class SwiftDataService{
           try  modelContext.save()
         }
         catch(let error){
+            print(error.localizedDescription)
+        }
+    }
+    
+    func clearAllData(){
+        guard let modelContext = modelContext else {
+                return
+            }
+        do{
+            try modelContext.delete(model: PortfolioModel.self)
+            saveData()
+
+
+        }catch(let error){
             print(error.localizedDescription)
         }
     }

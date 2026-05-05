@@ -12,12 +12,13 @@ import Combine
 enum TickerDetailRoute:Hashable {
     case tickerDetail(symbol:String)
     case corporationDetail(sectionName:CorporationEnum  ,data:[DividendModel])
-    case indexDetail(indexName:IndexEnums)
+    case indexDetail(indexName:IndexEnums,tickerDetail: SymbolDataClass)
 }
 
 enum PortfolioNavigationEnums:Hashable{
     case tickerDetail(symbol:String)
     case addTickerVolume(symbol:String)
+    case tickerTransaction(symbol:String)
 }
 
 enum SectorNavigationEnums:Hashable{
@@ -27,6 +28,15 @@ enum SectorNavigationEnums:Hashable{
 
 enum SheetNavigationEnums:Hashable{
     case openVolumeSheet(symbol:String,volume:Int)
+}
+
+enum MoreNavigationEnums: Hashable{
+    case searchView
+    case tickerDetail(symbol:String)
+    case etfView
+    case etfDetailView(indexName:String,etf:Etf)
+    // Comment for now
+    //case privacyPolicy
 }
 
 @MainActor
@@ -87,5 +97,23 @@ class SheetNavigation{
     
     func root(){
         sheetNav = NavigationPath()
+    }
+}
+
+@MainActor
+@Observable
+class MoreNavigation{
+    var moreNav = NavigationPath()
+    
+    func push(route:MoreNavigationEnums){
+        moreNav.append(route)
+    }
+    
+    func pop(){
+        moreNav.removeLast()
+    }
+    
+    func root(){
+        moreNav = NavigationPath()
     }
 }

@@ -16,6 +16,7 @@ class PortfolioViewModel{
     
     var savedTicker:[PortfolioModel] = []
     private var swiftDataService:SwiftDataService = SwiftDataService()
+    var singleTicker : PortfolioModel?
     
     init() {
         getSavedTicker()
@@ -26,9 +27,22 @@ class PortfolioViewModel{
 
     }
     
-    func addTicker(ticker:String,volume:Int)  {
-        swiftDataService.addTicker(ticker: ticker,volume: volume)
+    func addTicker(ticker:String,volume:Int,data:String,price:Double)  {
+        swiftDataService.addTicker(ticker: ticker,volume: volume,date: data,price: price)
+    }
+    
+    func addTransaction(portfolio:PortfolioModel,volume:Int,date:String,price:Double){
+        swiftDataService.addTransaction(portfolio: portfolio, volume: volume, date: date,price: price)
         getSavedTicker()
+    }
+    
+    func deletePortfolio(ticker:String){
+        swiftDataService.deleteTicker(ticker: ticker)
+        getSavedTicker()
+    }
+    
+    func getSingleTicker(ticker:String){
+       singleTicker = swiftDataService.getSingleTicker(ticker: ticker)
     }
     
     

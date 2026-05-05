@@ -14,13 +14,19 @@ struct ContentView: View {
     @Environment(AppNavigation.self) private var appNavigation
     @Environment(WebSocketManager.self) private var webSocketManager
     @State private var selectedTab: Int = 0
+    @State private var marketStatus: String = "OPN"
+    
+    init() {
+        UIPageControl.appearance().currentPageIndicatorTintColor = .clear
+        UIPageControl.appearance().pageIndicatorTintColor = .clear
+    }
     
     var body: some View {
         List {
             VStack(spacing: 20) {
                 
                 // Index Carousel Section
-                IndexView(psxWebSocket: webSocketManager, selectedTab: $selectedTab,appNavigation: appNavigation,psxViewModel: psxViewModel)
+                IndexView(psxWebSocket: webSocketManager, selectedTab: $selectedTab,appNavigation: appNavigation,psxViewModel: psxViewModel,marketStatus: $marketStatus)
                 
                 // Custom Page Indicators
                 HStack(spacing: 8) {
@@ -47,6 +53,7 @@ struct ContentView: View {
         }
         .listStyle(.plain)
         .navigationTitle("Market Overview")
+        .navigationSubtitle("\(marketStatusString(market: marketStatus)) • \(Date.now.formatted(date:.abbreviated,time:.omitted))")
         .navigationBarTitleDisplayMode(.large)
         .background(Color(.systemGroupedBackground))
         .task {
@@ -69,7 +76,7 @@ struct ContentView: View {
         while !Task.isCancelled {
             await psxViewModel.getIndexSymbolDetail(indices: ["KSE100","KMI30","PSXDIV20","KSE30","MII30"])
             
-            try? await Task.sleep(for: .seconds(60))
+            try? await Task.sleep(for: .seconds(120))
             
         }
     }
@@ -203,14 +210,16 @@ struct IndexView: View {
     @Binding var selectedTab: Int
     var appNavigation: AppNavigation
     var psxViewModel: PsxViewModel
+    @Binding var marketStatus: String
     
     var body: some View {
         
         switch psxViewModel.indicesEnums {
         case .initial, .loading:
             TickerView(tickerDetail: SymbolDataClass.mock)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
+                .background(Color(.tertiarySystemBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 20))
+                .padding(.horizontal, 16)
                 .redacted(reason: .placeholder)
         
         case .loaded(let data):
@@ -219,22 +228,28 @@ struct IndexView: View {
                     
                     let result = data[index]
                     
-                    TickerView(tickerDetail: result.data)
-                        
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 16)
-                        .background(Color(.systemBackground))
-                        .clipShape(RoundedRectangle(cornerRadius: 20))
-                        .padding(.horizontal, 16)
-                        .onTapGesture {
-                            appNavigation.tickerNavigation.append(TickerDetailRoute.indexDetail(indexName: StringToIndexEnum(indexName: result.data.symbol)))
-                        }
-                        .tag(index)
+                    Button {
+                        appNavigation.tickerNavigation.append(TickerDetailRoute.indexDetail(indexName: StringToIndexEnum(indexName: result.data.symbol),tickerDetail: result.data))
+                    } label: {
+                        TickerView(tickerDetail: result.data)
+                            .frame(height: 200)
+                            .background(Color(.tertiarySystemBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 20))
+                            .padding(.horizontal, 16)
+                            .tag(index)
+                    }
+                    .buttonStyle(SpringButtonStyle())
+
+                    
+                    
                 }
             }
+            .onAppear(perform: {
+                marketStatus = data.first?.data.st ?? "Open"
+            })
             .tabViewStyle(.page)
-            .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .never))
-            .frame(height: 180)
+            .indexViewStyle(.page(backgroundDisplayMode: .never))
+            .frame(height: 200)
         case .error(let errorMessage):
             ErrorView(message: errorMessage)
         }
@@ -254,7 +269,7 @@ struct TickerView: View {
                         .fontWeight(.bold)
                         .foregroundColor(.primary)
                     
-                    Text(tickerDetail?.st ?? "")
+                    Text(marketStatusString(market: tickerDetail?.st ?? ""))
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .padding(.horizontal, 8)
@@ -291,12 +306,12 @@ struct TickerView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     priceMetric(title: "High", value: tickerDetail?.high ?? 0.0)
                     priceMetric(title: "Low", value: tickerDetail?.low ?? 0.0)
-                    priceMetric(title: "Volume", value: Double(tickerDetail?.volume ?? 0))
+                    priceMetric(title: "Volume", value: Double(tickerDetail?.volume ?? 0),isVolume: true)
                 }
                 
                 Spacer()
                 
-                if tickerDetail?.market != "IDX" {
+                if tickerDetail?.st == "T+2" {
                     VStack(alignment: .trailing, spacing: 6) {
                         priceMetric(title: "Bid", value: Double(tickerDetail?.bid ?? 0))
                         priceMetric(title: "Bid Vol", value: Double(tickerDetail?.bidVol ?? 0))
@@ -310,7 +325,7 @@ struct TickerView: View {
         .padding()
     }
     
-    private func priceMetric(title: String, value: Double) -> some View {
+    private func priceMetric(title: String, value: Double,isVolume:Bool = false) -> some View {
         HStack {
             if title.contains("Bid") || title.contains("Ask") {
                 Spacer()
@@ -319,7 +334,7 @@ struct TickerView: View {
             Text(title)
                 .foregroundColor(.secondary)
             
-            Text(value, format: .number.precision(.fractionLength(2)))
+            Text(value, format: isVolume ? .number.notation(.compactName) : .number.precision(.fractionLength(2)))
                 .font(.system(.caption, design: .monospaced))
                 .fontWeight(.medium)
                 .foregroundColor(.primary)
@@ -493,7 +508,7 @@ struct DividendCard: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
+                .fill(Color(.tertiarySystemBackground))
                 .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
         )
     }
@@ -571,7 +586,7 @@ struct EpsCard: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
+                .fill(Color(.tertiarySystemBackground))
                 .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
         )
     }
@@ -651,7 +666,7 @@ struct ProfitLossCard: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
+                .fill(Color(.tertiarySystemBackground))
                 .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
         )
     }
@@ -712,7 +727,7 @@ struct MeetingCard: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
+                .fill(Color(.tertiarySystemBackground))
                 .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
         )
     }
@@ -734,7 +749,7 @@ struct SectionHeader: View {
                 .font(.headline)
                 .foregroundColor(color)
             
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.headline)
                 .fontWeight(.semibold)
                 .foregroundColor(.primary)

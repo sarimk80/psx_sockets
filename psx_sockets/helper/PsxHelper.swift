@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 
 func StringToIndexEnum(indexName:String) -> IndexEnums {
@@ -146,3 +147,56 @@ func iconForSector(_ sector: String) -> String {
     }
 }
 
+struct SpringButtonStyle: ButtonStyle {
+    
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.94 : 1)
+            .animation(
+                .spring(response: 0.25, dampingFraction: 0.6),
+                value: configuration.isPressed
+            )
+    }
+}
+
+func marketStatusString(market:String) -> String {
+    switch market {
+    case "PRE":
+        "Pre-market"
+    case "OPN":
+        "Open"
+    case "SUS":
+        "Suspended"
+    case "CLS":
+        "Closed"
+    default:
+        "Open"
+    }
+}
+
+
+//PRE    Pre-market
+//OPN    Open
+//SUS    Suspended
+//CLS    Closed
+
+func visibleDomainLenght(chartTimeFrame:ChartTimeFrame) -> TimeInterval {
+    let minute: TimeInterval = 60
+    let hour = 60 * minute
+    let day = 24 * hour
+    
+    switch chartTimeFrame {
+    case .M1:
+        return hour              // 60 candles (1h)
+    case .M5:
+        return 5 * hour          // 5h
+    case .M15:
+        return 15 * hour         // 15h
+    case .H1:
+        return day               // 1 day
+    case .H4:
+        return 4 * day           // 4 days
+    case .D1:
+        return 60 * day          // 60 days
+    }
+}
