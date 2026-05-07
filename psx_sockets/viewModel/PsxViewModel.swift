@@ -344,7 +344,13 @@ class PsxViewModel{
         
         do{
             let response  = try await psxServiceManager.getAllIndex()
-            self.indicesEnums = .loaded(indicesData: response)
+            
+            let indicesSet = Set(indices)
+            
+            let filteredResponse = response.filter {
+                indicesSet.contains($0.data.symbol)
+            }
+            self.indicesEnums = .loaded(indicesData: filteredResponse)
                         
         }catch{
             self.indicesEnums = .error(errorMessage: error.localizedDescription)

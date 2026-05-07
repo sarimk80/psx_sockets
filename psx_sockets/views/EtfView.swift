@@ -196,35 +196,7 @@ struct SkeletonView: View {
                 minHeight: height,
                 maxHeight: height
             )
-            .overlay(
-                shimmer
-            )
             .clipped()
     }
     
-    private var shimmer: some View {
-        GeometryReader { geometry in
-            let size = geometry.size
-            
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    Color.clear,
-                    Color.white.opacity(0.6),
-                    Color.clear
-                ]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .rotationEffect(.degrees(20))
-            .offset(x: isAnimating ? size.width : -size.width)
-            .onAppear {
-                withAnimation(
-                    .linear(duration: 1.2)
-                    .repeatForever(autoreverses: false)
-                ) {
-                    isAnimating = true
-                }
-            }
-        }
-    }
 }

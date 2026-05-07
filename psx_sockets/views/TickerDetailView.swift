@@ -149,6 +149,46 @@ struct CompanyDetailView: View {
                 // Fundamentals Section
                 DetailSection(title: "Fundamentals") {
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                        
+                        Group {
+                            switch psxViewModel.symbolDetailEnum {
+                            case .initial, .loading:
+                                ProgressView()
+                                    .frame(maxWidth: .infinity, alignment: .center)
+                                    .gridCellColumns(2) // Span full width
+                                
+                            case .loaded(let portfolioTickers):
+                                CompanyFundamentals(
+                                    title: "Circuit breaker:",
+                                    subTitle: portfolioTickers.data.circuit_breaker
+                                )
+                                .gridCellColumns(2)
+                                
+                                CompanyFundamentals(
+                                    title: "Day range:",
+                                    subTitle: portfolioTickers.data.day_range
+                                )
+                                .gridCellColumns(2)
+                                
+                                CompanyFundamentals(
+                                    title: "52 Week range:",
+                                    subTitle: portfolioTickers.data.week_range_52
+                                )
+                                .gridCellColumns(2)
+                                
+                                CompanyFundamentals(
+                                    title: "Price earning:",
+                                    subTitle: portfolioTickers.data.price_earning.formatted(.number.precision(.fractionLength(2)))
+                                )
+                                .gridCellColumns(2)
+                                
+                            case .error(let errorMessage):
+                                Text(errorMessage)
+                                    .foregroundColor(.red)
+                                    .gridCellColumns(2) // Span full width
+                            }
+                        }
+                        
                         CompanyFundamentals(title: "Free float:", subTitle: company.data.financialStats.freeFloat.raw)
                         CompanyFundamentals(title: "Free float %:", subTitle: company.data.financialStats.freeFloatPercent.raw)
                         CompanyFundamentals(title: "Market Cap:", subTitle: company.data.financialStats.marketCap.raw)
