@@ -9,11 +9,14 @@
 /* Begin PBXBuildFile section */
 		4A067FD32F751A19001D1CFC /* TextViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A067FD22F751A19001D1CFC /* TextViewModel.swift */; };
 		4A067FD42F751A8B001D1CFC /* TextViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A067FD22F751A19001D1CFC /* TextViewModel.swift */; };
+		4A15386F2F876B8600728AEE /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 4A15386E2F876B8600728AEE /* Localizable.xcstrings */; };
+		4A1538702F876B8600728AEE /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 4A15386E2F876B8600728AEE /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		4A067FC62F751827001D1CFC /* psx_socket_mac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = psx_socket_mac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A067FD22F751A19001D1CFC /* TextViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextViewModel.swift; sourceTree = "<group>"; };
+		4A15386E2F876B8600728AEE /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		4A3995A42E2A25EE00FBBD2D /* psx_sockets.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = psx_sockets.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -52,6 +55,7 @@
 			isa = PBXGroup;
 			children = (
 				4A067FD22F751A19001D1CFC /* TextViewModel.swift */,
+				4A15386E2F876B8600728AEE /* Localizable.xcstrings */,
 			);
 			path = shared;
 			sourceTree = "<group>";
@@ -146,6 +150,7 @@
 			knownRegions = (
 				en,
 				Base,
+				ur,
 			);
 			mainGroup = 4A39959B2E2A25EE00FBBD2D;
 			minimizedProjectReferenceProxies = 1;
@@ -167,6 +172,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4A15386F2F876B8600728AEE /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -174,6 +180,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4A1538702F876B8600728AEE /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -327,6 +334,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -384,6 +392,7 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -398,6 +407,7 @@
 				DEVELOPMENT_TEAM = N65MK7D7BV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "psx-sockets-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Stockistan;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -431,6 +441,7 @@
 				DEVELOPMENT_TEAM = N65MK7D7BV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "psx-sockets-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Stockistan;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

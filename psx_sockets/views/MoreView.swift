@@ -39,38 +39,40 @@ struct MoreView: View {
                         moreNavigation.push(route: .etfView)
                     }
                     
-//                    Divider()
-//                    
-//                    MoreRow(
-//                        icon: "mount",
-//                        iconColor: .yellow,
-//                        title: "Metals",
-//                        subtitle: "Find stocks, sectors & more"
-//                    ) {
-//                        moreNavigation.push(route: .searchView)
-//                    }
-//                    
-//                    Divider()
-//                    
-//                    MoreRow(
-//                        icon: "pesetasign.bank.building",
-//                        iconColor: .pink,
-//                        title: "Currency Exchange",
-//                        subtitle: "Find stocks, sectors & more"
-//                    ) {
-//                        moreNavigation.push(route: .searchView)
-//                    }
-//                    
-//                    Divider()
-//                    
-//                    MoreRow(
-//                        icon: "bolt.slash",
-//                        iconColor: .mint,
-//                        title: "Circult Breaker",
-//                        subtitle: "Find stocks, sectors & more"
-//                    ) {
-//                        moreNavigation.push(route: .searchView)
-//                    }
+                    Divider()
+                    
+                    MoreRow(
+                        icon: "bolt.slash",
+                        iconColor: .mint,
+                        title: "Circult Breaker",
+                        subtitle: "Find stocks, sectors & more"
+                    ) {
+                        moreNavigation.push(route: .comingSoon)
+                    }
+                    
+                    Divider()
+                    
+                    MoreRow(
+                        icon: "mount",
+                        iconColor: .yellow,
+                        title: "Metals",
+                        subtitle: "Find stocks, sectors & more"
+                    ) {
+                        moreNavigation.push(route: .comingSoon)
+                    }
+                    
+                    Divider()
+                    
+                    MoreRow(
+                        icon: "pesetasign.bank.building",
+                        iconColor: .pink,
+                        title: "Currency Exchange",
+                        subtitle: "Find stocks, sectors & more"
+                    ) {
+                        moreNavigation.push(route: .comingSoon)
+                    }
+                    
+                   
                 }
 
                 SectionCard(header: "App Settings") {
@@ -85,15 +87,16 @@ struct MoreView: View {
                         }
                     }
                     
-//                    Divider()
-//
-//                    MoreRow(
-//                        icon: "globe",
-//                        iconColor: .purple,
-//                        title: "Change Language",
-//                        subtitle: "Remove all cached data",
-//                    ) {
-//                    }
+                    Divider()
+
+                    MoreRow(
+                        icon: "globe",
+                        iconColor: .purple,
+                        title: "Change Language",
+                        subtitle: "Remove all cached data",
+                    ) {
+                        moreNavigation.push(route: .comingSoon)
+                    }
 
                     Divider()
 

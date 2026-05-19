@@ -35,6 +35,7 @@ enum MoreNavigationEnums: Hashable{
     case tickerDetail(symbol:String)
     case etfView
     case etfDetailView(indexName:String,etf:Etf)
+    case comingSoon
     // Comment for now
     //case privacyPolicy
 }

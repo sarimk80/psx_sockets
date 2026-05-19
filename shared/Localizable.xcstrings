@@ -254,6 +254,9 @@
     "Clear data" : {
 
     },
+    "Coming Soon" : {
+
+    },
     "Company Details" : {
       "localizations" : {
         "ur" : {
@@ -1222,6 +1225,9 @@
           }
         }
       }
+    },
+    "We're working on something exciting. Stay tuned for updates!" : {
+
     },
     "Weight" : {
 
