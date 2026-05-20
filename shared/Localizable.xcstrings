@@ -241,6 +241,9 @@
         }
       }
     },
+    "Circuit Breaker" : {
+
+    },
     "Clear All Data" : {
       "localizations" : {
         "ur" : {
@@ -586,6 +589,9 @@
         }
       }
     },
+    "Loading Circuit Breakers..." : {
+
+    },
     "Loading market data..." : {
       "localizations" : {
         "ur" : {
@@ -605,6 +611,9 @@
           }
         }
       }
+    },
+    "Lower Circuit" : {
+
     },
     "LTP: %@" : {
       "localizations" : {
@@ -1156,6 +1165,9 @@
         }
       }
     },
+    "Upper Circuit" : {
+
+    },
     "Version 1.0.0" : {
       "localizations" : {
         "ur" : {
@@ -1205,6 +1217,9 @@
           }
         }
       }
+    },
+    "Vol: %lld" : {
+
     },
     "Volume" : {
       "localizations" : {

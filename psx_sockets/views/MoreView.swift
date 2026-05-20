@@ -47,7 +47,7 @@ struct MoreView: View {
                         title: "Circult Breaker",
                         subtitle: "Find stocks, sectors & more"
                     ) {
-                        moreNavigation.push(route: .comingSoon)
+                        moreNavigation.push(route: .circuitBreaker)
                     }
                     
                     Divider()

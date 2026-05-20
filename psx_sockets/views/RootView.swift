@@ -114,6 +114,9 @@ struct RootView: View {
                                     .environment(moreNavigation)
                             case .comingSoon:
                                 ComingSoonView()
+                            case .circuitBreaker:
+                                CircuitBreakerView()
+                                    .environment(moreNavigation)
                             }
                             
                         }

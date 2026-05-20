@@ -39,4 +39,6 @@ protocol PsxProtocol{
     func getAllIndex() async throws -> [SymbolDetail]
     
     func getAllEtf() async throws -> EtfModel
+    
+    func getAllCircuitBreaker() async throws -> CircuitBreakerModel
 }

@@ -134,6 +134,13 @@ enum AllEtfEnums {
     case error(errorMessage:String)
 }
 
+enum CircuitBreakerEnums {
+    case initial
+    case loading
+    case loaded(circuitBreaker:CircuitBreakerModel)
+    case error(message:String)
+}
+
 
 @MainActor
 @Observable
@@ -156,6 +163,7 @@ class PsxViewModel{
     var transactionDetailEnum : TransactionDetailEnums = .initial
     var clearDataEnum : ClearDataEnums = .initial
     var allEtfEnum: AllEtfEnums = .initial
+    var breakerEnum: CircuitBreakerEnums = .initial
     
     // for Index Detail symbols
     
@@ -593,6 +601,17 @@ class PsxViewModel{
             self.allEtfEnum = .loaded(etfModel: data,groupData: groupData)
         }catch{
             self.allEtfEnum = .error(errorMessage: error.localizedDescription)
+        }
+    }
+    
+    func getAllCircuitBreaker()async{
+        self.breakerEnum = .loading
+        
+        do{
+            let data = try await psxServiceManager.getAllCircuitBreaker()
+            self.breakerEnum = .loaded(circuitBreaker: data)
+        }catch{
+            self.breakerEnum = .error(message: error.localizedDescription)
         }
     }
 
