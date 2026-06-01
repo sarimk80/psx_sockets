@@ -79,7 +79,7 @@ struct EtfDetailView: View {
         .background(Color(.systemGroupedBackground))
         .navigationTitle(etf.etfName)
         .navigationSubtitle(etf.fullName)
-        .navigationBarTitleDisplayMode(.large)
+        .navigationBarTitleDisplayMode(.inline)
         .task {
             await psxVM.getSymbolDetail(ticker: etf.etfName)
         }
