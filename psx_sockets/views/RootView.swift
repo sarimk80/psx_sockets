@@ -117,6 +117,8 @@ struct RootView: View {
                             case .circuitBreaker:
                                 CircuitBreakerView()
                                     .environment(moreNavigation)
+                            case .currencyExchange:
+                                CurrencyExchangeView()
                             }
                             
                         }

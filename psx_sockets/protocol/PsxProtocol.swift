@@ -41,4 +41,6 @@ protocol PsxProtocol{
     func getAllEtf() async throws -> EtfModel
     
     func getAllCircuitBreaker() async throws -> CircuitBreakerModel
+    
+    func getAllCurrencyExchange() async throws -> CurrencyExchangeModel
 }

@@ -141,6 +141,13 @@ enum CircuitBreakerEnums {
     case error(message:String)
 }
 
+enum CurrencyExchangeEnums {
+    case initial
+    case loading
+    case loaded(currencyExchange:CurrencyExchangeModel)
+    case error(message:String)
+}
+
 
 @MainActor
 @Observable
@@ -164,6 +171,7 @@ class PsxViewModel{
     var clearDataEnum : ClearDataEnums = .initial
     var allEtfEnum: AllEtfEnums = .initial
     var breakerEnum: CircuitBreakerEnums = .initial
+    var currencyExchangeEnum: CurrencyExchangeEnums = .initial
     
     // for Index Detail symbols
     
@@ -612,6 +620,40 @@ class PsxViewModel{
             self.breakerEnum = .loaded(circuitBreaker: data)
         }catch{
             self.breakerEnum = .error(message: error.localizedDescription)
+        }
+    }
+    
+    func getAllCurrencyExchange() async{
+        self.currencyExchangeEnum = .loading
+        
+        do{
+            let data = try await psxServiceManager.getAllCurrencyExchange()
+            self.currencyExchangeEnum = .loaded(currencyExchange: data)
+        }catch{
+            self.currencyExchangeEnum = .error(message: error.localizedDescription)
+        }
+    }
+    
+    func filteredItems(currencyFilter:CurrencyFilter,searchText:String)-> [CurrencyResponse] {
+        guard case .loaded(let exchange) = currencyExchangeEnum else { return [] }
+
+        let items = exchange.response.filter { item in
+            switch currencyFilter {
+            case .All:
+                return true
+            // Add other filter cases matching your CurrencyFilter enum
+            // case .Favorites: return item.isFavorite
+            default:
+                return item.type == currencyFilter.rawValue
+            }
+        }
+
+        guard !searchText.trimmingCharacters(in: .whitespaces).isEmpty else { return items }
+
+        let query = searchText.lowercased()
+        return items.filter {
+            $0.country.lowercased().contains(query) ||
+            $0.currencyName.lowercased().contains(query)
         }
     }
 

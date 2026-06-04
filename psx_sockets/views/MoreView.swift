@@ -53,6 +53,17 @@ struct MoreView: View {
                     Divider()
                     
                     MoreRow(
+                        icon: "pesetasign.bank.building",
+                        iconColor: .pink,
+                        title: "Currency Exchange",
+                        subtitle: "Find stocks, sectors & more"
+                    ) {
+                        moreNavigation.push(route: .currencyExchange)
+                    }
+                    
+                    Divider()
+                    
+                    MoreRow(
                         icon: "mount",
                         iconColor: .yellow,
                         title: "Metals",
@@ -61,16 +72,7 @@ struct MoreView: View {
                         moreNavigation.push(route: .comingSoon)
                     }
                     
-                    Divider()
-                    
-                    MoreRow(
-                        icon: "pesetasign.bank.building",
-                        iconColor: .pink,
-                        title: "Currency Exchange",
-                        subtitle: "Find stocks, sectors & more"
-                    ) {
-                        moreNavigation.push(route: .comingSoon)
-                    }
+                   
                     
                    
                 }

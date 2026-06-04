@@ -52,6 +52,16 @@
     "×" : {
 
     },
+    "1 PKR = %@ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "1 PKR = %1$@ %2$@"
+          }
+        }
+      }
+    },
     "Add" : {
       "localizations" : {
         "ur" : {
@@ -280,6 +290,9 @@
         }
       }
     },
+    "Currency Exchange" : {
+
+    },
     "Current Price" : {
       "localizations" : {
         "ur" : {
@@ -366,6 +379,9 @@
         }
       }
     },
+    "Enter currency or country" : {
+
+    },
     "Enter number of shares" : {
       "localizations" : {
         "ur" : {
@@ -451,6 +467,9 @@
           }
         }
       }
+    },
+    "Fetching rates..." : {
+
     },
     "Financial Dashboard" : {
       "localizations" : {
@@ -716,6 +735,9 @@
           }
         }
       }
+    },
+    "No results found" : {
+
     },
     "No Sector Data" : {
       "localizations" : {
@@ -1104,6 +1126,9 @@
           }
         }
       }
+    },
+    "Try a different currency name or country." : {
+
     },
     "Try Again" : {
       "localizations" : {

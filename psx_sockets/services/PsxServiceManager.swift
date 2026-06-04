@@ -9,6 +9,31 @@ import Foundation
 
 
 class PsxServiceManager:PsxProtocol{
+    
+    func getAllCurrencyExchange() async throws -> CurrencyExchangeModel {
+        guard let url = URL(string: "https://sarim-pix.hf.space/get_all_currency")
+        else {  throw URLError(.badURL) }
+              
+        let (data,response) = try await URLSession.shared.data(from: url)
+              
+              
+        guard let response = response as? HTTPURLResponse,
+                    
+                response.statusCode == 200
+                      
+                      
+        else { throw URLError(.badServerResponse) }
+              
+        if let string = String(data: data, encoding: .utf8) {
+                    print(string)
+                }
+              
+              
+        let decodeResponse = try JSONDecoder().decode(CurrencyExchangeModel.self, from: data)
+              
+        return decodeResponse
+    }
+    
     func getAllCircuitBreaker() async throws -> CircuitBreakerModel {
         
         guard let url = URL(string: "https://sarim-pix.hf.space/circuit-breakers/all")
