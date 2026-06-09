@@ -30,6 +30,10 @@ enum SheetNavigationEnums:Hashable{
     case openVolumeSheet(symbol:String,volume:Int)
 }
 
+enum CurrencyNavigationEnums: Hashable{
+    case openCurrencySheet(currencyExchange:[CurrencyResponse],isFromCurrency:Bool)
+}
+
 enum MoreNavigationEnums: Hashable{
     case searchView
     case tickerDetail(symbol:String)
@@ -118,5 +122,23 @@ class MoreNavigation{
     
     func root(){
         moreNav = NavigationPath()
+    }
+}
+
+@MainActor
+@Observable
+class CurrencyNavigation{
+    var currencyNav = NavigationPath()
+    
+    func push(route:CurrencyNavigationEnums){
+        currencyNav.append(route)
+    }
+    
+    func pop(){
+        currencyNav.removeLast()
+    }
+    
+    func root(){
+        currencyNav = NavigationPath()
     }
 }

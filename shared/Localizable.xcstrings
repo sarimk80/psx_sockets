@@ -52,6 +52,9 @@
     "×" : {
 
     },
+    "0.00" : {
+
+    },
     "1 PKR = %@ %@" : {
       "localizations" : {
         "en" : {
@@ -280,6 +283,9 @@
         }
       }
     },
+    "Converted Amount" : {
+
+    },
     "Count" : {
       "localizations" : {
         "ur" : {
@@ -480,6 +486,9 @@
           }
         }
       }
+    },
+    "From" : {
+
     },
     "Fund Size: %@" : {
 
@@ -898,6 +907,12 @@
         }
       }
     },
+    "Search currency" : {
+
+    },
+    "Search Currency" : {
+
+    },
     "Search for stock symbols..." : {
       "localizations" : {
         "ur" : {
@@ -947,6 +962,9 @@
           }
         }
       }
+    },
+    "Select currency" : {
+
     },
     "Select Symbol" : {
       "localizations" : {
@@ -1076,6 +1094,9 @@
           }
         }
       }
+    },
+    "To" : {
+
     },
     "Top performing stocks in the market" : {
       "localizations" : {

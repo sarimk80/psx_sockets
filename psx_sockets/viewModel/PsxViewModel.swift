@@ -172,6 +172,7 @@ class PsxViewModel{
     var allEtfEnum: AllEtfEnums = .initial
     var breakerEnum: CircuitBreakerEnums = .initial
     var currencyExchangeEnum: CurrencyExchangeEnums = .initial
+    var currencyExchange: [CurrencyResponse] = []
     
     // for Index Detail symbols
     
@@ -628,14 +629,16 @@ class PsxViewModel{
         
         do{
             let data = try await psxServiceManager.getAllCurrencyExchange()
+            currencyExchange = data.response
             self.currencyExchangeEnum = .loaded(currencyExchange: data)
         }catch{
             self.currencyExchangeEnum = .error(message: error.localizedDescription)
         }
     }
     
-    func filteredItems(currencyFilter:CurrencyFilter,searchText:String)-> [CurrencyResponse] {
-        guard case .loaded(let exchange) = currencyExchangeEnum else { return [] }
+    func filteredItems(currencyFilter:CurrencyFilter,searchText:String)  {
+        
+        guard case .loaded(let exchange) = currencyExchangeEnum else {return}
 
         let items = exchange.response.filter { item in
             switch currencyFilter {
@@ -648,10 +651,13 @@ class PsxViewModel{
             }
         }
 
-        guard !searchText.trimmingCharacters(in: .whitespaces).isEmpty else { return items }
+        guard !searchText.trimmingCharacters(in: .whitespaces).isEmpty else {
+            currencyExchange = items
+            return
+        }
 
         let query = searchText.lowercased()
-        return items.filter {
+        currencyExchange = items.filter {
             $0.country.lowercased().contains(query) ||
             $0.currencyName.lowercased().contains(query)
         }

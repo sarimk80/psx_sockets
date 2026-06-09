@@ -13,11 +13,13 @@ struct CurrencyExchangeModel: Codable {
 }
 
 // MARK: - Response
-struct CurrencyResponse: Codable {
+struct CurrencyResponse: Codable,Hashable {
     let country: String
     let currency: Double
     let currencyName: String
     let type: String
+    
+    var id:String {currencyName}
 }
 
 enum CurrencyFilter:String,CaseIterable,Codable {
