@@ -42,6 +42,7 @@ struct SearchView: View {
         }
         .navigationTitle("Search")
         .searchable(text: $psxViewModel.symbolSearch,
+                    placement:.navigationBarDrawer(displayMode: .always),
                     prompt: "Enter ticker here...")
         .onChange(of: psxViewModel.symbolSearch) { _, _ in
             Task {

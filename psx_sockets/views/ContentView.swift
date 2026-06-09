@@ -311,12 +311,18 @@ struct TickerView: View {
                 
                 Spacer()
                 
-                if tickerDetail?.st == "T+2" {
+                if tickerDetail?.bid != 0 {
                     VStack(alignment: .trailing, spacing: 6) {
-                        priceMetric(title: "Bid", value: Double(tickerDetail?.bid ?? 0))
-                        priceMetric(title: "Bid Vol", value: Double(tickerDetail?.bidVol ?? 0))
-                        priceMetric(title: "Ask", value: Double(tickerDetail?.ask ?? 0))
-                        priceMetric(title: "Ask Vol", value: Double(tickerDetail?.askVol ?? 0))
+                        priceMetric(title: "Bid", value: Double(tickerDetail?.bid ?? 0),isRight: true)
+                        priceMetric(title: "Bid Vol", value: Double(tickerDetail?.bidVol ?? 0),isRight: true)
+                        priceMetric(title: "Ask", value: Double(tickerDetail?.ask ?? 0),isRight: true)
+                        priceMetric(title: "Ask Vol", value: Double(tickerDetail?.askVol ?? 0),isRight: true)
+                    }
+                }else{
+                    VStack(alignment: .trailing, spacing: 6) {
+                        priceMetric(title: "Close", value: Double(tickerDetail?.ldcp ?? 0),isRight: true)
+                        priceMetric(title: "1 Year Change", value: Double(tickerDetail?.year_1_change ?? 0),isRight: true)
+                        priceMetric(title: "Yearly Change", value: Double(tickerDetail?.ytd_change ?? 0),isRight: true)
                     }
                 }
             }
@@ -325,9 +331,9 @@ struct TickerView: View {
         .padding()
     }
     
-    private func priceMetric(title: String, value: Double,isVolume:Bool = false) -> some View {
+    private func priceMetric(title: String, value: Double,isVolume:Bool = false,isRight:Bool = false) -> some View {
         HStack {
-            if title.contains("Bid") || title.contains("Ask") {
+            if isRight {
                 Spacer()
             }
             
@@ -339,7 +345,7 @@ struct TickerView: View {
                 .fontWeight(.medium)
                 .foregroundColor(.primary)
             
-            if !title.contains("Bid") && !title.contains("Ask") {
+            if !isRight {
                 Spacer()
             }
         }

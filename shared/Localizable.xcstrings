@@ -52,6 +52,19 @@
     "×" : {
 
     },
+    "0.00" : {
+
+    },
+    "1 PKR = %@ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "1 PKR = %1$@ %2$@"
+          }
+        }
+      }
+    },
     "Add" : {
       "localizations" : {
         "ur" : {
@@ -241,6 +254,9 @@
         }
       }
     },
+    "Circuit Breaker" : {
+
+    },
     "Clear All Data" : {
       "localizations" : {
         "ur" : {
@@ -254,6 +270,9 @@
     "Clear data" : {
 
     },
+    "Coming Soon" : {
+
+    },
     "Company Details" : {
       "localizations" : {
         "ur" : {
@@ -264,6 +283,9 @@
         }
       }
     },
+    "Converted Amount" : {
+
+    },
     "Count" : {
       "localizations" : {
         "ur" : {
@@ -273,6 +295,9 @@
           }
         }
       }
+    },
+    "Currency Exchange" : {
+
     },
     "Current Price" : {
       "localizations" : {
@@ -360,6 +385,9 @@
         }
       }
     },
+    "Enter currency or country" : {
+
+    },
     "Enter number of shares" : {
       "localizations" : {
         "ur" : {
@@ -446,6 +474,9 @@
         }
       }
     },
+    "Fetching rates..." : {
+
+    },
     "Financial Dashboard" : {
       "localizations" : {
         "ur" : {
@@ -455,6 +486,9 @@
           }
         }
       }
+    },
+    "From" : {
+
     },
     "Fund Size: %@" : {
 
@@ -583,6 +617,9 @@
         }
       }
     },
+    "Loading Circuit Breakers..." : {
+
+    },
     "Loading market data..." : {
       "localizations" : {
         "ur" : {
@@ -602,6 +639,9 @@
           }
         }
       }
+    },
+    "Lower Circuit" : {
+
     },
     "LTP: %@" : {
       "localizations" : {
@@ -704,6 +744,9 @@
           }
         }
       }
+    },
+    "No results found" : {
+
     },
     "No Sector Data" : {
       "localizations" : {
@@ -864,6 +907,12 @@
         }
       }
     },
+    "Search currency" : {
+
+    },
+    "Search Currency" : {
+
+    },
     "Search for stock symbols..." : {
       "localizations" : {
         "ur" : {
@@ -913,6 +962,9 @@
           }
         }
       }
+    },
+    "Select currency" : {
+
     },
     "Select Symbol" : {
       "localizations" : {
@@ -1043,6 +1095,9 @@
         }
       }
     },
+    "To" : {
+
+    },
     "Top performing stocks in the market" : {
       "localizations" : {
         "ur" : {
@@ -1092,6 +1147,9 @@
           }
         }
       }
+    },
+    "Try a different currency name or country." : {
+
     },
     "Try Again" : {
       "localizations" : {
@@ -1153,6 +1211,9 @@
         }
       }
     },
+    "Upper Circuit" : {
+
+    },
     "Version 1.0.0" : {
       "localizations" : {
         "ur" : {
@@ -1203,6 +1264,9 @@
         }
       }
     },
+    "Vol: %lld" : {
+
+    },
     "Volume" : {
       "localizations" : {
         "ur" : {
@@ -1222,6 +1286,9 @@
           }
         }
       }
+    },
+    "We're working on something exciting. Stay tuned for updates!" : {
+
     },
     "Weight" : {
 

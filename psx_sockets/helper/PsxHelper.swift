@@ -161,14 +161,14 @@ struct SpringButtonStyle: ButtonStyle {
 
 func marketStatusString(market:String) -> String {
     switch market {
-    case "PRE":
+    case "Pre-Open Session":
         "Pre-market"
-    case "OPN":
+    case "Normal Trading Session":
         "Open"
-    case "SUS":
-        "Suspended"
-    case "CLS":
+    case "Post-Close Session":
         "Closed"
+    case "Order Matching":
+        "Order Matching"
     default:
         "Open"
     }

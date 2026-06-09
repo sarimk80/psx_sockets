@@ -112,6 +112,13 @@ struct RootView: View {
                             case .etfDetailView(let indexName,let etf):
                                 EtfDetailView(etf: etf)
                                     .environment(moreNavigation)
+                            case .comingSoon:
+                                ComingSoonView()
+                            case .circuitBreaker:
+                                CircuitBreakerView()
+                                    .environment(moreNavigation)
+                            case .currencyExchange:
+                                CurrencyExchangeView()
                             }
                             
                         }

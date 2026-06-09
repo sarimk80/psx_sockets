@@ -79,7 +79,7 @@ struct EtfDetailView: View {
         .background(Color(.systemGroupedBackground))
         .navigationTitle(etf.etfName)
         .navigationSubtitle(etf.fullName)
-        .navigationBarTitleDisplayMode(.large)
+        .navigationBarTitleDisplayMode(.inline)
         .task {
             await psxVM.getSymbolDetail(ticker: etf.etfName)
         }
@@ -326,7 +326,7 @@ struct FundPriceStatsGrid: View {
             HStack(spacing: 10) {
                 MiniStatCard(label: "High", value: data.high, trend: .up)
                 MiniStatCard(label: "Low", value: data.low, trend: .down)
-                MiniStatCard(label: "LDCP", value: data.ldcp, trend: .neutral)
+                MiniStatCard(label: "Close", value: data.ldcp, trend: .neutral)
             }
 
             // Range bars
@@ -348,7 +348,7 @@ struct FundPriceStatsGrid: View {
 
             // Secondary stats
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                DetailStatCell(label: "Volume", value: data.volume.formatted(), icon: "waveform.bar.chart", color: .mint)
+                DetailStatCell(label: "Volume", value: data.volume.formatted(), icon: "chart.bar", color: .mint)
                
                
                 DetailStatCell(label: "Circuit Breaker", value: data.circuit_breaker, icon: "bolt.shield", color: .red)

@@ -134,6 +134,20 @@ enum AllEtfEnums {
     case error(errorMessage:String)
 }
 
+enum CircuitBreakerEnums {
+    case initial
+    case loading
+    case loaded(circuitBreaker:CircuitBreakerModel)
+    case error(message:String)
+}
+
+enum CurrencyExchangeEnums {
+    case initial
+    case loading
+    case loaded(currencyExchange:CurrencyExchangeModel)
+    case error(message:String)
+}
+
 
 @MainActor
 @Observable
@@ -156,6 +170,9 @@ class PsxViewModel{
     var transactionDetailEnum : TransactionDetailEnums = .initial
     var clearDataEnum : ClearDataEnums = .initial
     var allEtfEnum: AllEtfEnums = .initial
+    var breakerEnum: CircuitBreakerEnums = .initial
+    var currencyExchangeEnum: CurrencyExchangeEnums = .initial
+    var currencyExchange: [CurrencyResponse] = []
     
     // for Index Detail symbols
     
@@ -344,7 +361,13 @@ class PsxViewModel{
         
         do{
             let response  = try await psxServiceManager.getAllIndex()
-            self.indicesEnums = .loaded(indicesData: response)
+            
+            let indicesSet = Set(indices)
+            
+            let filteredResponse = response.filter {
+                indicesSet.contains($0.data.symbol)
+            }
+            self.indicesEnums = .loaded(indicesData: filteredResponse)
                         
         }catch{
             self.indicesEnums = .error(errorMessage: error.localizedDescription)
@@ -587,6 +610,56 @@ class PsxViewModel{
             self.allEtfEnum = .loaded(etfModel: data,groupData: groupData)
         }catch{
             self.allEtfEnum = .error(errorMessage: error.localizedDescription)
+        }
+    }
+    
+    func getAllCircuitBreaker()async{
+        self.breakerEnum = .loading
+        
+        do{
+            let data = try await psxServiceManager.getAllCircuitBreaker()
+            self.breakerEnum = .loaded(circuitBreaker: data)
+        }catch{
+            self.breakerEnum = .error(message: error.localizedDescription)
+        }
+    }
+    
+    func getAllCurrencyExchange() async{
+        self.currencyExchangeEnum = .loading
+        
+        do{
+            let data = try await psxServiceManager.getAllCurrencyExchange()
+            currencyExchange = data.response
+            self.currencyExchangeEnum = .loaded(currencyExchange: data)
+        }catch{
+            self.currencyExchangeEnum = .error(message: error.localizedDescription)
+        }
+    }
+    
+    func filteredItems(currencyFilter:CurrencyFilter,searchText:String)  {
+        
+        guard case .loaded(let exchange) = currencyExchangeEnum else {return}
+
+        let items = exchange.response.filter { item in
+            switch currencyFilter {
+            case .All:
+                return true
+            // Add other filter cases matching your CurrencyFilter enum
+            // case .Favorites: return item.isFavorite
+            default:
+                return item.type == currencyFilter.rawValue
+            }
+        }
+
+        guard !searchText.trimmingCharacters(in: .whitespaces).isEmpty else {
+            currencyExchange = items
+            return
+        }
+
+        let query = searchText.lowercased()
+        currencyExchange = items.filter {
+            $0.country.lowercased().contains(query) ||
+            $0.currencyName.lowercased().contains(query)
         }
     }
 
