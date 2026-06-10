@@ -113,6 +113,19 @@ https://github.com/user-attachments/assets/da413b88-7475-418e-af6f-81838ba375a3
   <img src="https://github.com/user-attachments/assets/eb175600-3c13-4b20-bcc6-d15e35089b98" width="22%" />
 </p>
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/059384a3-5495-4726-bf60-a195048c1efc" width="22%" />
+  <img src="https://github.com/user-attachments/assets/bdde7a87-f0c8-41b3-93f8-f445a2d1edc3" width="22%" />
+  <img src="https://github.com/user-attachments/assets/15c0bad4-f525-46c3-bf10-edb5945bfd5d" width="22%" />
+  <img src="https://github.com/user-attachments/assets/45b54c4a-8c4f-4703-9685-3bc0e4575b1c" width="22%" />
+</p>
+
+<img width="1206" height="2622" alt="Simulator Screenshot - iPhone 17 Pro - 2026-06-10 at 12 06 56" src="" />
+<img width="1206" height="2622" alt="Simulator Screenshot - iPhone 17 Pro - 2026-06-10 at 12 06 52" src="" />
+<img width="1206" height="2622" alt="Simulator Screenshot - iPhone 17 Pro - 2026-06-10 at 12 06 28" src="" />
+<img width="1206" height="2622" alt="Simulator Screenshot - iPhone 17 Pro - 2026-06-10 at 12 06 25" src="" />
+
+
 
 
 
