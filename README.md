@@ -120,14 +120,6 @@ https://github.com/user-attachments/assets/da413b88-7475-418e-af6f-81838ba375a3
   <img src="https://github.com/user-attachments/assets/45b54c4a-8c4f-4703-9685-3bc0e4575b1c" width="22%" />
 </p>
 
-<img width="1206" height="2622" alt="Simulator Screenshot - iPhone 17 Pro - 2026-06-10 at 12 06 56" src="" />
-<img width="1206" height="2622" alt="Simulator Screenshot - iPhone 17 Pro - 2026-06-10 at 12 06 52" src="" />
-<img width="1206" height="2622" alt="Simulator Screenshot - iPhone 17 Pro - 2026-06-10 at 12 06 28" src="" />
-<img width="1206" height="2622" alt="Simulator Screenshot - iPhone 17 Pro - 2026-06-10 at 12 06 25" src="" />
-
-
-
-
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/cd0a6721-fb4e-495c-9db7-af032c293c80" width="22%" />
