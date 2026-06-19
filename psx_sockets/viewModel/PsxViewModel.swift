@@ -469,8 +469,40 @@ class PsxViewModel{
         var symbolResponse:[SymbolDetail] =  []
         symbolResponse.reserveCapacity(data.count)
         
+        var unAvailableSymbols:[PortfolioModel] = []
+        
         do{
-            for result in data{
+            let cacheTickers = try await psxServiceManager.getAllCacheTickers()
+            
+            let savedSymbols = Set(data.map(\.ticker))
+            
+            let filteredFromCache = cacheTickers.filter {
+                savedSymbols.contains($0.data.symbol)
+            }
+            
+            symbolResponse = populateVolumeData(data: data, cacheTicker: filteredFromCache)
+            
+            let cachedSymbols = Set(cacheTickers.map { $0.data.symbol })
+
+            unAvailableSymbols = data.filter {
+                    !cachedSymbols.contains($0.ticker)
+            }
+            
+//            print("Saved:", data.map(\.ticker))
+//            print("Cache:", cacheTickers.map { $0.data.symbol })
+//            print("Saved count:", data.count)
+//            print("Cache count:", cacheTickers.count)
+//            print("Saved symbols:", symbolResponse.map{ $0.data.symbol})
+            
+            portfolioEnums = .loaded(portfolioTickers: symbolResponse)
+        
+            
+        }catch(_){
+           print("Error")
+        }
+        
+        do{
+            for result in unAvailableSymbols{
              let response = try await psxServiceManager.getSymbolDetail(market: "REG", symbol: result.ticker)
                 
                 let dataWithSector = SymbolDataClass(market: response.data.market, st: response.data.st, symbol: response.data.symbol, price: response.data.price, change: response.data.change, changePercent: response.data.changePercent, volume: response.data.volume, trades: response.data.trades, value: response.data.value, high: response.data.high, low: response.data.low, bid: response.data.bid, ask: response.data.ask, bidVol: response.data.bidVol, askVol: response.data.askVol, timestamp: response.timestamp,sectorName: nil,portfolioVolume: result.transaction.reduce(0){$0 + $1.volume},fullName: "",circuit_breaker: response.data.circuit_breaker,day_range: response.data.day_range,week_range_52:response.data.week_range_52, ldcp:response.data.ldcp,haircut: response.data.haircut,price_earning: response.data.price_earning,year_1_change: response.data.year_1_change,ytd_change: response.data.ytd_change)
@@ -491,6 +523,52 @@ class PsxViewModel{
         }catch{
             print(error.localizedDescription)
             portfolioEnums = .error(errorMessage: error.localizedDescription)
+        }
+        
+    }
+    
+    // Privete fun
+    
+    private func populateVolumeData(data:[PortfolioModel],cacheTicker:[SymbolDetail]) -> [SymbolDetail]{
+        
+        let volumebySymbol = Dictionary(data.map{($0.ticker, $0.transaction.reduce(0) { $0 + $1.volume })}, uniquingKeysWith: { first, _  in
+            first
+        })
+        
+        return cacheTicker.map { response in
+            let portfolioVolume = volumebySymbol[response.data.symbol] ?? 0
+            
+            let updatedData = SymbolDataClass(
+                market: response.data.market,
+                st: response.data.st,
+                symbol: response.data.symbol,
+                price: response.data.price,
+                change: response.data.change,
+                changePercent: response.data.changePercent,
+                volume: response.data.volume,
+                trades: response.data.trades,
+                value: response.data.value,
+                high: response.data.high,
+                low: response.data.low,
+                bid: response.data.bid,
+                ask: response.data.ask,
+                bidVol: response.data.bidVol,
+                askVol: response.data.askVol,
+                timestamp: response.data.timestamp,
+                sectorName: "",
+                portfolioVolume: portfolioVolume,
+                fullName: "",
+                circuit_breaker: response.data.circuit_breaker,
+                day_range: response.data.day_range,
+                week_range_52: response.data.week_range_52,
+                ldcp: response.data.ldcp,
+                haircut: response.data.haircut,
+                price_earning: response.data.price_earning,
+                year_1_change: response.data.year_1_change,
+                ytd_change: response.data.ytd_change
+            )
+            
+            return SymbolDetail(success: true, data: updatedData, timestamp: response.timestamp)
         }
         
     }

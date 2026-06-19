@@ -10,6 +10,31 @@ import Foundation
 
 class PsxServiceManager:PsxProtocol{
     
+    func getAllCacheTickers() async throws -> [SymbolDetail] {
+        guard let url = URL(string: "https://sarim-pix.hf.space/get_all_ticker")
+        else {  throw URLError(.badURL) }
+              
+        let (data,response) = try await URLSession.shared.data(from: url)
+              
+              
+        guard let response = response as? HTTPURLResponse,
+                    
+                response.statusCode == 200
+                      
+                      
+        else { throw URLError(.badServerResponse) }
+              
+        if let string = String(data: data, encoding: .utf8) {
+                    print(string)
+                }
+              
+              
+        let decodeResponse = try JSONDecoder().decode([SymbolDetail].self, from: data)
+              
+        return decodeResponse
+    }
+    
+    
     func getAllCurrencyExchange() async throws -> CurrencyExchangeModel {
         guard let url = URL(string: "https://sarim-pix.hf.space/get_all_currency")
         else {  throw URLError(.badURL) }
