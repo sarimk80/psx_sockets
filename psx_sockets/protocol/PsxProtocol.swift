@@ -43,4 +43,6 @@ protocol PsxProtocol{
     func getAllCircuitBreaker() async throws -> CircuitBreakerModel
     
     func getAllCurrencyExchange() async throws -> CurrencyExchangeModel
+    
+    func getAllCacheTickers() async throws -> [SymbolDetail]
 }

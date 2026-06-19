@@ -262,7 +262,7 @@ struct HoldingRow: View {
     var body: some View {
         HStack(spacing: 14) {
             // Ticker Badge
-            Text(symbol.ticker)
+            Text(symbol.ticker.prefix(3))
                 .font(.caption)
                 .fontWeight(.bold)
                 .foregroundStyle(.white)
