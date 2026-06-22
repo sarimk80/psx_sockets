@@ -173,6 +173,7 @@ class PsxViewModel{
     var breakerEnum: CircuitBreakerEnums = .initial
     var currencyExchangeEnum: CurrencyExchangeEnums = .initial
     var currencyExchange: [CurrencyResponse] = []
+    var allCurrencyExchange: [CurrencyResponse] = []
     
     // for Index Detail symbols
     
@@ -708,6 +709,7 @@ class PsxViewModel{
         do{
             let data = try await psxServiceManager.getAllCurrencyExchange()
             currencyExchange = data.response
+            allCurrencyExchange = data.response
             self.currencyExchangeEnum = .loaded(currencyExchange: data)
         }catch{
             self.currencyExchangeEnum = .error(message: error.localizedDescription)

@@ -145,6 +145,10 @@ struct CurrencyExchangeView: View {
         List(items, id: \.currencyName) { item in
             CurrencyRowView(item: item)
                 .listRowInsets(EdgeInsets(top: 0, leading: 8, bottom: 6, trailing: 8))
+                .onTapGesture {
+                    self.fromSelectedCurrency = item
+                    self.showBottomSheet = true
+                }
         }
         .listStyle(.insetGrouped)
     }
@@ -212,7 +216,7 @@ struct CurrencyExchangeView: View {
                 Button {
                     currencyNavigation.push(
                         route: .openCurrencySheet(
-                            currencyExchange: psxViewModel.currencyExchange,
+                            currencyExchange: psxViewModel.allCurrencyExchange,
                             isFromCurrency: true
                         )
                     )
@@ -271,7 +275,7 @@ struct CurrencyExchangeView: View {
                 Button {
                     currencyNavigation.push(
                         route: .openCurrencySheet(
-                            currencyExchange: psxViewModel.currencyExchange,
+                            currencyExchange: psxViewModel.allCurrencyExchange,
                             isFromCurrency: false
                         )
                     )
@@ -305,12 +309,19 @@ struct CurrencyExchangeView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 
-                Text(
-                    ((Double(amount) ?? 0) *
-                     ((fromSelectedCurrency?.currency ?? 1) / (toSelectedCurrency?.currency ?? 1))),
-                    format: .number.precision(.fractionLength(2))
-                )
-                .font(.system(size: 34, weight: .bold))
+                if(toSelectedCurrency != nil && !amount.isEmpty){
+                    Text(
+                        ((Double(amount) ?? 0) *
+                         ((fromSelectedCurrency?.currency ?? 1) / (toSelectedCurrency?.currency ?? 1))),
+                        format: .number.precision(.fractionLength(2))
+                    )
+                    .font(.system(size: 34, weight: .bold))
+                }else{
+                    Text("0.00")
+                        .font(.system(size: 34, weight: .bold))
+                }
+                
+                
                 
                 Text(toSelectedCurrency?.currencyName ?? "")
                     .foregroundStyle(.secondary)
