@@ -24,7 +24,7 @@ protocol PsxProtocol{
     
     func psxDividend(symbol:String) async throws -> PsxDividendModel
     
-    func psxKline(symbol:String,timeFrame:String) async throws -> KLineRequestModel
+    func psxKline(symbol:String,timeFrame:String) async throws -> SymbolKLine
     
     func getDividend() async throws -> [DividendModel]
     

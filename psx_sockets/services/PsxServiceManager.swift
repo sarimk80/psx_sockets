@@ -261,8 +261,8 @@ class PsxServiceManager:PsxProtocol{
         return decodeResponse
     }
     
-    func psxKline(symbol: String,timeFrame:String) async throws -> KLineRequestModel {
-        guard let url = URL(string: "https://psxterminal.com/api/klines/\(symbol)/\(timeFrame)")
+    func psxKline(symbol: String,timeFrame:String) async throws -> SymbolKLine {
+        guard let url = URL(string: "https://dps.psx.com.pk/timeseries/eod/\(symbol)")
         else {  throw URLError(.badURL) }
               
         let (data,response) = try await URLSession.shared.data(from: url)
@@ -280,7 +280,7 @@ class PsxServiceManager:PsxProtocol{
                 }
               
               
-        let decodeResponse = try JSONDecoder().decode(KLineRequestModel.self, from: data)
+        let decodeResponse = try JSONDecoder().decode(SymbolKLine.self, from: data)
               
         return decodeResponse
     }

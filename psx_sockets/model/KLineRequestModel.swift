@@ -5,6 +5,22 @@
 
 import Foundation
 
+
+struct SymbolKLine: Codable {
+    let status: Int
+    let message: String
+    let data: [[Double]]
+}
+
+struct SymbolKLineDatum: Identifiable, Hashable {
+    let date: Date
+    let close: Double
+    let volume: Double
+    let open: Double
+
+    var id: Date { date }
+}
+
 // MARK: - KLineRequestModel
 struct KLineRequestModel: Codable {
     let success: Bool

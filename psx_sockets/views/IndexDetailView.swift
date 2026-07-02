@@ -243,8 +243,8 @@ struct IndexDetailView: View {
             ProgressView()
         case .loading:
             ProgressView()
-        case .loaded(let data):
-            KlineChartView(kline: data, scrollPosition: $scrollPosition,showVolume: false)
+        case .loaded(let data,let kLineData):
+            KlineChartView(kline: kLineData, scrollPosition: $scrollPosition,showVolume: false)
         case .error(let errorMessage):
             Text(errorMessage)
         }

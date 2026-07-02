@@ -37,14 +37,6 @@ struct TickerDetailView: View {
                     ErrorView(message: errorMessage)
                 }
                 
-//                Picker("TimeFrame", selection: $chartTimeFrame) {
-//                    ForEach(ChartTimeFrame.allCases) { value in
-//                        Text(value.rawValue)
-//                            .tag(value)
-//                    }
-//                }
-//                .pickerStyle(.segmented)
-//                .padding(.horizontal, 16)
                 
                 
                 // Chart Section
@@ -83,7 +75,6 @@ struct TickerDetailView: View {
         .navigationTitle(symbol)
         .navigationBarTitleDisplayMode(.large)
         .task {
-            await psxViewModel.getCompanyDetail(symbol: symbol)
             await psxViewModel.getKlineSymbol(symbol: symbol, timeFrame: "1d")
             await psxViewModel.getSymbolOverview(symbol: symbol)
             await psxViewModel.getSymbolDetail(ticker: symbol)
@@ -205,13 +196,13 @@ struct CompanyDetailView: View {
                 // Key People Section
                 DetailSection(title: "Key People") {
                     VStack(spacing: 12) {
-                        ForEach(company.data.keyPeople, id: \.position) { person in
+                        ForEach(company.data.keyPeople, id: \.id) { person in
                             HStack {
                                 Text(person.position)
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
                                 Spacer()
-                                Text(person.name)
+                                Text(person.person)
                                     .font(.headline)
                                     .foregroundColor(.primary)
                             }
@@ -251,17 +242,17 @@ struct CompanyDetailView: View {
                         .cornerRadius(8)
                         
                         // Dividend Rows
-                        ForEach(dividend.data, id: \.paymentDate) { dividend in
+                        ForEach(dividend, id: \.id) { dividend in
                             HStack {
-                                Text(dividend.symbol)
+                                Text(company.data.symbol)
                                     .font(.subheadline)
                                     .foregroundColor(.primary)
                                     .frame(maxWidth: .infinity, alignment: .leading)
-                                Text(dividend.paymentDate)
+                                Text(dividend.book_closure_start ?? "")
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
                                     .frame(maxWidth: .infinity, alignment: .center)
-                                Text(String(describing: dividend.amount))
+                                Text(String(describing: dividend.percentage ?? 0.0))
                                     .font(.headline)
                                     .foregroundColor(.green)
                                     .frame(maxWidth: .infinity, alignment: .trailing)
@@ -377,8 +368,8 @@ struct KlineChart: View {
             switch psxViewModel.kLineEnum {
             case .initial, .loading:
                 LineChartLoading()
-            case .loaded(let kline):
-                KlineChartView(kline: kline, scrollPosition: $scrollPosition,chartTimeFrame: chartTimeFrame)
+            case .loaded(let kline,let kLineData):
+                KlineChartView(kline: kLineData, scrollPosition: $scrollPosition,chartTimeFrame: chartTimeFrame)
             case .error(let errorMessage):
                 ErrorView(message: errorMessage)
             }
@@ -387,7 +378,7 @@ struct KlineChart: View {
 }
 
 struct KlineChartView: View {
-    var kline: KLineRequestModel
+    var kline: [SymbolKLineDatum]
     @Binding var scrollPosition: Date
     var showVolume:Bool = true
     var chartTimeFrame: ChartTimeFrame = .D1
@@ -396,36 +387,90 @@ struct KlineChartView: View {
     @State private var selectedPrice: Double? = nil
     @State private var selectedVolume: Int? = nil
     
+    
+    private var closes: [Double] {
+        kline.map(\.close)
+    }
+
+    private var volumes: [Double] {
+        kline.map(\.volume)
+    }
+    
+    private var open: [Double]{
+        kline.map(\.open)
+    }
+
+    private var minClose: Double {
+        closes.min() ?? 0
+    }
+
+    private var maxClose: Double {
+        closes.max() ?? 0
+    }
+
+    private var averageClose: Double {
+        closes.reduce(0, +) / Double(closes.count)
+    }
+    
+    private var maxVolume:Double{
+        volumes.max() ?? 1
+    }
+    
+    private var minVolume:Double{
+        volumes.min() ?? 1
+    }
+    
+    private var lineColor: Color {
+        (closes.last ?? 0) >= (open.last ?? 0) ? .green : .red
+    }
+    
+//    private var lineGradient: LinearGradient {
+//        LinearGradient(
+//            colors: [.blue, lineColor],
+//            startPoint: .leading,
+//            endPoint: .trailing
+//        )
+//    }
+//    
+//    private var opacityLineGradient: LinearGradient {
+//        LinearGradient(
+//            colors: [lineColor.opacity(0.25), lineColor.opacity(0.02)],
+//            startPoint: .top,
+//            endPoint: .bottom
+//        )
+//    }
+    
+   
+    
     var body: some View {
-        let closes = kline.data.map { $0.close }
-        let volumes = kline.data.map { $0.volume }
-        let open = kline.data.map{ $0.datumOpen}
-        let minClose = closes.min() ?? 0.0
-        let maxClose = closes.max() ?? 0.0
-        let maxVolume = volumes.max() ?? 1
-        let minVolume = volumes.min() ?? 1
-        let averageClose = kline.data.reduce(0.0) {$0 + $1.close } / Double(kline.data.count)
+//        let closes = kline.items.map{$0.close}
+//        let volumes = kline.items.map { $0.volume }
+//        let open = kline.items.map{ $0.open}
+//        let minClose = closes.min() ?? 0.0
+//        let maxClose = closes.max() ?? 0.0
+//        let maxVolume = volumes.max() ?? 1
+//        let minVolume = volumes.min() ?? 1
+//        let averageClose = kline.items.reduce(0.0) {$0 + $1.close } / Double(kline.items.count)
         //let lastDate = kline.data.last?.adjustedDate ?? .now
         
-        let isPositive = closes.last ?? 0.0 >= open.last ?? 0.0
-        let lineColor:Color = isPositive ? .green : .red
+//        let isPositive = closes.last ?? 0.0 >= open.last ?? 0.0
+//        let lineColor:Color = isPositive ? .green : .red
         
-        var selectedItem: KLineDatum? {
+        
+         var selectedItem: SymbolKLineDatum? {
             guard let selectedDate else { return nil }
 
-            return kline.data.min(by: {
-                abs($0.adjustedDate.timeIntervalSince(selectedDate)) <
-                abs($1.adjustedDate.timeIntervalSince(selectedDate))
+            return kline.min(by: {
+                abs($0.date.timeIntervalSince(selectedDate)) <
+                abs($1.date.timeIntervalSince(selectedDate))
             })
         }
         
         // Determine annotation position dynamically
-        var annotationPosition: AnnotationPosition {
-            let range = maxClose - minClose
-            let threshold = minClose + (range * 0.75) // top 25% of chart
-            return selectedItem?.close ?? 0.0 > threshold ? .bottom : .top
+         var annotationPosition: AnnotationPosition {
+            let threshold = minClose + (maxClose - minClose) * 0.75
+            return (selectedItem?.close ?? 0) > threshold ? .bottom : .top
         }
-        
         
         VStack(spacing: 0) {
             // Price chart (70% height)
@@ -435,32 +480,31 @@ struct KlineChartView: View {
                     .foregroundStyle(lineColor.opacity(0.4))
                     .lineStyle(StrokeStyle(lineWidth:2, dash: [6,3]))
                 
-                ForEach(kline.data.indices, id: \.self) { indexes in
-                    let data = kline.data[indexes]
-                    LineMark(x: .value("Date", data.adjustedDate), y: .value("Price", data.close))
-                        .foregroundStyle(LinearGradient(colors: [.blue, lineColor], startPoint: .leading, endPoint: .trailing))
+                ForEach(kline,id: \.id) { indexes in
+                    //let data = kline.items[indexes]
+                    LineMark(x: .value("Date", indexes.date), y: .value("Price", indexes.close))
+                        .foregroundStyle(lineColor)
                         .lineStyle(StrokeStyle(lineWidth: 2))
                         .interpolationMethod(.cardinal)
-                    AreaMark(x: .value("Date", data.adjustedDate), y: .value("Price", data.close))
-                        .foregroundStyle(.linearGradient(colors: [lineColor.opacity(0.25), lineColor.opacity(0.02)], startPoint: .top, endPoint: .bottom))
-                    
+                    AreaMark(x: .value("Date", indexes.date), y: .value("Price", indexes.close))
+                        .foregroundStyle(lineColor.opacity(0.2))
                     
                 }
                 
                 if let selectedValue = selectedItem{
-                    RuleMark(x: .value("date", selectedValue.adjustedDate))
+                    RuleMark(x: .value("date", selectedValue.date))
                         .foregroundStyle(.gray.opacity(0.4))
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [4]))
                     
                     PointMark(
-                        x: .value("Date", selectedValue.adjustedDate),
+                        x: .value("Date", selectedValue.date),
                         y: .value("Price", selectedValue.close)
                     )
                     .foregroundStyle(lineColor)
                     .symbolSize(60)
                     .annotation(position: annotationPosition , spacing:6) {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(selectedValue.adjustedDate, format: .dateTime.month(.abbreviated).day())
+                            Text(selectedValue.date, format: .dateTime.month(.abbreviated).day())
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
                             Text(selectedValue.close, format: .number.precision(.fractionLength(2)))
@@ -481,11 +525,7 @@ struct KlineChartView: View {
                 AxisMarks(values: .automatic) { value in
                     AxisGridLine()
                     AxisTick()
-//                    AxisValueLabel {
-//                        if let date = value.as(Date.self) {
-//                            Text(date, format: .dateTime.month(.abbreviated).day())
-//                        }
-//                    }
+                    AxisValueLabel(format: .dateTime.month(.abbreviated).day())
                 }
             }
             .chartYAxis {
@@ -517,14 +557,13 @@ struct KlineChartView: View {
             
             // Volume chart (30% height)
             if (showVolume) {  Chart {
-                ForEach(kline.data.indices, id: \.self) { indexes in
-                    let data = kline.data[indexes]
-                    BarMark(x: .value("Date", data.adjustedDate), y: .value("Volume", data.volume))
+                ForEach(kline,id: \.id) { indexes in
+                    //let data = kline.data[indexes]
+                    BarMark(x: .value("Date", indexes.date), y: .value("Volume", indexes.volume))
                         .foregroundStyle(.gray.opacity(0.3))
                 }
             }
-            .chartXVisibleDomain(length: visibleDomainLenght(chartTimeFrame: chartTimeFrame))
-            .chartYScale(domain: minVolume * Int(0.98) ... maxVolume * Int(1.2))
+            .chartYScale(domain: (minVolume * 0.98)...(maxVolume * 1.2))
             .chartYAxis {
                 AxisMarks(position: .automatic) { value in
                     AxisGridLine()
@@ -549,7 +588,7 @@ struct KlineChartView: View {
             }
             .chartScrollableAxes(.horizontal)
             .chartScrollPosition(x: $scrollPosition)
-            .frame(height: 110)
+            .frame(height: 90)
             }
         }
     }

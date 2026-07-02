@@ -18,7 +18,7 @@ struct DataClassCompanies: Codable {
     let symbol, scrapedAt: String
     let financialStats: FinancialStats
     let businessDescription: String
-    let keyPeople: [KeyPerson]
+    let keyPeople: [StockKeyPeople]
 }
 
 // MARK: - FinancialStats
