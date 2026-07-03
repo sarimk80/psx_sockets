@@ -60,90 +60,138 @@ func calculateYScaleDomain(for items: [Annual]) -> ClosedRange<Double> {
 }
 
 func iconForSector(_ sector: String) -> String {
-    switch sector {
+    switch sector.uppercased() {
 
-    // MARK: - Finance
-    case "BANKS",
+    // MARK: Finance
+    case "COMMERCIAL BANKS",
+         "BANKS",
+         "INVESTMENT BANKS / INVESTMENT COMPANIES / SECURITIES COMPANIES",
          "INV BANKS",
          "INSURANCE",
+         "LEASING COMPANIES",
          "LEASING",
-         "MUTUAL FUND",
-         "ETFS",
-         "MODARABAS":
+         "MODARABAS",
+         "MUTUAL FUNDS",
+         "CLOSE - END MUTUAL FUND",
+         "EXCHANGE TRADED FUNDS",
+         "ETFS":
         return "building.columns.fill"
 
-    // MARK: - Energy / Oil / Power
-    case "POWER",
+    // MARK: Technology
+    case "TECHNOLOGY & COMMUNICATION",
+         "TECH & COMM":
+        return "desktopcomputer"
+
+    // MARK: Power / Energy
+    case "POWER GENERATION & DISTRIBUTION",
+         "POWER",
+         "OIL & GAS EXPLORATION COMPANIES",
          "O&G EXPL",
+         "OIL & GAS MARKETING COMPANIES",
          "O&G MKT",
          "REFINERY":
         return "bolt.fill"
 
-    // MARK: - Technology
-    case "TECH & COMM":
-        return "cpu.fill"
-
-    // MARK: - Automotive / Transport
-    case "AUTO PARTS",
-         "AUTO ASSEMBLER",
-         "TRANSPORT":
+    // MARK: Automobile
+    case "AUTOMOBILE ASSEMBLER",
+         "AUTO ASSEMBLER":
         return "car.fill"
 
-    // MARK: - Pharma / Medical
-    case "PHARMA":
+    case "AUTOMOBILE PARTS & ACCESSORIES",
+         "AUTO PARTS":
+        return "steeringwheel"
+
+    // MARK: Pharma
+    case "PHARMACEUTICALS",
+         "PHARMA":
         return "pills.fill"
 
-    // MARK: - Chemicals / Industrial
-    case
-        "CABLE & ELEC",
-         "ENGINEERING",
-         "SYNTHETIC":
-        return "gearshape.fill"
-        
-    case "CHEMICAL":
+    // MARK: Chemicals
+    case "CHEMICAL",
+         "CHEMICALS":
         return "testtube.2"
 
-    // MARK: - Construction / Materials
-    case "CEMENT",
-         "GLASS & CERAM":
-        return "hammer.fill"
+    // MARK: Engineering
+    case "ENGINEERING":
+        return "gearshape.2.fill"
 
-    // MARK: - Real Estate
+    case "CABLE & ELECTRICAL GOODS",
+         "CABLE & ELEC":
+        return "cable.connector"
+
+    // MARK: Cement / Construction
+    case "CEMENT":
+        return "building.2.fill"
+
+    case "GLASS & CERAMICS",
+         "GLASS & CERAM":
+        return "square.stack.3d.up.fill"
+
+    // MARK: Property
     case "PROPERTY",
          "REAL ESTATE":
         return "house.fill"
 
-    // MARK: - Consumer / Food
-    case "FOOD & CARE",
-         "VANASPATI",
-         "SUGAR",
-         "TOBACCO":
+    // MARK: Food
+    case "FOOD & PERSONAL CARE PRODUCTS",
+         "FOOD & CARE":
         return "cart.fill"
 
-    // MARK: - Textile / Leather
-    case "TEXTILE SPIN",
+    case "SUGAR":
+        return "cube.fill"
+
+    case "TOBACCO":
+        return "smoke.fill"
+
+    case "VANASPATI & ALLIED INDUSTRIES",
+         "VANASPATI":
+        return "fork.knife"
+
+    // MARK: Textile
+    case "TEXTILE SPINNING",
+         "TEXTILE SPIN",
+         "TEXTILE WEAVING",
          "TEXTILE WEAV",
+         "TEXTILE COMPOSITE",
          "TEXTILE COMP",
          "WOOLLEN",
-         "LEATHER":
+         "APPAREL":
         return "tshirt.fill"
 
-    // MARK: - Packaging / Paper
-    case "PAPER & PACK":
-        return "shippingbox.fill"
+    case "LEATHER & TANNERIES",
+         "LEATHER":
+        return "shoeprints.fill"
 
-    // MARK: - Agriculture / Fertilizer
+    // MARK: Agriculture
     case "FERTILIZER":
         return "leaf.fill"
 
-    // MARK: - Misc / Manufacturing
-    case "MISC",
-         "JUTE":
+    // MARK: Packaging
+    case "PAPER & BOARD",
+         "PAPER & PACK":
+        return "shippingbox.fill"
+
+    // MARK: Transport
+    case "TRANSPORT":
+        return "truck.box.fill"
+
+    // MARK: Miscellaneous
+    case "JUTE":
+        return "basket.fill"
+
+    case "SYNTHETIC & RAYON":
+        return "circle.grid.cross.fill"
+
+    case "MISCELLANEOUS",
+         "MISC":
         return "cube.box.fill"
 
+    // MARK: Futures
+    case "FUTURE CONTRACTS":
+        return "chart.line.uptrend.xyaxis"
+
     default:
-        // ⭐ VERY IMPORTANT fallback
-        return "circle"
+        return "building.2"
     }
 }
 

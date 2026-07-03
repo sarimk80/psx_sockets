@@ -18,7 +18,7 @@ struct SectorView: View {
             switch psxViewModel.psxSector {
             case .initial, .loading:
                 ForEach(0..<5) { _ in
-                    SectorListView(sectorName: "", data: SectorDataModel.mock)
+                    SectorListView(sectorName: "", data: [SectorStocks.mock])
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                         .listRowBackground(Color.clear)
@@ -26,16 +26,16 @@ struct SectorView: View {
                 
                 
             case .loaded(let response):
-                if response.data.isEmpty {
+                if response.sectors.isEmpty {
                     emptyStateView
                 } else {
-                    ForEach(Array(response.data.keys.sorted()), id: \.self) { key in
+                    ForEach(Array(response.sectors.keys.sorted()), id: \.self) { key in
                         SectorListView(
                             sectorName: key,
-                            data: response.data[key]!
+                            data: response.sectors[key]!
                         )
                         .onTapGesture {
-                            appNavigation.push(route: SectorNavigationEnums.sectorDetail(sector: response.data[key]!,sectorName: key))
+//                            appNavigation.push(route: SectorNavigationEnums.sectorDetail(sector: response.data[key]!,sectorName: key))
                         }
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
@@ -108,7 +108,24 @@ struct SectorView: View {
 
 struct SectorListView: View {
     let sectorName: String
-    let data: SectorDataModel
+    let data: [SectorStocks]
+    
+    private var gainerCount:Int{
+        data.map{$0.trend == "increase"}.count
+    }
+    
+    private var looserCount:Int{
+        data.map{$0.trend == "decrease"}.count
+    }
+    
+    private var avgChange:Double{
+        
+        let change = data.map{Double($0.change) ?? 0.0}
+        
+        let avgChangePer = (change.reduce(0.0, +)) / Double(change.count)
+        
+        return avgChangePer
+    }
     
     var body: some View {
         HStack(spacing: 8) {
@@ -128,23 +145,23 @@ struct SectorListView: View {
             // Gainers/Losers indicators
             HStack(spacing: 6) {
                 IndicatorPill(
-                    count: data.gainers,
+                    count: gainerCount,
                     color: .green,
                     icon: "arrow.up"
                 )
                 
                 IndicatorPill(
-                    count: data.losers,
+                    count: looserCount,
                     color: .red,
                     icon: "arrow.down"
                 )
             }
             
             // Percentage change
-            Text(data.avgChangePercent, format: .percent.precision(.fractionLength(1)))
+            Text(avgChange, format: .percent.precision(.fractionLength(1)))
                 .font(.caption)
                 .fontWeight(.semibold)
-                .foregroundColor(data.avgChangePercent >= 0 ? .green : .red)
+                .foregroundColor(avgChange >= 0 ? .green : .red)
                 .frame(minWidth: 50, alignment: .trailing)
         }
         .padding(.vertical, 24)
@@ -156,7 +173,7 @@ struct SectorListView: View {
     }
     // Color based on sector name (optional)
      private var sectorColor: Color {
-         let colors: [Color] = [.blue, .green, .orange, .purple, .pink, .teal]
+         let colors: [Color] = [.blue, .green, .orange, .purple, .pink, .teal,.brown,.cyan,.indigo,.mint,.yellow]
          let index = abs(sectorName.hashValue) % colors.count
          return colors[index]
      }

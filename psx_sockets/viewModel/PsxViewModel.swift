@@ -33,7 +33,7 @@ enum PsxSearchSymbolEnum{
 enum PsxSectorEnum {
     case initial
     case loading
-    case loaded(data:SectorModel)
+    case loaded(data:SectorPsxResponse)
     case error(errorMessage:String)
 }
 
@@ -268,7 +268,7 @@ class PsxViewModel{
         self.psxSector = PsxSectorEnum.loading
         
         do{
-            let sectors = try await psxServiceManager.getPsxSector()
+            let sectors = try await psxServiceManager.getAllStocksDetail()
             self.psxSector = PsxSectorEnum.loaded(data: sectors)
         }
         catch(let error){
