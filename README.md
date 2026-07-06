@@ -244,10 +244,7 @@ Distributed under the **MIT License** — see [LICENSE](LICENSE) for details.
 
 ---
 
-## ⭐ Acknowledgements
 
-- [mumtazkahn/psx-terminal](https://github.com/mumtazkahn/psx-terminal) — backend API and WebSocket data provider
-- Pakistan Stock Exchange for making market data accessible
 
 ---
 
