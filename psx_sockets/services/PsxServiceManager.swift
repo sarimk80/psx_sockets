@@ -10,6 +10,31 @@ import Foundation
 
 class PsxServiceManager:PsxProtocol{
     
+    func getAllMetals(metal:String) async throws -> [MetalModel] {
+        guard let url = URL(string: "https://sarim-pix.hf.space/\(metal)_price")
+        else {  throw URLError(.badURL) }
+              
+        let (data,response) = try await URLSession.shared.data(from: url)
+              
+              
+        guard let response = response as? HTTPURLResponse,
+                    
+                response.statusCode == 200
+                      
+                      
+        else { throw URLError(.badServerResponse) }
+              
+        if let string = String(data: data, encoding: .utf8) {
+                    print(string)
+                }
+              
+              
+        let decodeResponse = try JSONDecoder().decode([MetalModel].self, from: data)
+              
+        return decodeResponse
+    }
+    
+    
     func getAllCacheTickers() async throws -> [SymbolDetail] {
         guard let url = URL(string: "https://sarim-pix.hf.space/get_all_ticker")
         else {  throw URLError(.badURL) }
@@ -261,8 +286,8 @@ class PsxServiceManager:PsxProtocol{
         return decodeResponse
     }
     
-    func psxKline(symbol: String,timeFrame:String) async throws -> KLineRequestModel {
-        guard let url = URL(string: "https://psxterminal.com/api/klines/\(symbol)/\(timeFrame)")
+    func psxKline(symbol: String,timeFrame:String) async throws -> SymbolKLine {
+        guard let url = URL(string: "https://dps.psx.com.pk/timeseries/eod/\(symbol)")
         else {  throw URLError(.badURL) }
               
         let (data,response) = try await URLSession.shared.data(from: url)
@@ -280,7 +305,7 @@ class PsxServiceManager:PsxProtocol{
                 }
               
               
-        let decodeResponse = try JSONDecoder().decode(KLineRequestModel.self, from: data)
+        let decodeResponse = try JSONDecoder().decode(SymbolKLine.self, from: data)
               
         return decodeResponse
     }

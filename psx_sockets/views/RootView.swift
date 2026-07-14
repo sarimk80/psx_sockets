@@ -84,7 +84,7 @@ struct RootView: View {
                         .navigationDestination(for: SectorNavigationEnums.self) { route in
                             switch route{
                             case .sectorDetail(let sector,let sectorName):
-                                SectorDetailView(sectorName: sectorName, data: sector,appNavigation: sectorNavigation)
+                                SectorDetailView(sectorName: sectorName, data: sector)
                             case .tickerDetail(symbol: let symbol):
                                 TickerDetailView(symbol: symbol)
                             }
@@ -119,6 +119,12 @@ struct RootView: View {
                                     .environment(moreNavigation)
                             case .currencyExchange:
                                 CurrencyExchangeView()
+                            case .metals:
+                                MetalView()
+                                    .environment(moreNavigation)
+                                
+                            case .metalDetail(metal: let metal):
+                                MetalDetailView(metal: metal)
                             }
                             
                         }

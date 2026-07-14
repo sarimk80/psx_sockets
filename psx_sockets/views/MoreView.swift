@@ -69,11 +69,8 @@ struct MoreView: View {
                         title: "Metals",
                         subtitle: "Find stocks, sectors & more"
                     ) {
-                        moreNavigation.push(route: .comingSoon)
+                        moreNavigation.push(route: .metals)
                     }
-                    
-                   
-                    
                    
                 }
 
