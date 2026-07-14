@@ -9,49 +9,59 @@ import SwiftUI
 
 struct SectorDetailView: View {
     let sectorName: String
-    let data: SectorDataModel
-    
-    @Environment(WebSocketManager.self) private var socketManager
-    @State private var psxViewModel: PsxViewModel = PsxViewModel(psxServiceManager: PsxServiceManager())
-    @Bindable var appNavigation:SectorNavigation
-    
-    
+    let data: [SectorStocks]
+
     var body: some View {
-        List{
-            SectorCardView(sectorName: sectorName, data: data)
-                .listRowSeparator(.hidden)
-            
-            switch psxViewModel.sectorSymbolEnum {
-            case .initial, .loading:
-                ForEach(0..<5) { _ in
-                    PortfolioStockRow(result: SymbolDataClass.mock)
-                        .redacted(reason: .placeholder)
-                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+        List(data) { stock in
+
+            HStack(spacing: 16) {
+
+                VStack(alignment: .leading, spacing: 6) {
+
+                    Text(stock.scriptCode)
+                        .font(.headline)
+
+                    Text(stock.scriptName)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
                 }
-                
-            case .loaded(let portfolioTickers):
-                ForEach(portfolioTickers,id: \.data.symbol) { result in
-                    PortfolioStockRow(result: result.data)
-                        .onTapGesture {
-                            appNavigation.push(route: SectorNavigationEnums.tickerDetail(symbol: result.data.symbol))
-                        }
-                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+
+                Spacer()
+
+                VStack(alignment: .trailing, spacing: 6) {
+
+                    Text(stock.current)
+                        .font(.headline.bold())
+
+                    Text(stock.change)
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(changeColor(stock.change))
                 }
-            case .error(let errorMessage):
-                ErrorView(message: errorMessage)
+
+                Image(systemName: trendIcon(stock.trend))
+                    .foregroundStyle(trendColor(stock.trend))
             }
-            
-            
+
         }
         .navigationTitle(sectorName)
-        .listStyle(.plain)
-        .task {
-            
-            if case SectorSymbolEnum.initial = psxViewModel.sectorSymbolEnum{
-                await psxViewModel.getSectorSymbolDetail(tickers: data.symbols)
-            }
-            
-        }
+        .listStyle(.insetGrouped)
+    }
+
+    private func changeColor(_ value: String) -> Color {
+        guard let change = Double(value) else { return .secondary }
+        return change >= 0 ? .green : .red
+    }
+
+    private func trendColor(_ trend: String) -> Color {
+        trend.lowercased() == "increase" ? .green : .red
+    }
+
+    private func trendIcon(_ trend: String) -> String {
+        trend.lowercased() == "increase"
+        ? "arrow.up.right.circle.fill"
+        : "arrow.down.right.circle.fill"
     }
 }
 

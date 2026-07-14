@@ -7,6 +7,16 @@
     "%.2f%%" : {
 
     },
+    "%@ (%@%%)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ (%2$@%%)"
+          }
+        }
+      }
+    },
     "%@ • %@" : {
       "localizations" : {
         "en" : {
@@ -286,6 +296,9 @@
     "Converted Amount" : {
 
     },
+    "Couldn't load data" : {
+
+    },
     "Count" : {
       "localizations" : {
         "ur" : {
@@ -338,6 +351,9 @@
           }
         }
       }
+    },
+    "Day" : {
+
     },
     "Delete" : {
       "localizations" : {
@@ -617,6 +633,9 @@
         }
       }
     },
+    "Loading %@ prices…" : {
+
+    },
     "Loading Circuit Breakers..." : {
 
     },
@@ -700,6 +719,9 @@
       }
     },
     "Menu" : {
+
+    },
+    "Metals" : {
 
     },
     "More" : {
@@ -1064,6 +1086,9 @@
           }
         }
       }
+    },
+    "Tap to view details" : {
+
     },
     "There are currently no %@ announcements" : {
       "localizations" : {

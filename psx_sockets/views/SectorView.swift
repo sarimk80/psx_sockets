@@ -35,7 +35,7 @@ struct SectorView: View {
                             data: response.sectors[key]!
                         )
                         .onTapGesture {
-//                            appNavigation.push(route: SectorNavigationEnums.sectorDetail(sector: response.data[key]!,sectorName: key))
+                            appNavigation.push(route: SectorNavigationEnums.sectorDetail(sector: response.sectors[key]!,sectorName: key))
                         }
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
@@ -111,11 +111,11 @@ struct SectorListView: View {
     let data: [SectorStocks]
     
     private var gainerCount:Int{
-        data.map{$0.trend == "increase"}.count
+        data.count(where: {$0.trend.lowercased() == "increase"})
     }
     
     private var looserCount:Int{
-        data.map{$0.trend == "decrease"}.count
+        data.count(where: {$0.trend == "decrease"})
     }
     
     private var avgChange:Double{

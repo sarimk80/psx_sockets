@@ -22,7 +22,7 @@ enum PortfolioNavigationEnums:Hashable{
 }
 
 enum SectorNavigationEnums:Hashable{
-    case sectorDetail(sector:SectorDataModel,sectorName:String)
+    case sectorDetail(sector:[SectorStocks],sectorName:String)
     case tickerDetail(symbol:String)
 }
 
@@ -42,6 +42,8 @@ enum MoreNavigationEnums: Hashable{
     case comingSoon
     case circuitBreaker
     case currencyExchange
+    case metals
+    case metalDetail(metal:String)
     // Comment for now
     //case privacyPolicy
 }

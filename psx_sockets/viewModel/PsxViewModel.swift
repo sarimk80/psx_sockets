@@ -148,6 +148,13 @@ enum CurrencyExchangeEnums {
     case error(message:String)
 }
 
+enum MetalEnums {
+    case initial
+    case loading
+    case loaded(metalModel:[MetalModel])
+    case error(message:String)
+}
+
 
 @MainActor
 @Observable
@@ -172,6 +179,7 @@ class PsxViewModel{
     var allEtfEnum: AllEtfEnums = .initial
     var breakerEnum: CircuitBreakerEnums = .initial
     var currencyExchangeEnum: CurrencyExchangeEnums = .initial
+    var metalEnums: MetalEnums = .initial
     var currencyExchange: [CurrencyResponse] = []
     var allCurrencyExchange: [CurrencyResponse] = []
     
@@ -225,20 +233,7 @@ class PsxViewModel{
             self.hotStockEnum = HotStocksEnums.error(errorMessage: error.localizedDescription)
         }
     }
-    //debugDescription    String    "No value associated with key CodingKeys(stringValue: \"sectors\", //intValue: nil) (\"sectors\")."
-    
-//    func getCompanyDetail(symbol:String)async{
-//        do{
-//            self.psxCompany = PsxCompanyDetailEnums.loading
-//            let detail = try await psxServiceManager.psxCompanies(symbol: symbol)
-//            let dividend = try await psxServiceManager.psxDividend(symbol: symbol)
-//            let fundamentals = try await psxServiceManager.psxfundamentals(symbol: symbol)
-//            
-////            self.psxCompany = PsxCompanyDetailEnums.loaded(company: detail, dividend: dividend, fundamental: fundamentals)
-//        }catch(let error){
-//            self.psxCompany = PsxCompanyDetailEnums.error(errorMessage: error.localizedDescription)
-//        }
-//    }
+
     
     func getAllSymbols()async{
         do{
@@ -771,6 +766,31 @@ class PsxViewModel{
         currencyExchange = items.filter {
             $0.country.lowercased().contains(query) ||
             $0.currencyName.lowercased().contains(query)
+        }
+    }
+    
+    
+    func getAllMetal(metal:String) async {
+        metalEnums = .loading
+        do{
+            let response = try await psxServiceManager.getAllMetals(metal: metal)
+            let data = try await psxServiceManager.getAllCurrencyExchange()
+            
+            let usdCurrency = data.response.first { $0.currencyName == "USD" }
+            
+            let updatedMetals = response.map { metal in
+                
+                var updateMetal = metal
+                
+                updateMetal.maxPrice = String (Double(metal.maxPrice) ?? 0.0 * (usdCurrency?.currency ?? 0.0))
+                
+                return updateMetal
+            }
+            
+            
+            metalEnums = MetalEnums.loaded(metalModel: updatedMetals)
+        }catch{
+            metalEnums = .error(message: error.localizedDescription)
         }
     }
 

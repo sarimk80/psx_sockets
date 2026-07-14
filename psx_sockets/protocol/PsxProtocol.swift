@@ -45,4 +45,6 @@ protocol PsxProtocol{
     func getAllCurrencyExchange() async throws -> CurrencyExchangeModel
     
     func getAllCacheTickers() async throws -> [SymbolDetail]
+    
+    func getAllMetals(metal:String) async throws -> [MetalModel]
 }
