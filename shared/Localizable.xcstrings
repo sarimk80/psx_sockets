@@ -4,6 +4,16 @@
     "" : {
 
     },
+    "%.2f (%.2f%%)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$.2f (%2$.2f%%)"
+          }
+        }
+      }
+    },
     "%.2f%%" : {
 
     },
@@ -23,6 +33,16 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$@ • %2$@"
+          }
+        }
+      }
+    },
+    "%@%.2f" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@%2$.2f"
           }
         }
       }
@@ -293,7 +313,13 @@
         }
       }
     },
+    "Compare Stocks" : {
+
+    },
     "Converted Amount" : {
+
+    },
+    "Couldn't load comparison" : {
 
     },
     "Couldn't load data" : {
@@ -366,6 +392,9 @@
       }
     },
     "Detail View" : {
+
+    },
+    "Details" : {
 
     },
     "Dividend" : {
@@ -639,6 +668,9 @@
     "Loading Circuit Breakers..." : {
 
     },
+    "Loading comparison…" : {
+
+    },
     "Loading market data..." : {
       "localizations" : {
         "ur" : {
@@ -789,6 +821,9 @@
           }
         }
       }
+    },
+    "No Stocks Selected" : {
+
     },
     "No Symbols Found" : {
       "localizations" : {
@@ -945,6 +980,9 @@
         }
       }
     },
+    "Search symbol" : {
+
+    },
     "Searching..." : {
       "localizations" : {
         "ur" : {
@@ -1086,6 +1124,9 @@
           }
         }
       }
+    },
+    "Tap the + button to add stocks for comparison." : {
+
     },
     "Tap to view details" : {
 
