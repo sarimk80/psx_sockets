@@ -44,6 +44,7 @@ enum MoreNavigationEnums: Hashable{
     case currencyExchange
     case metals
     case metalDetail(metal:String)
+    case compareStock
     // Comment for now
     //case privacyPolicy
 }

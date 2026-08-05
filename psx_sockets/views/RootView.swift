@@ -125,6 +125,8 @@ struct RootView: View {
                                 
                             case .metalDetail(metal: let metal):
                                 MetalDetailView(metal: metal)
+                            case .compareStock:
+                                CompareStockView()
                             }
                             
                         }

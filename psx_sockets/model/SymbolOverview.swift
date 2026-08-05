@@ -45,19 +45,25 @@ struct Announcement : Codable,Hashable,Identifiable{
     
 }
 
-struct Financials : Codable{
+struct Financials : Codable,Hashable,Identifiable{
     let annual, quarterly: [Annual]
+    
+    var id: String {UUID().uuidString}
 }
 
-struct Annual : Codable{
+struct Annual : Codable,Hashable,Identifiable{
     let period: String?
     let sales: Int?
     let profitAfterTax: Int?
     let eps: Double?
+    
+    var id: String {eps?.debugDescription ?? ""}
 }
 
-struct Ratio : Codable{
+struct Ratio : Codable,Hashable,Identifiable{
     let period: String?
     let grossProfitMargin: Double?
     let netProfitMargin, epsGrowth, peg: Double?
+    
+    var id: String { peg?.debugDescription ?? ""}
 }

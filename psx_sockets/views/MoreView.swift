@@ -71,6 +71,17 @@ struct MoreView: View {
                     ) {
                         moreNavigation.push(route: .metals)
                     }
+                    
+                    Divider()
+                    
+                    MoreRow(
+                        icon: "arrow.trianglehead.left.and.right.righttriangle.left.righttriangle.right",
+                        iconColor: .cyan,
+                        title: "Compare Stocks",
+                        subtitle: "Find stocks, sectors & more"
+                    ) {
+                        moreNavigation.push(route: .compareStock)
+                    }
                    
                 }
 

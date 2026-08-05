@@ -155,6 +155,13 @@ enum MetalEnums {
     case error(message:String)
 }
 
+enum IndexTickersEnums {
+    case initial
+    case loading
+    case loaded(indexTicker:[IndexTickers])
+    case error(message:String)
+}
+
 
 @MainActor
 @Observable
@@ -180,6 +187,8 @@ class PsxViewModel{
     var breakerEnum: CircuitBreakerEnums = .initial
     var currencyExchangeEnum: CurrencyExchangeEnums = .initial
     var metalEnums: MetalEnums = .initial
+    var indexTickerEnums: IndexTickersEnums = .initial
+    
     var currencyExchange: [CurrencyResponse] = []
     var allCurrencyExchange: [CurrencyResponse] = []
     
@@ -238,8 +247,8 @@ class PsxViewModel{
     func getAllSymbols()async{
         do{
             let symbols =   try await psxServiceManager.getAllSymbols()
-            self.psxSearch = PsxSearchSymbolEnum.allSymbolLoaded(allSymbol: symbols.data)
-            self.listOfSymbols = symbols.data
+            self.psxSearch = PsxSearchSymbolEnum.allSymbolLoaded(allSymbol: symbols)
+            self.listOfSymbols = symbols
         }catch(let error){
             self.psxSearch = PsxSearchSymbolEnum.error(errorMessage: error.localizedDescription)
         }
@@ -791,6 +800,19 @@ class PsxViewModel{
             metalEnums = MetalEnums.loaded(metalModel: updatedMetals)
         }catch{
             metalEnums = .error(message: error.localizedDescription)
+        }
+    }
+    
+    
+    func getAllIndexTicker(index:String) async {
+        self.indexTickerEnums = .loading
+        
+        do{
+            let response = try await psxServiceManager.getAllIndexTicker(index: index)
+            self.indexTickerEnums = .loaded(indexTicker: response)
+            
+        }catch(let e){
+            self.indexTickerEnums = .error(message: e.localizedDescription)
         }
     }
 

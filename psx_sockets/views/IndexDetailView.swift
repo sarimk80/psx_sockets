@@ -20,119 +20,25 @@ struct IndexDetailView: View {
     @State private var showLineSheet:Bool = false
     
     @State private var scrollPosition: Date = .now
-        
-   
+    
+    
     
     var body: some View {
         ZStack {
             List {
-
-                if psxViewModel.indexSymbols.isEmpty {
-
-                    // MARK: - Chart Skeleton
-                    Section {
-                        HStack(alignment: .top, spacing: 8) {
-                            
-                            BigCardSkeleton()
-                                .frame(maxWidth: .infinity)
-                            
-                            VStack(spacing: 8) {
-                                SmallCardSkeleton()
-                                SmallCardSkeleton()
-                            }
-                            .frame(maxWidth: .infinity)
-                        }
-                    }
-                    .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-
-                    // MARK: - Rows Skeleton
-                    Section {
-                        ForEach(0..<5, id: \.self) { _ in
-                            PortfolioStockRow(result: SymbolDataClass.mock)
-                                .redacted(reason: .placeholder)
-                                .listRowInsets(EdgeInsets(top: 8, leading: 6, bottom: 8, trailing: 6))
-                                .listRowSeparator(.hidden)
-                                .listRowBackground(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(Color(.tertiarySystemBackground))
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 4)
-                                )
-                        }
-                    } header: {
-                        Text("Stocks")
-                            .redacted(reason: .placeholder)
-                            .font(.headline)
-                            .textCase(nil)
-                    }
-
-                } else {
-
-                    // MARK: - Real Chart
-                    Section {
-                        HStack(alignment: .top, spacing: 8){
-                            BigCard()
-                                .frame(maxWidth: .infinity)
-                                .onTapGesture {
-                                    showLineSheet.toggle()
-                                }
-                            VStack(spacing: 8){
-                                SmallCard(title: "Allocation", subtitle: "Distribution", image: "chart.pie",color: .orange)
-                                    .onTapGesture {
-                                        showSectorSheet.toggle()
-                                    }
-                                SmallCard(title: "Index Stats", subtitle: "Market Snapshot", image: "chart.bar.horizontal.page",color: .pink)
-                                    .onTapGesture {
-                                        showIndexSheet.toggle()
-                                    }
-                            }
-                            .frame(maxWidth: .infinity)
-                        }
-                        
-                    }
-                    .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-
-                    // MARK: - Real Rows
-                    Section {
-                        ForEach(psxViewModel.indexSymbols, id: \.data.symbol) { result in
-                            PortfolioStockRow(result: result.data)
-                                .contentShape(Rectangle())
-                                .background(
-                                    RoundedRectangle(cornerRadius : 16)
-                                        .fill(Color(.tertiarySystemBackground))
-                                )
-                                .onTapGesture {
-                                    appNavigation.tickerNavigation.append(
-                                        TickerDetailRoute.tickerDetail(symbol: result.data.symbol)
-                                    )
-                                }
-                        }
-                    } header: {
-                        HStack {
-                            Text("Stocks")
-                                .font(.headline)
-                                .textCase(nil)
-
-                            Spacer()
-
-                            Text("\(psxViewModel.indexSymbols.count)")
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .listRowInsets(EdgeInsets(top: 8, leading: 6, bottom: 8, trailing: 6))
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(.systemBackground))
-                            .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                    )
+                
+                switch psxViewModel.indexTickerEnums {
+                case .initial, .loading:
+                    indexDetailLoading
+                case .loaded(let indexTicker):
+                    IndexDetailLoaded(indexTicker: indexTicker,
+                                      onChartClick: {self.showLineSheet.toggle()},
+                                      onSectorClick: {self.showSectorSheet.toggle()},
+                                      onIndexClick: {self.showIndexSheet.toggle()},appNavigation: appNavigation)
+                case .error(let message):
+                    Text(message)
                 }
+                
             }
             .listStyle(.grouped)
             .scrollContentBackground(.hidden)
@@ -145,7 +51,8 @@ struct IndexDetailView: View {
                 await psxViewModel.getIndexData(indexEnum: indexName)
             }
             await psxViewModel.getKlineSymbol(symbol: IndexEnumToString(indexEnum: indexName), timeFrame: "1d")
-            await psxViewModel.getIndexSymbolAllDetail(indexEnum: indexName)
+            //await psxViewModel.getIndexSymbolAllDetail(indexEnum: indexName)
+            await psxViewModel.getAllIndexTicker(index: IndexEnumToString(indexEnum: indexName))
         }
         .sheet(isPresented: $showSectorSheet) {
             SheetContainer(title: "Sector Breakdown", content: {
@@ -153,9 +60,9 @@ struct IndexDetailView: View {
             }, onClose: {
                 showSectorSheet = false
             })
-                .presentationDetents([indexName == .kse_100 ? .large : .medium])
-                .presentationBackground(Color(.systemBackground))
-                .presentationDragIndicator(.visible)
+            .presentationDetents([indexName == .kse_100 ? .large : .medium])
+            .presentationBackground(Color(.systemBackground))
+            .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $showIndexSheet) {
             SheetContainer(title: "Index Overview", content: {
@@ -163,9 +70,9 @@ struct IndexDetailView: View {
             }, onClose: {
                 showIndexSheet = false
             })
-                .presentationDetents([.height(260)])
-                .presentationBackground(Color(.systemBackground))
-                .presentationDragIndicator(.visible)
+            .presentationDetents([.height(260)])
+            .presentationBackground(Color(.systemBackground))
+            .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $showLineSheet) {
             SheetContainer(title: "Performance Trend", content: {
@@ -173,9 +80,9 @@ struct IndexDetailView: View {
             }, onClose: {
                 showLineSheet = false
             })
-                .presentationDetents([.medium])
-                .presentationBackground(Color(.systemBackground))
-                .presentationDragIndicator(.visible)
+            .presentationDetents([.medium])
+            .presentationBackground(Color(.systemBackground))
+            .presentationDragIndicator(.visible)
         }
     }
     
@@ -218,7 +125,7 @@ struct IndexDetailView: View {
             }
             .frame(height: 320)
             .frame(maxWidth: .infinity)
-
+            
         }
     }
     
@@ -250,6 +157,192 @@ struct IndexDetailView: View {
         }
     }
     
+    @ViewBuilder
+    private var indexDetailLoading: some View {
+        Section {
+            HStack(alignment: .top, spacing: 8) {
+                
+                BigCardSkeleton()
+                    .frame(maxWidth: .infinity)
+                
+                VStack(spacing: 16) {
+                    SmallCardSkeleton()
+                    SmallCardSkeleton()
+                }
+                .frame(maxWidth: .infinity)
+            }
+        }
+        .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
+        .listRowBackground(Color.clear)
+        .listRowSeparator(.hidden)
+        
+        Section {
+            ForEach(0..<5, id: \.self) { _ in
+                PortfolioStockRow(result: SymbolDataClass.mock)
+                    .redacted(reason: .placeholder)
+                    .listRowInsets(EdgeInsets(top: 8, leading: 6, bottom: 8, trailing: 6))
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color(.tertiarySystemBackground))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                    )
+            }
+        } header: {
+            Text("Stocks")
+                .redacted(reason: .placeholder)
+                .font(.headline)
+                .textCase(nil)
+        }
+    }
+    
+    
+    
+}
+
+struct IndexDetailLoaded: View {
+    
+    let indexTicker:[IndexTickers]
+    let onChartClick: () -> Void
+    let onSectorClick: () -> Void
+    let onIndexClick: () -> Void
+    
+    var appNavigation: AppNavigation
+    
+    var body: some View {
+        Section {
+            HStack(alignment: .top, spacing: 8){
+                BigCard()
+                    .frame(maxWidth: .infinity)
+                
+                    .onTapGesture {
+                        onChartClick()
+                    }
+                VStack(spacing: 8){
+                    SmallCard(title: "Allocation", subtitle: "Distribution", image: "chart.pie",color: .orange)
+                        .onTapGesture {
+                            onSectorClick()
+                        }
+                    SmallCard(title: "Index Stats", subtitle: "Market Snapshot", image: "chart.bar.horizontal.page",color: .pink)
+                        .onTapGesture {
+                            onIndexClick()
+                        }
+                }
+                .frame(maxWidth: .infinity)
+            }
+            
+        }
+        .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
+        .listRowBackground(Color.clear)
+        .listRowSeparator(.hidden)
+        
+        // MARK: - Real Rows
+        Section {
+            ForEach(indexTicker, id: \.symbol) { result in
+                IndexList(indexDetail: result)
+                    .onTapGesture {
+                        appNavigation.tickerNavigation.append(TickerDetailRoute.tickerDetail(symbol: result.symbol))
+                    }
+            }
+        } header: {
+            HStack {
+                Text("Stocks")
+                    .font(.headline)
+                    .textCase(nil)
+                
+                Spacer()
+                
+                Text("\(indexTicker.count)")
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .listRowInsets(EdgeInsets(top: 8, leading: 6, bottom: 12, trailing: 6))
+        .listRowSeparator(.hidden)
+        .listRowBackground(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.systemBackground))
+                .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+        )
+        
+    }
+}
+
+struct IndexList:View {
+    let indexDetail: IndexTickers
+    
+    
+    private var trendColor: Color {
+        indexDetail.change > 0 ? .green : .red
+    }
+    
+    var body: some View{
+        
+        HStack(spacing: 16) {
+            ZStack {
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                trendColor.opacity(0.2),
+                                trendColor.opacity(0.05)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 46, height: 46)
+                
+                Text(indexDetail.symbol.prefix(3))
+                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .foregroundColor(trendColor)
+            }
+            
+            VStack(alignment: .leading,spacing:6){
+                Text(indexDetail.symbol)
+                    .font(.system(.headline, weight: .semibold))
+                    .foregroundColor(.primary)
+                    .lineLimit(1)
+                Text(indexDetail.name)
+                    .font(.system(.caption2, design: .monospaced))
+                    .fontWeight(.medium)
+                    .foregroundColor(.secondary)
+            }
+            
+            Spacer()
+            
+            VStack(alignment:.trailing){
+                Text(indexDetail.current)
+                    .font(.system(.caption, design: .monospaced))
+                    .fontWeight(.medium)
+                    .foregroundColor(.secondary)
+                
+                HStack(spacing: 6) {
+                    // Percentage change pill
+                    Text("\(indexDetail.change > 0 ? "+" : "")\(indexDetail.change, specifier: "%.2f")")
+                        .font(.system(.caption2, design: .monospaced))
+                        .fontWeight(.medium)
+                        .foregroundColor(trendColor)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 3)
+                        .background(
+                            Capsule()
+                                .fill(trendColor.opacity(0.12))
+                        )
+                    
+                    
+                    Text(indexDetail.volume)
+                        .font(.system(.caption, design: .monospaced))
+                        .fontWeight(.medium)
+                        .foregroundColor(trendColor)
+                }
+            }
+        }
+        .padding(.horizontal,8)
+        
+    }
 }
 
 struct BigCard: View {
@@ -322,7 +415,7 @@ struct SheetContainer<Content: View>: View {
         self.content = content()
         self.onClose = onClose
     }
-
+    
     var body: some View {
         VStack(spacing: 16) {
             HStack {
@@ -336,7 +429,7 @@ struct SheetContainer<Content: View>: View {
                 }
             }
             Divider()
-
+            
             content
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -378,14 +471,14 @@ struct SmallCardSkeleton: View {
                 .fill(Color.gray.opacity(0.3))
                 .frame(width: 36, height: 36)
             
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 12) {
                 RoundedRectangle(cornerRadius: 6)
                     .fill(Color.gray.opacity(0.3))
-                    .frame(width: 100, height: 14)
+                    .frame(width: 100, height: 16)
                 
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(Color.gray.opacity(0.25))
-                    .frame(width: 80, height: 12)
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 100, height: 16)
             }
             
             Spacer()

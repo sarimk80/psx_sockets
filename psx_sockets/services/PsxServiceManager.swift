@@ -9,6 +9,31 @@ import Foundation
 
 
 class PsxServiceManager:PsxProtocol{
+    func getAllIndexTicker(index: String) async throws -> [IndexTickers] {
+        
+        guard let url = URL(string: "https://sarim-pix.hf.space/get_all_index?indexName=\(index)")
+        else {  throw URLError(.badURL) }
+              
+        let (data,response) = try await URLSession.shared.data(from: url)
+              
+              
+        guard let response = response as? HTTPURLResponse,
+                    
+                response.statusCode == 200
+                      
+                      
+        else { throw URLError(.badServerResponse) }
+              
+        if let string = String(data: data, encoding: .utf8) {
+                    print(string)
+                }
+              
+              
+        let decodeResponse = try JSONDecoder().decode([IndexTickers].self, from: data)
+              
+        return decodeResponse
+    }
+    
     
     func getAllMetals(metal:String) async throws -> [MetalModel] {
         guard let url = URL(string: "https://sarim-pix.hf.space/\(metal)_price")
@@ -408,8 +433,8 @@ class PsxServiceManager:PsxProtocol{
         return decodeResponse
     }
     
-    func getAllSymbols() async throws -> AllSymbolsModel{
-        guard let url = URL(string: "https://psxterminal.com/api/symbols")
+    func getAllSymbols() async throws -> [String]{
+        guard let url = URL(string: "https://sarim-pix.hf.space/get_all_symbols")
         else {  throw URLError(.badURL) }
               
         let (data,response) = try await URLSession.shared.data(from: url)
@@ -427,7 +452,7 @@ class PsxServiceManager:PsxProtocol{
                 }
               
               
-        let decodeResponse = try JSONDecoder().decode(AllSymbolsModel.self, from: data)
+        let decodeResponse = try JSONDecoder().decode([String].self, from: data)
         
         return decodeResponse
     }
