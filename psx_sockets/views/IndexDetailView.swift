@@ -18,8 +18,11 @@ struct IndexDetailView: View {
     @State private var showSectorSheet:Bool = false
     @State private var showIndexSheet:Bool = false
     @State private var showLineSheet:Bool = false
+    @State private var showFilterSheet:Bool = false
     
     @State private var scrollPosition: Date = .now
+    
+    @State private var indexFilter:IndexFilterEnums = .Current
     
     
     
@@ -34,7 +37,10 @@ struct IndexDetailView: View {
                     IndexDetailLoaded(indexTicker: indexTicker,
                                       onChartClick: {self.showLineSheet.toggle()},
                                       onSectorClick: {self.showSectorSheet.toggle()},
-                                      onIndexClick: {self.showIndexSheet.toggle()},appNavigation: appNavigation)
+                                      onIndexClick: {self.showIndexSheet.toggle()} ,
+                                      onFilterClick: {self.showFilterSheet.toggle()},
+                                      appNavigation: appNavigation,
+                                      indexFilter: $indexFilter)
                 case .error(let message):
                     Text(message)
                 }
@@ -51,9 +57,13 @@ struct IndexDetailView: View {
                 await psxViewModel.getIndexData(indexEnum: indexName)
             }
             await psxViewModel.getKlineSymbol(symbol: IndexEnumToString(indexEnum: indexName), timeFrame: "1d")
-            //await psxViewModel.getIndexSymbolAllDetail(indexEnum: indexName)
             await psxViewModel.getAllIndexTicker(index: IndexEnumToString(indexEnum: indexName))
         }
+        .onChange(of: indexFilter, { oldValue, newValue in
+            Task{
+                await psxViewModel.filterIndexTicker(filterEnums: newValue)
+            }
+        })
         .sheet(isPresented: $showSectorSheet) {
             SheetContainer(title: "Sector Breakdown", content: {
                 chartView
@@ -70,7 +80,7 @@ struct IndexDetailView: View {
             }, onClose: {
                 showIndexSheet = false
             })
-            .presentationDetents([.height(260)])
+            .presentationDetents([.medium])
             .presentationBackground(Color(.systemBackground))
             .presentationDragIndicator(.visible)
         }
@@ -80,9 +90,60 @@ struct IndexDetailView: View {
             }, onClose: {
                 showLineSheet = false
             })
-            .presentationDetents([.medium])
+            
+        }
+        .sheet(isPresented: $showFilterSheet) {
+            Form{
+                
+                Section {
+                    HStack{
+                        Text("Filters")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                        
+                        Spacer()
+                        
+                        Image(systemName: "xmark.circle.fill")
+                            .onTapGesture {
+                                self.showFilterSheet.toggle()
+                            }
+                    }
+                }
+                .listRowBackground(Color(.clear))
+                
+                Section {
+                    Picker("Picker", selection: $indexFilter) {
+                        ForEach(IndexFilterEnums.allCases) { temp in
+                            Text(temp.rawValue)
+                                .tag(temp)
+                        }
+                    }
+                    .pickerStyle(.inline)
+                    .labelsHidden()
+                } header: {
+                    Text("Filter by: ")
+                }
+                .listRowBackground(Color(.clear))
+                
+                Section {
+                    Button {
+                        showFilterSheet.toggle()
+                    } label: {
+                        Text("Done")
+                            .fontWeight(.semibold)
+                            .padding(.vertical,6)
+                    }
+                    .buttonSizing(.flexible)
+                    .buttonStyle(.glassProminent)
+                }
+                .listRowBackground(Color.clear)
+
+            }
+                            
+            .presentationDetents([.fraction(0.8)])
             .presentationBackground(Color(.systemBackground))
             .presentationDragIndicator(.visible)
+
         }
     }
     
@@ -130,17 +191,95 @@ struct IndexDetailView: View {
     }
     
     @ViewBuilder
-    private var statsView: some View{
-        VStack(alignment:.leading){
-            
-            TickerView(tickerDetail: tickerDetail)
-                .frame(height: 200)
-                .background(Color(.secondarySystemBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 20))
-                .padding(.horizontal, 8)
-            
+    private var statsView: some View {
+        ScrollView {
+            VStack(spacing: 12) {
+                // Header: symbol name & price/change
+                HStack(alignment: .firstTextBaseline) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(tickerDetail.symbol)
+                            .font(.title2.bold())
+                        if let fullName = tickerDetail.fullName, !fullName.isEmpty {
+                            Text(fullName)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    Spacer()
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text(tickerDetail.price, format: .number.precision(.fractionLength(2)))
+                            .font(.title2.monospacedDigit())
+                        HStack(spacing: 4) {
+                            Image(systemName: tickerDetail.change >= 0 ? "arrow.up.right" : "arrow.down.right")
+                                .font(.caption2)
+                            Text(tickerDetail.change, format: .number.sign(strategy: .automatic).precision(.fractionLength(2)))
+                            Text("(\(tickerDetail.changePercent, format: .number.precision(.fractionLength(2)))%)")
+                                .foregroundStyle(.secondary)
+                        }
+                        .font(.caption)
+                        .foregroundColor(tickerDetail.change >= 0 ? .green : .red)
+                    }
+                }
+                
+                Divider()
+                
+                // Grid of key metrics
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                    MetricCell(title: "High", value: tickerDetail.high, format: .number.precision(.fractionLength(2)))
+                    MetricCell(title: "Low", value: tickerDetail.low, format: .number.precision(.fractionLength(2)))
+                    MetricCell(title: "Volume", value: tickerDetail.volume, format: .number.notation(.compactName))
+                   
+                   
+                    MetricCell(title: "1Y Change", value: tickerDetail.year_1_change, format: .number.precision(.fractionLength(2)), isPercent: true)
+                    MetricCell(title: "YTD Change", value: tickerDetail.ytd_change, format: .number.precision(.fractionLength(2)), isPercent: true)
+                    MetricCell(title: "Day Range", value: tickerDetail.day_range, isString: true)
+                    MetricCell(title: "52W Range", value: tickerDetail.week_range_52, isString: true)
+                    
+                    MetricCell(title: "LDCP", value: tickerDetail.ldcp, format: .number.precision(.fractionLength(2)))
+                    
+                }
+            }
+            .padding(12)
+            //.background(Color(.secondarySystemBackground))
+            //.clipShape(RoundedRectangle(cornerRadius: 16))
+            .padding(.horizontal, 8)
+        }
+        //.frame(maxHeight: 200) // respects sheet detent
+    }
+
+    // Helper view for a single metric
+    private struct MetricCell: View {
+        let title: String
+        let value: String
+        
+        init(title: String, value: String) {
+            self.title = title
+            self.value = value
         }
         
+        // Convenience initializers for numeric/percent/string values
+        init(title: String, value: some Numeric, format: FloatingPointFormatStyle<Double>, isPercent: Bool = false) {
+            self.title = title
+            let formatted = (value as? Double ?? Double("\(value)") ?? 0)
+            self.value = isPercent ? formatted.formatted(format) + "%" : formatted.formatted(format)
+        }
+        
+        init(title: String, value: String, isString: Bool) {
+            self.title = title
+            self.value = value
+        }
+        
+        var body: some View {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                Text(value)
+                    .font(.caption.weight(.medium))
+                    .lineLimit(1)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
     }
     
     @ViewBuilder
@@ -150,7 +289,7 @@ struct IndexDetailView: View {
             ProgressView()
         case .loading:
             ProgressView()
-        case .loaded(let data,let kLineData):
+        case .loaded(_,let kLineData):
             KlineChartView(kline: kLineData, scrollPosition: $scrollPosition,showVolume: false)
         case .error(let errorMessage):
             Text(errorMessage)
@@ -190,10 +329,14 @@ struct IndexDetailView: View {
                     )
             }
         } header: {
-            Text("Stocks")
-                .redacted(reason: .placeholder)
-                .font(.headline)
-                .textCase(nil)
+                Text("Stocks")
+                    .redacted(reason: .placeholder)
+                    .font(.headline)
+                    .textCase(nil)
+                
+                
+            
+            
         }
     }
     
@@ -207,8 +350,11 @@ struct IndexDetailLoaded: View {
     let onChartClick: () -> Void
     let onSectorClick: () -> Void
     let onIndexClick: () -> Void
+    let onFilterClick:() -> Void
     
     var appNavigation: AppNavigation
+    
+    @Binding var indexFilter: IndexFilterEnums
     
     var body: some View {
         Section {
@@ -240,24 +386,32 @@ struct IndexDetailLoaded: View {
         // MARK: - Real Rows
         Section {
             ForEach(indexTicker, id: \.symbol) { result in
-                IndexList(indexDetail: result)
+                IndexList(indexDetail: result,indexFilter: $indexFilter)
                     .onTapGesture {
                         appNavigation.tickerNavigation.append(TickerDetailRoute.tickerDetail(symbol: result.symbol))
                     }
             }
         } header: {
-            HStack {
+            HStack(spacing: 4) {
                 Text("Stocks")
                     .font(.headline)
                     .textCase(nil)
                 
                 Spacer()
                 
-                Text("\(indexTicker.count)")
-                    .foregroundStyle(.secondary)
+                HStack(spacing: 2){
+                    Image(systemName: "line.3.horizontal.decrease")
+                    Text("Filter")
+                        .fontWeight(.semibold)
+                }
+                .foregroundStyle(.accent)
+                .onTapGesture {
+                    onFilterClick()
+                }
+                
             }
         }
-        .listRowInsets(EdgeInsets(top: 8, leading: 6, bottom: 12, trailing: 6))
+        .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 12, trailing: 8))
         .listRowSeparator(.hidden)
         .listRowBackground(
             RoundedRectangle(cornerRadius: 12)
@@ -272,6 +426,8 @@ struct IndexDetailLoaded: View {
 
 struct IndexList:View {
     let indexDetail: IndexTickers
+    
+    @Binding var indexFilter:IndexFilterEnums
     
     
     private var trendColor: Color {
@@ -314,10 +470,14 @@ struct IndexList:View {
             Spacer()
             
             VStack(alignment:.trailing){
-                Text(indexDetail.current)
+                
+                indexValue
                     .font(.system(.caption, design: .monospaced))
                     .fontWeight(.medium)
                     .foregroundColor(.secondary)
+                
+                
+                    
                 
                 HStack(spacing: 6) {
                     // Percentage change pill
@@ -340,8 +500,37 @@ struct IndexList:View {
                 }
             }
         }
-        .padding(.horizontal,8)
+        .padding(.vertical, 8)
+        .padding(.horizontal, 6)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.tertiarySystemBackground))
+        )
+        .padding(.horizontal,6)
         
+    }
+    
+    @ViewBuilder
+    var indexValue: some View {
+        switch indexFilter {
+        case .Current:
+            Text("\(indexDetail.current)")
+
+        case .High:
+            Text("High: \(indexDetail.current)")
+
+        case .IndexWeight:
+            Text("Index Weight: \(indexDetail.idxWeight.formatted(.number))")
+
+        case .Low:
+            Text("Low: \(indexDetail.current)")
+
+        case .MarketCap:
+            Text("Market Cap: \(indexDetail.marketCap.formatted(.number))")
+
+        case .Volume:
+            Text("Vol: \(indexDetail.volume)")
+        }
     }
 }
 
@@ -457,7 +646,7 @@ struct BigCardSkeleton: View {
                 .frame(width: 110, height: 14)
         }
         .frame(maxWidth: .infinity, minHeight: 150)
-        .background(Color(.systemBackground))
+        .background(Color(.tertiarySystemBackground))
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.04), radius: 6, x: 0, y: 3)
     }
@@ -484,7 +673,7 @@ struct SmallCardSkeleton: View {
             Spacer()
         }
         .padding(12)
-        .background(Color(.systemBackground))
+        .background(Color(.tertiarySystemBackground))
         .cornerRadius(14)
         .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 2)
     }
