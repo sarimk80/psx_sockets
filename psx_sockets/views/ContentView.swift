@@ -217,6 +217,7 @@ struct IndexView: View {
         switch psxViewModel.indicesEnums {
         case .initial, .loading:
             TickerView(tickerDetail: SymbolDataClass.mock)
+                .frame(height: 200)
                 .background(Color(.tertiarySystemBackground))
                 .clipShape(RoundedRectangle(cornerRadius: 20))
                 .padding(.horizontal, 16)

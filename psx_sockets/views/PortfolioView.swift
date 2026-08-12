@@ -286,6 +286,14 @@ struct PortfolioView: View {
                 .fontWeight(.semibold)
                 .foregroundColor(.blue)
             }
+            
+            ToolbarItem(placement: .primaryAction) {
+                Button("Filter", systemImage: "line.3.horizontal.decrease") {
+                    self.showSymbolsheet.toggle()
+                }
+                .fontWeight(.semibold)
+                .foregroundColor(.blue)
+            }
         }
         .listStyle(.insetGrouped)
         .contentMargins(8.0, for: .automatic)

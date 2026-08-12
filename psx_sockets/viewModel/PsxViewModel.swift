@@ -248,7 +248,7 @@ class PsxViewModel{
         do{
             let symbols =   try await psxServiceManager.getAllSymbols()
             self.psxSearch = PsxSearchSymbolEnum.allSymbolLoaded(allSymbol: symbols)
-            self.listOfSymbols = symbols
+            self.listOfSymbols = symbols.map{ $0.replacing("XD", with: "") }
         }catch(let error){
             self.psxSearch = PsxSearchSymbolEnum.error(errorMessage: error.localizedDescription)
         }
@@ -779,26 +779,33 @@ class PsxViewModel{
     }
     
     
-    func getAllMetal(metal:String) async {
+    func getAllMetal(metal: String) async {
         metalEnums = .loading
-        do{
+
+        do {
             let response = try await psxServiceManager.getAllMetals(metal: metal)
             let data = try await psxServiceManager.getAllCurrencyExchange()
-            
+
             let usdCurrency = data.response.first { $0.currencyName == "USD" }
-            
+            let usdToPkr = usdCurrency?.currency ?? 0.0
+
+            let troyOzToTola = 2.6666667
+
             let updatedMetals = response.map { metal in
-                
                 var updateMetal = metal
-                
-                updateMetal.maxPrice = String (Double(metal.maxPrice) ?? 0.0 * (usdCurrency?.currency ?? 0.0))
-                
+
+                let usdPerOz = Double(metal.maxPrice) ?? 0.0
+                let pkrPerOz = usdPerOz * usdToPkr
+                let pkrPerTola = pkrPerOz / troyOzToTola
+
+                updateMetal.maxPrice = String(pkrPerTola)
+
                 return updateMetal
             }
-            
-            
-            metalEnums = MetalEnums.loaded(metalModel: updatedMetals)
-        }catch{
+
+            metalEnums = .loaded(metalModel: updatedMetals)
+
+        } catch {
             metalEnums = .error(message: error.localizedDescription)
         }
     }
@@ -809,11 +816,55 @@ class PsxViewModel{
         
         do{
             let response = try await psxServiceManager.getAllIndexTicker(index: index)
-            self.indexTickerEnums = .loaded(indexTicker: response)
+                        
+            let updatedResponse = response.map { result in
+                
+                var new = result
+                
+                new.symbol = result.symbol.replacing("XD", with: "")
+                
+                return new
+            }
+            
+            self.indexTickerEnums = .loaded(indexTicker: updatedResponse)
             
         }catch(let e){
             self.indexTickerEnums = .error(message: e.localizedDescription)
         }
+    }
+    
+    func filterIndexTicker(filterEnums: IndexFilterEnums) async{
+        guard case .loaded(let response) = indexTickerEnums else {return}
+        
+        let filterResponse:[IndexTickers] = switch filterEnums {
+        case .Current:
+            response.sorted {
+                    $0.symbol.localizedCaseInsensitiveCompare($1.symbol) == .orderedAscending
+                }
+        case .High:
+            response.sorted(by: { old, new in
+                Double(old.current) ?? 0.0 > Double(new.current) ?? 0.0
+            })
+        case .Low:
+            response.sorted(by: { old, new in
+                Double(old.current) ?? 0.0 < Double(new.current) ?? 0.0
+            })
+        case .IndexWeight:
+            response.sorted(by: { old, new in
+                old.idxWeight > new.idxWeight
+            })
+        case .Volume:
+            response.sorted(by: { old, new in
+                Double(old.volume) ?? 0.0 > Double(new.volume) ?? 0.0
+            })
+        case .MarketCap:
+            response.sorted(by: { old, new in
+                old.marketCap > new.marketCap
+            })
+        }
+        
+        self.indexTickerEnums = .loaded(indexTicker: filterResponse)
+        
     }
 
 }

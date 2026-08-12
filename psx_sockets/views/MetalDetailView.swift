@@ -76,7 +76,7 @@ struct MetalDetailView: View {
             let isPositive = change >= 0
 
             VStack(alignment: .leading, spacing: 6) {
-                Text(currencyString(latest.price))
+                Text(latest.price,format: .number.precision(.fractionLength(2)))
                     .font(.system(size: 34, weight: .bold, design: .rounded))
                     .contentTransition(.numericText())
 
