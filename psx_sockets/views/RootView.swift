@@ -109,7 +109,7 @@ struct RootView: View {
                             case .etfView:
                                 EtfView()
                                     .environment(moreNavigation)
-                            case .etfDetailView(let indexName,let etf):
+                            case .etfDetailView(_,let etf):
                                 EtfDetailView(etf: etf)
                                     .environment(moreNavigation)
                             case .comingSoon:
@@ -123,8 +123,8 @@ struct RootView: View {
                                 MetalView()
                                     .environment(moreNavigation)
                                 
-                            case .metalDetail(metal: let metal):
-                                MetalDetailView(metal: metal)
+                            case .metalDetail(metal: let metal,color: let color):
+                                MetalDetailView(metal: metal,color: color)
                             case .compareStock:
                                 CompareStockView()
                             }

@@ -61,20 +61,7 @@ struct HotStocks: View {
     private var headerSection: some View {
         Section {
             VStack(spacing: 16) {
-                // Title
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Hot Stocks")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .foregroundColor(.primary)
-                    
-                    Text("Top performing stocks in the market")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
                 
-                // Segmented Control
                 Picker("Market Performance", selection: $stockerEnums) {
                     ForEach(StockerEnums.allCases) { stockType in
                         Label(stockType.title, systemImage: stockType.iconName)

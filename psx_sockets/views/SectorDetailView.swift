@@ -46,6 +46,7 @@ struct SectorDetailView: View {
 
         }
         .navigationTitle(sectorName)
+        .navigationBarTitleDisplayMode(.inline)
         .listStyle(.insetGrouped)
     }
 

@@ -99,6 +99,7 @@ struct CompareStockView: View {
                 
             }
         }
+        .background(Color(.systemGroupedBackground))
         
     }
     
@@ -207,7 +208,7 @@ struct CompareStockView: View {
         .frame(width: 160, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 14)
-                .fill(Color(.secondarySystemBackground))
+                .fill(Color(.tertiarySystemBackground))
         )
     }
     
@@ -313,7 +314,7 @@ struct CompareStockView: View {
         .padding(14)
         .background(
             RoundedRectangle(cornerRadius: 14)
-                .fill(Color(.secondarySystemBackground))
+                .fill(Color(.tertiarySystemBackground))
         )
     }
 }

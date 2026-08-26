@@ -76,7 +76,6 @@ struct CorporationDetailView: View {
             .padding(.vertical)
         }
         .background(Color(.systemGroupedBackground))
-        //.navigationBarTitleDisplayMode(.inline)
         .navigationTitle(corporation.rawValue)
     }
     

@@ -28,6 +28,61 @@ func StringToIndexEnum(indexName:String) -> IndexEnums {
     
 }
 
+func SymbolToString(symbol: String) -> String {
+    switch symbol {
+    case "GC=F":
+        return "Gold"
+    case "SI=F":
+        return "Silver"
+    case "PL=F":
+        return "Platinum"
+    case "PA=F":
+        return "Palladium"
+    case "CL=F":
+        return "WTI Crude Oil"
+    case "BZ=F":
+        return "Brent Crude Oil"
+    case "NG=F":
+        return "Natural Gas"
+    case "RB=F":
+        return "Gasoline"
+    case "HO=F":
+        return "Heating Oil"
+    case "HG=F":
+        return "Copper"
+    case "ZC=F":
+        return "Corn"
+    case "ZW=F":
+        return "Wheat"
+    case "ZS=F":
+        return "Soybeans"
+    case "ZO=F":
+        return "Oats"
+    case "ZR=F":
+        return "Rough Rice"
+    case "KC=F":
+        return "Coffee"
+    case "SB=F":
+        return "Sugar"
+    case "CC=F":
+        return "Cocoa"
+    case "CT=F":
+        return "Cotton"
+    case "LBS=F":
+        return "Lumber"
+    case "OJ=F":
+        return "Orange Juice"
+    case "LE=F":
+        return "Live Cattle"
+    case "GF=F":
+        return "Feeder Cattle"
+    case "HE=F":
+        return "Lean Hogs"
+    default:
+        return "Gold"
+    }
+}
+
 func IndexEnumToString(indexEnum:IndexEnums) -> String {
     switch indexEnum {
     case .kse_100:

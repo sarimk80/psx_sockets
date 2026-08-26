@@ -2,315 +2,289 @@ import SwiftUI
 import Charts
 
 struct MetalDetailView: View {
-
-    @State private var psxViewModel = PsxViewModel(psxServiceManager: PsxServiceManager())
-    @State private var selectedRange: PriceRange = .threeMonths
-    @State private var selectedPoint: MetalModel?
-
+    
+    @State private var viewModel = PsxViewModel(psxServiceManager: PsxServiceManager())
+    
+    @State private var chartSelection: ChartRange = .all
+    
     let metal: String
-
-    private let formatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        return formatter
-    }()
-
+    let color: Color
+    
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                switch psxViewModel.metalEnums {
-
+                switch viewModel.metalEnums {
                 case .initial, .loading:
-                    loadingState
-
-                case .loaded(let metalModel):
-                    let parsed = parsedData(metalModel)
-                    let filtered = filteredData(parsed)
-
-                    priceHeader(filtered)
-                    rangeSelector
-                    chartCard(filtered)
-                    listdata(parsed)
+                    VStack(alignment: .leading, spacing: 16) {
+                        // Summary header
+                        summaryHeader(for: [MetalModel.mock])
+                            .redacted(reason: .placeholder)
+                        
+                        // Chart
+                        LineChartLoading()
+                            
+                        
+                        // Historical data list
+                        historicalListView(for: [MetalModel.mock])
+                            .redacted(reason: .placeholder)
+                    }
+                    .padding(.horizontal,8)
                     
-
+                case .loaded(let metals):
+                    if metals.isEmpty {
+                        emptyStateView
+                    } else {
+                        // Main content
+                        VStack(alignment: .leading, spacing: 16) {
+                            // Summary header
+                            summaryHeader(for: metals)
+                                .padding(.horizontal,8)
+                            
+                            Picker("", selection: $chartSelection, content: {
+                                ForEach(ChartRange.allCases,id: \.self) { period in
+                                    Text(period.rawValue)
+                                        .tag(period)
+                                }
+                            })
+                            .pickerStyle(.segmented)
+                            .padding(.horizontal,8)
+                            .onChange(of: chartSelection) { old, new in
+                                viewModel.filterChartPeriod(chartRange: new,metal: metals)
+                            }
+                            
+                            // Chart
+                            chartView(for: viewModel.filterMetals)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .fill(Color(.systemBackground))
+                                )
+                                .frame(height: 350)
+                            
+                            // Historical data list
+                            historicalListView(for: metals)
+                                .padding(.horizontal,8)
+                        }
+                        
+                    }
+                    
                 case .error(let message):
-                    errorState(message)
+                    errorView(message: message)
                 }
             }
-            .padding(.horizontal)
             .padding(.top, 8)
         }
         .background(Color(.systemGroupedBackground))
-        .navigationTitle(metal.capitalized)
+        .navigationTitle(SymbolToString(symbol: metal))
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(content: {
+            ToolbarItem {
+                Image(systemName: "line.3.horizontal.decrease.circle")
+            }
+        })
         .task {
-            await psxViewModel.getAllMetal(metal: metal.lowercased())
+            await viewModel.getAllMetal(metal: metal)
         }
     }
+}
 
-    // MARK: - Data Helpers
-
-    private func parsedData(_ raw: [MetalModel]) -> [(date: Date, price: Double, raw: MetalModel)] {
-        raw.compactMap { item in
-            guard let date = formatter.date(from: item.day),
-                  let price = Double(item.maxPrice) else { return nil }
-            return (date, price, item)
-        }
-        .sorted { $0.date < $1.date }
-    }
-
-    private func filteredData(_ data: [(date: Date, price: Double, raw: MetalModel)]) -> [(date: Date, price: Double, raw: MetalModel)] {
-        guard let cutoff = selectedRange.cutoffDate else { return data }
-        return data.filter { $0.date >= cutoff }
-    }
-
-    // MARK: - Price Header
-
-    @ViewBuilder
-    private func priceHeader(_ data: [(date: Date, price: Double, raw: MetalModel)]) -> some View {
-        if let latest = data.last {
-            let first = data.first?.price ?? latest.price
-            let change = latest.price - first
-            let percentChange = first != 0 ? (change / first) * 100 : 0
-            let isPositive = change >= 0
-
-            VStack(alignment: .leading, spacing: 6) {
-                Text(latest.price,format: .number.precision(.fractionLength(2)))
-                    .font(.system(size: 34, weight: .bold, design: .rounded))
-                    .contentTransition(.numericText())
-
-                HStack(spacing: 6) {
-                    Image(systemName: isPositive ? "arrow.up.right" : "arrow.down.right")
-                        .font(.caption.weight(.bold))
-                    Text("\(currencyString(abs(change))) (\(String(format: "%.2f", abs(percentChange)))%)")
-                        .font(.subheadline.weight(.semibold))
-                    Text(selectedRange.label)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-                .foregroundStyle(isPositive ? .green : .red)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
-    }
-
-    // MARK: - Range Selector
-
-    private var rangeSelector: some View {
-        HStack(spacing: 8) {
-            ForEach(PriceRange.allCases) { range in
-                Button {
-                    withAnimation(.snappy) { selectedRange = range }
-                } label: {
-                    Text(range.label)
-                        .font(.footnote.weight(.semibold))
-                        .padding(.vertical, 6)
-                        .padding(.horizontal, 12)
-                        .background(
-                            Capsule().fill(selectedRange == range ? Color.accentColor : Color(.tertiarySystemFill))
-                        )
-                        .foregroundStyle(selectedRange == range ? .white : .primary)
-                }
-                .buttonStyle(.plain)
-            }
-        }
-    }
-
-    // MARK: - Chart
-
-    @ViewBuilder
-    private func chartCard(_ data: [(date: Date, price: Double, raw: MetalModel)]) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            if let selected = selectedPoint,
-               let match = data.first(where: { $0.raw.day == selected.day }) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(match.date.formatted(date: .abbreviated, time: .omitted))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Text(currencyString(match.price))
-                        .font(.headline)
-                }
-                .transition(.opacity)
-            }
-
-            Chart {
-                ForEach(data, id: \.raw.day) { item in
-                    LineMark(
-                        x: .value("Day", item.date),
-                        y: .value("Price", item.price)
-                    )
-                    .interpolationMethod(.catmullRom)
-                    .foregroundStyle(Color.accentColor)
-                    .lineStyle(StrokeStyle(lineWidth: 2))
-
-                    AreaMark(
-                        x: .value("Day", item.date),
-                        y: .value("Price", item.price)
-                    )
-                    .interpolationMethod(.catmullRom)
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [Color.accentColor.opacity(0.25), .clear],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-                }
-
-                if let selected = selectedPoint,
-                   let match = data.first(where: { $0.raw.day == selected.day }) {
-                    RuleMark(x: .value("Day", match.date))
-                        .foregroundStyle(.gray.opacity(0.4))
-                        .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
-
-                    PointMark(
-                        x: .value("Day", match.date),
-                        y: .value("Price", match.price)
-                    )
-                    .foregroundStyle(Color.accentColor)
-                    .symbolSize(80)
-                }
-            }
-            .frame(height: 260)
-            .chartXAxis {
-                AxisMarks(values: .automatic(desiredCount: 4)) {
-                    AxisGridLine()
-                    AxisValueLabel(format: .dateTime.day().month(.abbreviated))
-                }
-            }
-            .chartYAxis {
-                AxisMarks(position: .trailing) {
-                    AxisGridLine()
-                    AxisValueLabel()
-                }
-            }
-            .chartOverlay { proxy in
-                GeometryReader { geo in
-                    Rectangle()
-                        .fill(.clear)
-                        .contentShape(Rectangle())
-                        .gesture(
-                            DragGesture(minimumDistance: 0)
-                                .onChanged { value in
-                                    updateSelection(at: value.location, proxy: proxy, geo: geo, data: data)
-                                }
-                                .onEnded { _ in
-                                    withAnimation(.easeOut(duration: 0.2)) {
-                                        selectedPoint = nil
-                                    }
-                                }
-                        )
-                }
-            }
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.secondarySystemGroupedBackground))
-        )
-    }
-
-    private func updateSelection(at location: CGPoint, proxy: ChartProxy, geo: GeometryProxy, data: [(date: Date, price: Double, raw: MetalModel)]) {
-        guard let plotFrame = proxy.plotFrame else { return }
-        let origin = geo[plotFrame].origin
-        let xPosition = location.x - origin.x
-        guard let date: Date = proxy.value(atX: xPosition) else { return }
-
-        if let closest = data.min(by: { abs($0.date.timeIntervalSince(date)) < abs($1.date.timeIntervalSince(date)) }) {
-            selectedPoint = closest.raw
-        }
-    }
-
-    private func currencyString(_ value: Double) -> String {
-        "Rs. " + String(format: "%.2f", value)
-    }
-    
+extension MetalDetailView {
     
     @ViewBuilder
-    private func listdata(_ data: [(date: Date, price: Double, raw: MetalModel)]) -> some View {
-        ForEach(Array(data.reversed().enumerated()), id: \.element.date) { index, item in
-            HStack {
-                Text(item.date.formatted(date: .abbreviated, time: .omitted))
-                    .font(.subheadline)
-                    .foregroundStyle(.primary)
-                
-                Spacer()
-                
-                Text(currencyString(item.price))
-                    .font(.subheadline.weight(.semibold))
-                    .monospacedDigit()
-                
-            }
-        }
-    }
-
-    // MARK: - States
-
-    private var loadingState: some View {
+    private var loadingView: some View {
         VStack(spacing: 16) {
             ProgressView()
-            Text("Loading \(metal.capitalized) prices…")
+                .scaleEffect(1.2)
+            Text("Loading \(SymbolToString(symbol: metal)) data…")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundColor(.secondary)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.top, 100)
+        .frame(maxWidth: .infinity, minHeight: 200)
     }
-
-    private func errorState(_ message: String) -> some View {
+    
+    @ViewBuilder
+    private var emptyStateView: some View {
         VStack(spacing: 12) {
+            Image(systemName: "chart.line.downtrend.xyaxis")
+                .font(.largeTitle)
+                .foregroundColor(.secondary)
+            Text("No data available for \(SymbolToString(symbol: metal))")
+                .font(.headline)
+            Text("Try selecting a different period or check back later.")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity, minHeight: 200)
+        .padding()
+    }
+    
+    @ViewBuilder
+    private func errorView(message: String) -> some View {
+        VStack(spacing: 16) {
             Image(systemName: "exclamationmark.triangle")
                 .font(.largeTitle)
-                .foregroundStyle(.orange)
-            Text("Couldn't load data")
+                .foregroundColor(.orange)
+            Text("Something went wrong")
                 .font(.headline)
             Text(message)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
             Button("Retry") {
-                Task { await psxViewModel.getAllMetal(metal: metal.lowercased()) }
+                Task { await viewModel.getAllMetal(metal: metal) }
             }
             .buttonStyle(.borderedProminent)
-            .padding(.top, 8)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.top, 60)
+        .frame(maxWidth: .infinity, minHeight: 200)
+        .padding()
+    }
+    
+    @ViewBuilder
+    private func summaryHeader(for metals: [MetalModel]) -> some View {
+        
+        if let latest = metals.last {
+            let previous = metals.count > 1 ? metals[metals.count - 2] : nil
+            let change = previous.map { latest.high - $0.high }
+            let changePercent = previous.map {
+                $0.high > 0 ? (change! / $0.high) * 100 : 0
+            }
+            
+
+            HStack(alignment: .center, spacing: 24) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Current")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+
+                    Text(latest.high, format: .number.precision(.fractionLength(2)) )
+                        .font(.title2)
+                        .fontWeight(.bold)
+                    
+                    if let change, let percent = changePercent {
+                            HStack(spacing: 4) {
+                                Image(systemName: change >= 0
+                                      ? "arrow.up.right"
+                                      : "arrow.down.right")
+
+                                Text(
+                                    change,
+                                    format: .number.precision(.fractionLength(2))
+                                )
+
+                                Text(" (\(String(format: "%.2f", percent))%)")
+                            }
+                            .font(.caption)
+                            .foregroundColor(change >= 0 ? .green : .red)
+                        
+                    }
+                }
+
+                
+
+                Spacer()
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Range")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    
+                    Group {
+                        Text("L: \(latest.low, format: .number.precision(.fractionLength(2)) )")
+                        Text("C: \(latest.close, format: .number.precision(.fractionLength(2)) )")
+                    }
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                }
+            }
+            .padding(.vertical, 8)
+            .padding(.horizontal, 16)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(.secondarySystemBackground))
+            )
+        }
+    }
+
+    
+    @ViewBuilder
+    private func chartView(for metals: [MetalModel]) -> some View {
+        let latest = metals.last
+        
+        Chart(metals, id: \.id) { item in
+            LineMark(
+                x: .value("Date", item.parsedDate ?? Date.now),
+                y: .value("Price", item.high)
+            )
+            .foregroundStyle(color)
+            .lineStyle(StrokeStyle(lineWidth: 2.5))
+            .interpolationMethod(.cardinal)
+            
+            AreaMark(
+                x: .value("Date", item.parsedDate ?? Date.now),
+                y: .value("Price", item.high)
+            )
+            .foregroundStyle(
+                LinearGradient(
+                    gradient: Gradient(colors: [color.opacity(0.3), color.opacity(0.05)]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
+            .interpolationMethod(.cardinal)
+            
+            if let latest = latest, item.id == latest.id {
+                RuleMark(
+                    y: .value("Price", item.high)
+                )
+                .lineStyle(StrokeStyle(lineWidth: 1, dash: [4]))
+                .foregroundStyle(color.opacity(0.6))
+            }
+        }
+        .chartYAxis {
+            AxisMarks(position: .trailing) { value in
+                AxisValueLabel()
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .chartXAxis {
+            AxisMarks(values: .automatic(desiredCount: 6)) { value in
+                AxisValueLabel(format: .dateTime.month(.abbreviated).day())
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal,8)
+    }
+    
+    @ViewBuilder
+    private func historicalListView(for metals: [MetalModel]) -> some View {
+        
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Historical Data")
+                .font(.headline)
+                .padding(.top, 4)
+            
+            ForEach(metals.reversed(), id: \.id) { item in
+                HStack {
+                    Text(item.parsedDate ?? Date.now,format: .dateTime)
+                        .font(.subheadline)
+                    
+                    Spacer()
+                    Text(item.high, format: .number.precision(.fractionLength(2)))
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                }
+                .padding(.vertical, 6)
+                .padding(.horizontal, 12)
+                
+            }
+        }
     }
 }
 
-// MARK: - Range Enum
-
-enum PriceRange: String, CaseIterable, Identifiable {
-    case oneMonth, threeMonths, sixMonths, oneYear, all
-
-    var id: String { rawValue }
-
-    var label: String {
-        switch self {
-        case .oneMonth: return "1M"
-        case .threeMonths: return "3M"
-        case .sixMonths: return "6M"
-        case .oneYear: return "1Y"
-        case .all: return "All"
-        }
-    }
-
-    var cutoffDate: Date? {
-        let calendar = Calendar.current
-        switch self {
-        case .oneMonth: return calendar.date(byAdding: .month, value: -1, to: .now)
-        case .threeMonths: return calendar.date(byAdding: .month, value: -3, to: .now)
-        case .sixMonths: return calendar.date(byAdding: .month, value: -6, to: .now)
-        case .oneYear: return calendar.date(byAdding: .year, value: -1, to: .now)
-        case .all: return nil
-        }
-    }
-}
 
 #Preview {
     NavigationStack {
-        MetalDetailView(metal: "gold")
+        MetalDetailView(metal: "gold",color: .pink)
     }
 }

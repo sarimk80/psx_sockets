@@ -49,4 +49,8 @@ protocol PsxProtocol{
     func getAllMetals(metal:String) async throws -> [MetalModel]
     
     func getAllIndexTicker(index:String) async throws -> [IndexTickers]
+    
+    func getCommodityList() async throws -> MetalListModel
+    
+    func getCommodityDetail(metal:String) async throws -> [MetalModel]
 }

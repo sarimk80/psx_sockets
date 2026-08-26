@@ -65,8 +65,8 @@ struct MoreView: View {
                     
                     MoreRow(
                         icon: "mount",
-                        iconColor: .yellow,
-                        title: "Metals",
+                        iconColor: .brown,
+                        title: "Commodity",
                         subtitle: "Find stocks, sectors & more"
                     ) {
                         moreNavigation.push(route: .metals)

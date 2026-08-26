@@ -90,6 +90,9 @@ struct IndexDetailView: View {
             }, onClose: {
                 showLineSheet = false
             })
+            .presentationDetents([.medium])
+            .presentationBackground(Color(.systemBackground))
+            .presentationDragIndicator(.visible)
             
         }
         .sheet(isPresented: $showFilterSheet) {
@@ -379,7 +382,7 @@ struct IndexDetailLoaded: View {
             }
             
         }
-        .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
+        .listRowInsets(EdgeInsets(top: 0, leading: 8, bottom: 8, trailing: 8))
         .listRowBackground(Color.clear)
         .listRowSeparator(.hidden)
         
