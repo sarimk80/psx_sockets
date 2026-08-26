@@ -162,6 +162,13 @@ enum IndexTickersEnums {
     case error(message:String)
 }
 
+enum MetalListEnums {
+    case initial
+    case loading
+    case loaded(commodity:[Commodity])
+    case error(message:String)
+}
+
 
 @MainActor
 @Observable
@@ -188,9 +195,12 @@ class PsxViewModel{
     var currencyExchangeEnum: CurrencyExchangeEnums = .initial
     var metalEnums: MetalEnums = .initial
     var indexTickerEnums: IndexTickersEnums = .initial
+    var metalListEnum: MetalListEnums = .initial
     
     var currencyExchange: [CurrencyResponse] = []
     var allCurrencyExchange: [CurrencyResponse] = []
+    
+    var filterMetals : [MetalModel] = []
     
     // for Index Detail symbols
     
@@ -783,8 +793,10 @@ class PsxViewModel{
         metalEnums = .loading
 
         do {
-            let response = try await psxServiceManager.getAllMetals(metal: metal)
+            let response = try await psxServiceManager.getCommodityDetail(metal: metal)
             let data = try await psxServiceManager.getAllCurrencyExchange()
+            
+
 
             let usdCurrency = data.response.first { $0.currencyName == "USD" }
             let usdToPkr = usdCurrency?.currency ?? 0.0
@@ -793,20 +805,61 @@ class PsxViewModel{
 
             let updatedMetals = response.map { metal in
                 var updateMetal = metal
-
-                let usdPerOz = Double(metal.maxPrice) ?? 0.0
-                let pkrPerOz = usdPerOz * usdToPkr
-                let pkrPerTola = pkrPerOz / troyOzToTola
-
-                updateMetal.maxPrice = String(pkrPerTola)
-
+                
+                let conversionRate = usdToPkr / troyOzToTola
+                
+                updateMetal.close = metal.close * conversionRate
+                updateMetal.high = metal.high * conversionRate
+                updateMetal.low = metal.low * conversionRate
+                updateMetal.open = metal.open * conversionRate
+                
                 return updateMetal
             }
-
+            self.filterMetals = updatedMetals
             metalEnums = .loaded(metalModel: updatedMetals)
+            
+            
+           //let temp = updatedMetals.filter{$0.parsedDate ?? Date.now > thirtyDaysAgo}
 
         } catch {
             metalEnums = .error(message: error.localizedDescription)
+        }
+    }
+    
+    func filterChartPeriod(chartRange:ChartRange,metal:[MetalModel]){
+        
+        
+        
+        guard let thirtyDaysAgo = Calendar.current.date(byAdding: .day, value: -30, to: Date.now) else {
+            return
+        }
+        
+        guard let threeMonthsAgo = Calendar.current.date(byAdding: .day, value: -90, to: Date.now) else {
+            return
+        }
+        
+        guard let sixMonthsAgo = Calendar.current.date(byAdding: .day, value: -120, to: Date.now) else {
+            return
+        }
+        
+        guard let oneYearAgo = Calendar.current.date(byAdding: .day, value: -360, to: Date.now) else {
+            return
+        }
+        
+        switch chartRange {
+            
+        case .oneMonth:
+            self.filterMetals =  metal.filter{ $0.parsedDate ?? Date.now >= thirtyDaysAgo }
+            
+        case .threeMonths:
+            self.filterMetals = metal.filter{ $0.parsedDate ?? Date.now >= threeMonthsAgo }
+        case .sixMonths:
+            self.filterMetals = metal.filter{ $0.parsedDate ?? Date.now >= sixMonthsAgo }
+        case .oneYear:
+            self.filterMetals = metal.filter{ $0.parsedDate ?? Date.now >= oneYearAgo }
+        case .all:
+            self.filterMetals = metal
+            
         }
     }
     
@@ -865,6 +918,52 @@ class PsxViewModel{
         
         self.indexTickerEnums = .loaded(indexTicker: filterResponse)
         
+    }
+    
+    
+    func getAllCommodities() async {
+        
+        self.metalListEnum = .loading
+        
+        do{
+            let response = try await psxServiceManager.getCommodityList()
+            
+            let commodities:[Commodity] = [
+                Commodity(name: "Gold", symbol: response.gold),
+                Commodity(name: "Silver", symbol: response.silver),
+                Commodity(name: "Platinum", symbol: response.platinum),
+                Commodity(name: "Palladium", symbol: response.palladium),
+                Commodity(name: "Brent Crude Oil", symbol: response.brentCrudeOil),
+                
+                Commodity(name: "WTI Crude Oil", symbol: response.wtiCrudeOil),
+                Commodity(name: "Natural Gas", symbol: response.naturalGas),
+                Commodity(name: "Gasoline", symbol: response.gasoline),
+                Commodity(name: "Heating Oil", symbol: response.heatingOil),
+                Commodity(name: "Copper", symbol: response.copper),
+                
+                Commodity(name: "Corn", symbol: response.corn),
+                Commodity(name: "Wheat", symbol: response.wheat),
+                Commodity(name: "Soybeans", symbol: response.soybeans),
+                Commodity(name: "Oats", symbol: response.oats),
+                
+                Commodity(name: "Rough Rice", symbol: response.roughRice),
+                Commodity(name: "Coffee", symbol: response.coffee),
+                Commodity(name: "Sugar", symbol: response.sugar),
+                Commodity(name: "Cocoa", symbol: response.cocoa),
+                Commodity(name: "Cotton", symbol: response.cotton),
+                
+                Commodity(name: "Lumber", symbol: response.lumber),
+                Commodity(name: "Orange Juice", symbol: response.orangeJuice),
+                Commodity(name: "Live Cattle", symbol: response.liveCattle),
+                Commodity(name: "Feeder Cattle", symbol: response.feederCattle),
+                Commodity(name: "Lean Hogs", symbol: response.leanHogs)
+            ]
+            
+            self.metalListEnum = .loaded(commodity: commodities)
+            
+        }catch(let e){
+            self.metalListEnum = .error(message: e.localizedDescription)
+        }
     }
 
 }

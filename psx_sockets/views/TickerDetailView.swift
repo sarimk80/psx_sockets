@@ -368,7 +368,7 @@ struct KlineChart: View {
             switch psxViewModel.kLineEnum {
             case .initial, .loading:
                 LineChartLoading()
-            case .loaded(let kline,let kLineData):
+            case .loaded(_,let kLineData):
                 KlineChartView(kline: kLineData, scrollPosition: $scrollPosition,chartTimeFrame: chartTimeFrame)
             case .error(let errorMessage):
                 ErrorView(message: errorMessage)
@@ -424,37 +424,10 @@ struct KlineChartView: View {
         (closes.last ?? 0) >= (open.last ?? 0) ? .green : .red
     }
     
-//    private var lineGradient: LinearGradient {
-//        LinearGradient(
-//            colors: [.blue, lineColor],
-//            startPoint: .leading,
-//            endPoint: .trailing
-//        )
-//    }
-//    
-//    private var opacityLineGradient: LinearGradient {
-//        LinearGradient(
-//            colors: [lineColor.opacity(0.25), lineColor.opacity(0.02)],
-//            startPoint: .top,
-//            endPoint: .bottom
-//        )
-//    }
     
    
     
     var body: some View {
-//        let closes = kline.items.map{$0.close}
-//        let volumes = kline.items.map { $0.volume }
-//        let open = kline.items.map{ $0.open}
-//        let minClose = closes.min() ?? 0.0
-//        let maxClose = closes.max() ?? 0.0
-//        let maxVolume = volumes.max() ?? 1
-//        let minVolume = volumes.min() ?? 1
-//        let averageClose = kline.items.reduce(0.0) {$0 + $1.close } / Double(kline.items.count)
-        //let lastDate = kline.data.last?.adjustedDate ?? .now
-        
-//        let isPositive = closes.last ?? 0.0 >= open.last ?? 0.0
-//        let lineColor:Color = isPositive ? .green : .red
         
         
          var selectedItem: SymbolKLineDatum? {

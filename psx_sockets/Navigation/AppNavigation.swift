@@ -43,7 +43,7 @@ enum MoreNavigationEnums: Hashable{
     case circuitBreaker
     case currencyExchange
     case metals
-    case metalDetail(metal:String)
+    case metalDetail(metal:String,color: Color)
     case compareStock
     // Comment for now
     //case privacyPolicy

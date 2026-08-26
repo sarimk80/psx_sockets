@@ -4,6 +4,12 @@
     "" : {
 
     },
+    " (%@%%)" : {
+
+    },
+    "(%@%%)" : {
+
+    },
     "%.2f (%.2f%%)" : {
       "localizations" : {
         "en" : {
@@ -17,15 +23,8 @@
     "%.2f%%" : {
 
     },
-    "%@ (%@%%)" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ (%2$@%%)"
-          }
-        }
-      }
+    "%@" : {
+
     },
     "%@ • %@" : {
       "localizations" : {
@@ -61,6 +60,9 @@
 
     },
     "%lld announcements" : {
+
+    },
+    "%lld counts" : {
 
     },
     "%lld shares @ %@" : {
@@ -195,6 +197,9 @@
         }
       }
     },
+    "All commodities" : {
+
+    },
     "Amount" : {
       "localizations" : {
         "ur" : {
@@ -274,6 +279,9 @@
         }
       }
     },
+    "C: %@" : {
+
+    },
     "Cancel" : {
       "localizations" : {
         "ur" : {
@@ -303,6 +311,9 @@
     "Coming Soon" : {
 
     },
+    "Commodities" : {
+
+    },
     "Company Details" : {
       "localizations" : {
         "ur" : {
@@ -322,9 +333,6 @@
     "Couldn't load comparison" : {
 
     },
-    "Couldn't load data" : {
-
-    },
     "Count" : {
       "localizations" : {
         "ur" : {
@@ -336,6 +344,9 @@
       }
     },
     "Currency Exchange" : {
+
+    },
+    "Current" : {
 
     },
     "Current Price" : {
@@ -377,9 +388,6 @@
           }
         }
       }
-    },
-    "Day" : {
-
     },
     "Delete" : {
       "localizations" : {
@@ -522,6 +530,15 @@
     "Fetching rates..." : {
 
     },
+    "Filter" : {
+
+    },
+    "Filter by: " : {
+
+    },
+    "Filters" : {
+
+    },
     "Financial Dashboard" : {
       "localizations" : {
         "ur" : {
@@ -597,6 +614,12 @@
     "Hello, World!" : {
 
     },
+    "High: %@" : {
+
+    },
+    "Historical Data" : {
+
+    },
     "Holdings" : {
       "localizations" : {
         "ur" : {
@@ -640,6 +663,9 @@
         }
       }
     },
+    "Index Weight: %@" : {
+
+    },
     "Indices" : {
 
     },
@@ -662,7 +688,7 @@
         }
       }
     },
-    "Loading %@ prices…" : {
+    "Loading %@ data…" : {
 
     },
     "Loading Circuit Breakers..." : {
@@ -690,6 +716,9 @@
           }
         }
       }
+    },
+    "Low: %@" : {
+
     },
     "Lower Circuit" : {
 
@@ -753,9 +782,6 @@
     "Menu" : {
 
     },
-    "Metals" : {
-
-    },
     "More" : {
       "localizations" : {
         "ur" : {
@@ -798,6 +824,9 @@
           }
         }
       }
+    },
+    "No data available for %@" : {
+
     },
     "No results found" : {
 
@@ -950,6 +979,9 @@
           }
         }
       }
+    },
+    "Range" : {
+
     },
     "Retry" : {
 
@@ -1165,6 +1197,7 @@
 
     },
     "Top performing stocks in the market" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ur" : {
           "stringUnit" : {
@@ -1236,6 +1269,9 @@
           }
         }
       }
+    },
+    "Try selecting a different period or check back later." : {
+
     },
     "Type" : {
       "localizations" : {

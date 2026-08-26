@@ -7,61 +7,125 @@ import SwiftUI
 
 struct MetalView: View {
     
+    @State private var psxViewModel = PsxViewModel(psxServiceManager: PsxServiceManager())
     @Environment(MoreNavigation.self) private var moreNavigation
     
-    struct Metal: Identifiable {
-        let id = UUID()
-        let name: String
-        let icon: String
-        let color: Color
-    }
-
-    
-    let metals: [Metal] = [
-            Metal(name: "Gold",      icon: "crown.fill",              color: .yellow),
-            Metal(name: "Silver",    icon: "moon.stars.fill",         color: .gray),
-            Metal(name: "Copper",    icon: "bolt.fill",               color: .orange),
-            Metal(name: "Platinum",  icon: "diamond.fill",            color: .blue),
-            Metal(name: "Palladium", icon: "shield.lefthalf.filled",  color: .purple)
-        ]
-    
-
     var body: some View {
-            List {
-                ForEach(metals, id: \.id) { metal in
-                    HStack(spacing: 16) {
-
-                        Image(systemName: metal.icon)
-                            .font(.title2)
-                            .foregroundStyle(metal.color)
-                            .frame(width: 45, height: 45)
-                            .background(metal.color.opacity(0.15))
-                            .clipShape(Circle())
-
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(metal.name)
-                                .font(.headline)
-
-                            Text("Tap to view details")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-
-                        Spacer()
-
-                        Image(systemName: "chevron.right")
-                            .foregroundStyle(.gray)
+        ScrollView {
+            
+            switch psxViewModel.metalListEnum {
+            case .initial, .loading:
+                Section {
+                    ForEach(Commodity.mock,id:\.id) { result in
+                                                
+                            HStack(spacing: 16) {
+                                
+                                Image(systemName: result.icon)
+                                    .font(.title2)
+                                    .foregroundStyle(result.iconColor.opacity(0.95))
+                                    .frame(width: 45, height: 45)
+                                    .background(result.iconColor.opacity(0.15))
+                                    .clipShape(Circle())
+                                
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(result.name)
+                                        .font(.headline)
+                                    
+                                    Text("Tap to view details")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                
+                                Spacer()
+                                
+                                Image(systemName: "chevron.right")
+                                    .foregroundStyle(.gray)
+                            }
+                        .redacted(reason: .placeholder)
+                            
+                         
+                        
+                        .padding(.vertical, 8)
+                        .padding(.horizontal,8)
+                        .background(Color(.secondarySystemGroupedBackground))
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        
                     }
-                    .padding(.vertical, 8)
-                    .onTapGesture {
-                        moreNavigation.push(route: .metalDetail(metal: metal.name))
+                    .padding(.horizontal,8)
+                }
+            case .loaded(let commodities):
+                
+                Section {
+                    ForEach(commodities,id:\.id) { result in
+                                                
+                            HStack(spacing: 16) {
+                                
+                                Image(systemName: result.icon)
+                                    .font(.title2)
+                                    .foregroundStyle(result.iconColor.opacity(0.95))
+                                    .frame(width: 45, height: 45)
+                                    .background(result.iconColor.opacity(0.15))
+                                    .clipShape(Circle())
+                                
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(result.name)
+                                        .font(.headline)
+                                    
+                                    Text("Tap to view details")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                
+                                Spacer()
+                                
+                                Image(systemName: "chevron.right")
+                                    .foregroundStyle(.gray)
+                            }
+                            
+                         
+                        
+                        .padding(.vertical, 8)
+                        .padding(.horizontal,8)
+                        .background(Color(.secondarySystemGroupedBackground))
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .onTapGesture {
+                            moreNavigation.push(route: .metalDetail(metal: result.symbol,color: result.iconColor))
+                        }
+                        
+                    }
+                } header: {
+                    HStack (alignment: .firstTextBaseline){
+                        Text("All commodities")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        Spacer()
+                        Text("\(commodities.count) counts")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
                 }
+
+                
+                
+                .padding(.horizontal,16)
+                .padding(.top,4)
+                .padding(.bottom,4)
+                
+            case .error(let message):
+                Text(message)
             }
-            .navigationTitle("Metals")
-            .navigationBarTitleDisplayMode(.large)
-            .listStyle(.sidebar)
-            .scrollContentBackground(.hidden)
+            
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle("Commodities")
+        .navigationBarTitleDisplayMode(.inline)
+        .listStyle(.inset)
+        .task {
+            if case MetalListEnums.initial = psxViewModel.metalListEnum{
+                await psxViewModel.getAllCommodities()
+
+            }
+        }
         
     }
 }

@@ -9,6 +9,57 @@ import Foundation
 
 
 class PsxServiceManager:PsxProtocol{
+    
+    func getCommodityDetail(metal:String) async throws -> [MetalModel] {
+        
+        guard let url = URL(string: "https://sarim-pix.hf.space/get_single_commodity/\(metal)")
+        else {  throw URLError(.badURL) }
+              
+        let (data,response) = try await URLSession.shared.data(from: url)
+              
+              
+        guard let response = response as? HTTPURLResponse,
+                    
+                response.statusCode == 200
+                      
+                      
+        else { throw URLError(.badServerResponse) }
+              
+        if let string = String(data: data, encoding: .utf8) {
+                    print(string)
+                }
+              
+              
+        let decodeResponse = try JSONDecoder().decode([MetalModel].self, from: data)
+              
+        return decodeResponse
+    }
+    
+    func getCommodityList() async throws -> MetalListModel {
+        
+        guard let url = URL(string: "https://sarim-pix.hf.space/get_all_commodity")
+        else {  throw URLError(.badURL) }
+              
+        let (data,response) = try await URLSession.shared.data(from: url)
+              
+              
+        guard let response = response as? HTTPURLResponse,
+                    
+                response.statusCode == 200
+                      
+                      
+        else { throw URLError(.badServerResponse) }
+              
+        if let string = String(data: data, encoding: .utf8) {
+                    print(string)
+                }
+              
+              
+        let decodeResponse = try JSONDecoder().decode(MetalListModel.self, from: data)
+              
+        return decodeResponse
+    }
+    
     func getAllIndexTicker(index: String) async throws -> [IndexTickers] {
         
         guard let url = URL(string: "https://sarim-pix.hf.space/get_all_index?indexName=\(index)")
