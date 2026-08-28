@@ -41,3 +41,19 @@ enum ChartRange: String,CaseIterable {
     case oneYear = "1Y"
     case all = "All"
 }
+
+enum UnitEnum: String, CaseIterable {
+    case Ounce
+    case Tola
+    case Gram
+    case Kilo
+    case Ratti
+    case Masha
+}
+
+enum KaratEnum: String, CaseIterable{
+    case K_22 = "22 Karat"
+    case k_24 = "24 Karat"
+    case k_21 = "21 Karat"
+    case k_18 = "18 Karat"
+}

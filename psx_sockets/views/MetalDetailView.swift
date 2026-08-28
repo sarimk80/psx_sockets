@@ -6,6 +6,10 @@ struct MetalDetailView: View {
     @State private var viewModel = PsxViewModel(psxServiceManager: PsxServiceManager())
     
     @State private var chartSelection: ChartRange = .all
+    @State private var unitEnum: UnitEnum = .Ounce
+    @State private var karatEnum: KaratEnum = .k_24
+    
+    @State private var showSheet: Bool = false
     
     let metal: String
     let color: Color
@@ -79,10 +83,92 @@ struct MetalDetailView: View {
         .toolbar(content: {
             ToolbarItem {
                 Image(systemName: "line.3.horizontal.decrease.circle")
+                    .onTapGesture {
+                        showSheet.toggle()
+                    }
             }
         })
         .task {
             await viewModel.getAllMetal(metal: metal)
+        }
+        .sheet(isPresented: $showSheet) {
+            List{
+                
+                Section {
+                    HStack{
+                        Text("Unit Settings")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                        Spacer()
+                        Button {
+                            showSheet.toggle()
+                        } label: {
+                            Image(systemName: "xmark")
+                                .font(.headline)
+                                .frame(width: 32, height: 32)
+                                .background(.ultraThinMaterial, in: Circle())
+                        }
+                        .glassEffect()
+                    }
+                }
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                
+                
+                Section {
+                    HStack(alignment: .center){
+                        Spacer()
+                        Text(viewModel.metalConverstion,format: .number.precision(.fractionLength(2)))
+                            .font(.largeTitle)
+                            .fontWeight(.semibold)
+                        Spacer()
+                    }
+                    
+                } footer: {
+                    HStack{
+                        Text(unitEnum.rawValue)
+                        Spacer()
+                        Text(karatEnum.rawValue)
+                    }
+                    .font(.caption)
+                    .fontWeight(.light)
+                    
+                }
+
+
+                Section(header: Text("Weight Unit")) {
+                    Picker("Choose Weight Unit", selection: $unitEnum) {
+                        ForEach(UnitEnum.allCases,id: \.self) { value in
+                            Text(value.rawValue)
+                                .tag(value)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    }
+                .headerProminence(.standard)
+                
+                
+                Section(header: Text("Purity")) {
+                    Picker("Choose Purity", selection: $karatEnum) {
+                        ForEach(KaratEnum.allCases,id: \.self) { value in
+                            Text(value.rawValue)
+                                .tag(value)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    }
+                    .headerProminence(.standard)
+
+                
+            }
+            .presentationDetents([.fraction(0.6)])
+            .onChange(of: unitEnum) { old, new in
+                viewModel.changeMetalPrice(unitEnum: new, karatEnum: karatEnum)
+            }
+            .onChange(of: karatEnum) { old, new in
+                viewModel.changeMetalPrice(unitEnum: unitEnum, karatEnum: new)
+            }
+
         }
     }
 }

@@ -201,6 +201,7 @@ class PsxViewModel{
     var allCurrencyExchange: [CurrencyResponse] = []
     
     var filterMetals : [MetalModel] = []
+    var metalConverstion: Double = 0.0
     
     // for Index Detail symbols
     
@@ -808,27 +809,24 @@ class PsxViewModel{
                 
                 let conversionRate = usdToPkr / troyOzToTola
                 
-                updateMetal.close = metal.close * conversionRate
-                updateMetal.high = metal.high * conversionRate
-                updateMetal.low = metal.low * conversionRate
-                updateMetal.open = metal.open * conversionRate
+                updateMetal.close = metal.close * usdToPkr
+                updateMetal.high = metal.high * usdToPkr
+                updateMetal.low = metal.low * usdToPkr
+                updateMetal.open = metal.open * usdToPkr
                 
                 return updateMetal
             }
             self.filterMetals = updatedMetals
+            self.metalConverstion = updatedMetals.last?.high ?? 0.0
             metalEnums = .loaded(metalModel: updatedMetals)
             
             
-           //let temp = updatedMetals.filter{$0.parsedDate ?? Date.now > thirtyDaysAgo}
-
         } catch {
             metalEnums = .error(message: error.localizedDescription)
         }
     }
     
     func filterChartPeriod(chartRange:ChartRange,metal:[MetalModel]){
-        
-        
         
         guard let thirtyDaysAgo = Calendar.current.date(byAdding: .day, value: -30, to: Date.now) else {
             return
@@ -863,6 +861,46 @@ class PsxViewModel{
         }
     }
     
+    
+    func changeMetalPrice(
+        unitEnum: UnitEnum,
+        karatEnum: KaratEnum
+    ) {
+        
+        guard case .loaded(let response) = metalEnums else {return}
+        
+        let price = response.last?.high ?? 0.0
+        
+        let unitPrice: Double
+        switch unitEnum {
+        case .Ounce:
+            unitPrice = price
+        case .Gram:
+            unitPrice = price / 31.1034768
+        case .Tola:
+            unitPrice = price / 2.6666667
+        case .Kilo:
+            unitPrice = price * 32.1507466
+        case .Ratti:
+            unitPrice = price / 256.0
+        case .Masha:
+            unitPrice = price / 32.0
+        }
+
+        let karatPrice: Double
+        switch karatEnum {
+        case .k_24:
+            karatPrice = unitPrice
+        case .K_22:
+            karatPrice = unitPrice * 22 / 24
+        case .k_21:
+            karatPrice = unitPrice * 21 / 24
+        case .k_18:
+            karatPrice = unitPrice * 18 / 24
+        }
+
+        self.metalConverstion = karatPrice
+    }
     
     func getAllIndexTicker(index:String) async {
         self.indexTickerEnums = .loading

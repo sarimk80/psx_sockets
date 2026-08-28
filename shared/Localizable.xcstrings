@@ -292,6 +292,12 @@
         }
       }
     },
+    "Choose Purity" : {
+
+    },
+    "Choose Weight Unit" : {
+
+    },
     "Circuit Breaker" : {
 
     },
@@ -960,6 +966,9 @@
         }
       }
     },
+    "Purity" : {
+
+    },
     "Quantity:" : {
       "localizations" : {
         "ur" : {
@@ -1313,6 +1322,9 @@
         }
       }
     },
+    "Unit Settings" : {
+
+    },
     "Upper Circuit" : {
 
     },
@@ -1393,6 +1405,9 @@
 
     },
     "Weight" : {
+
+    },
+    "Weight Unit" : {
 
     },
     "Year" : {
