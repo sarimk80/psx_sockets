@@ -81,12 +81,15 @@ struct MetalDetailView: View {
         .navigationTitle(SymbolToString(symbol: metal))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(content: {
-            ToolbarItem {
-                Image(systemName: "line.3.horizontal.decrease.circle")
-                    .onTapGesture {
-                        showSheet.toggle()
-                    }
+            if(metal == "GC=F" || metal == "SI=F"){
+                ToolbarItem {
+                    Image(systemName: "line.3.horizontal.decrease.circle")
+                        .onTapGesture {
+                            showSheet.toggle()
+                        }
+                }
             }
+            
         })
         .task {
             await viewModel.getAllMetal(metal: metal)
