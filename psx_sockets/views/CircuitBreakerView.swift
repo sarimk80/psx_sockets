@@ -50,9 +50,7 @@ struct CircuitBreakerView: View {
                     }
                 }
                 .listStyle(.insetGrouped)
-                .refreshable {
-                    await psxViewModel.getAllCircuitBreaker()
-                }
+                
                 
             case .error(let message):
                 ErrorView(message: message)
